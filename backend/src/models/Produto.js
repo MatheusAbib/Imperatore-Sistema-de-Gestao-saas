@@ -35,13 +35,24 @@ class Produto {
         return result.affectedRows;
     }
 
-    static async deletar(id, estabelecimento_id) {
-        const [result] = await db.execute(
-            'DELETE FROM produtos WHERE id = ? AND estabelecimento_id = ?',
-            [id, estabelecimento_id]
+static async deletar(id, estabelecimento_id) {
+    const db = require('../config/database');
+    
+    try {
+        await db.execute(
+            'DELETE FROM produto_ingredientes WHERE produto_id = ?',
+            [id]
         );
-        return result.affectedRows;
+    } catch (error) {
+        console.log('Erro ao deletar relacionamentos:', error.message);
     }
+    
+    const [result] = await db.execute(
+        'DELETE FROM produtos WHERE id = ? AND estabelecimento_id = ?',
+        [id, estabelecimento_id]
+    );
+    return result.affectedRows;
+}
 
     static async calcularCusto(produto_id, estabelecimento_id) {
         const [rows] = await db.execute(

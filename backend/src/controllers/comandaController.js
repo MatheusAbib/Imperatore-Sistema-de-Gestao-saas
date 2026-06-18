@@ -8,6 +8,36 @@ async function getEstabelecimentoId(usuarioId) {
     return usuario.estabelecimento_id;
 }
 
+async function registrarNotificacao(estabelecimento_id, mensagem, pedido_id = null) {
+    const db = require('../config/database');
+    await db.execute(
+        'INSERT INTO notificacoes (estabelecimento_id, mensagem, pedido_id, lida) VALUES (?, ?, ?, 0)',
+        [estabelecimento_id, mensagem, pedido_id]
+    );
+}
+
+async function criarNotificacao(req, res) {
+    try {
+        const { mensagem, pedido_id } = req.body;
+        const estabelecimento_id = await getEstabelecimentoId(req.usuarioId);
+        const db = require('../config/database');
+        
+        if (!mensagem) {
+            return res.status(400).json({ mensagem: 'Mensagem é obrigatória' });
+        }
+        
+        await db.execute(
+            'INSERT INTO notificacoes (estabelecimento_id, mensagem, pedido_id, lida) VALUES (?, ?, ?, 0)',
+            [estabelecimento_id, mensagem, pedido_id || null]
+        );
+        
+        res.status(201).json({ mensagem: 'Notificação enviada com sucesso' });
+    } catch (error) {
+        console.error('Erro ao criar notificação:', error);
+        res.status(500).json({ mensagem: 'Erro ao criar notificação' });
+    }
+}
+
 async function criarComanda(req, res) {
     const { numero_mesa, nome_cliente } = req.body;
     const estabelecimento_id = await getEstabelecimentoId(req.usuarioId);
@@ -18,6 +48,8 @@ async function criarComanda(req, res) {
 
     const id = await Comanda.criar({ numero_mesa, nome_cliente, estabelecimento_id });
     const comanda = await Comanda.buscarPorId(id, estabelecimento_id);
+
+    await registrarNotificacao(estabelecimento_id, `Comanda da Mesa ${numero_mesa} foi aberta${nome_cliente ? ` para ${nome_cliente}` : ''}`);
 
     res.status(201).json(comanda);
 }
@@ -64,6 +96,8 @@ async function adicionarItem(req, res) {
         criado_por: usuario_id,
         observacao: observacao || null
     });
+
+    await registrarNotificacao(estabelecimento_id, `Pedido de ${produto.nome} (${quantidade}x) adicionado à Mesa ${comanda.numero_mesa}`);
 
     const itens = await Pedido.listarPorComanda(comanda_id, estabelecimento_id);
     let total = 0;
@@ -118,8 +152,39 @@ async function atualizarStatusPedido(req, res) {
     const { id } = req.params;
     const { status } = req.body;
     const usuario_id = req.usuarioId;
+    const estabelecimento_id = await getEstabelecimentoId(usuario_id);
 
     await Pedido.atualizarStatus(id, status, usuario_id);
+
+    const db = require('../config/database');
+    const [pedidoInfo] = await db.execute(
+        `SELECT p.quantidade, pr.nome as produto_nome, c.numero_mesa
+         FROM pedidos p 
+         JOIN produtos pr ON p.produto_id = pr.id 
+         JOIN comandas c ON p.comanda_id = c.id 
+         WHERE p.id = ?`,
+        [id]
+    );
+
+    if (pedidoInfo.length > 0) {
+        const p = pedidoInfo[0];
+        let mensagem = '';
+        switch (status) {
+            case 'preparo':
+                mensagem = `Pedido de ${p.produto_nome} (${p.quantidade}x) entrou em preparo - Mesa ${p.numero_mesa}`;
+                break;
+            case 'pronto':
+                mensagem = `Pedido de ${p.produto_nome} (${p.quantidade}x) está pronto - Mesa ${p.numero_mesa}`;
+                break;
+            case 'entregue':
+                mensagem = `Pedido de ${p.produto_nome} (${p.quantidade}x) foi entregue - Mesa ${p.numero_mesa}`;
+                break;
+            default:
+                mensagem = `Status do pedido ${p.produto_nome} atualizado para ${status}`;
+        }
+        await registrarNotificacao(estabelecimento_id, mensagem, id);
+    }
+
     res.json({ mensagem: 'Status atualizado com sucesso' });
 }
 
@@ -133,6 +198,8 @@ async function fecharComanda(req, res) {
     }
 
     await Comanda.fecharComanda(id);
+    await registrarNotificacao(estabelecimento_id, `Comanda da Mesa ${comanda.numero_mesa} foi fechada - Total: R$ ${parseFloat(comanda.total).toFixed(2)}`);
+
     res.json({ mensagem: 'Comanda fechada com sucesso' });
 }
 
@@ -141,16 +208,39 @@ async function listarNotificacoes(req, res) {
     const db = require('../config/database');
     
     const [rows] = await db.execute(
-        `SELECT p.id, p.status, p.quantidade, pr.nome as produto_nome, c.numero_mesa
-         FROM pedidos p 
-         JOIN produtos pr ON p.produto_id = pr.id 
-         JOIN comandas c ON p.comanda_id = c.id 
-         WHERE pr.estabelecimento_id = ? AND c.status = 'aberta'
-         ORDER BY p.updated_at DESC`,
+        `SELECT * FROM notificacoes 
+         WHERE estabelecimento_id = ? 
+         ORDER BY created_at DESC 
+         LIMIT 50`,
         [estabelecimento_id]
     );
     
     res.json(rows);
+}
+
+async function marcarNotificacaoLida(req, res) {
+    const { id } = req.params;
+    const estabelecimento_id = await getEstabelecimentoId(req.usuarioId);
+    const db = require('../config/database');
+    
+    await db.execute(
+        'UPDATE notificacoes SET lida = 1 WHERE id = ? AND estabelecimento_id = ?',
+        [id, estabelecimento_id]
+    );
+    
+    res.json({ mensagem: 'Notificação marcada como lida' });
+}
+
+async function marcarTodasNotificacoesLidas(req, res) {
+    const estabelecimento_id = await getEstabelecimentoId(req.usuarioId);
+    const db = require('../config/database');
+    
+    await db.execute(
+        'UPDATE notificacoes SET lida = 1 WHERE estabelecimento_id = ?',
+        [estabelecimento_id]
+    );
+    
+    res.json({ mensagem: 'Todas notificações marcadas como lidas' });
 }
 
 async function listarStatusPedidos(req, res) {
@@ -187,5 +277,8 @@ module.exports = {
     atualizarStatusPedido,
     fecharComanda,
     listarNotificacoes,
-    listarStatusPedidos
+    marcarNotificacaoLida,
+    marcarTodasNotificacoesLidas,
+    listarStatusPedidos,
+    criarNotificacao
 };

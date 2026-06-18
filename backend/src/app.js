@@ -7,10 +7,10 @@ const ingredienteRoutes = require('./routes/ingredienteRoutes');
 const validadeRoutes = require('./routes/validadeRoutes');
 const comandaRoutes = require('./routes/comandaRoutes');
 const loteRoutes = require('./routes/loteRoutes');
-
+const notificacaoRoutes = require('./routes/notificacaoRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 const app = express();
-
 
 app.use(cors());
 app.use(express.json());
@@ -22,8 +22,8 @@ app.use('/api/ingredientes', ingredienteRoutes);
 app.use('/api/validade', validadeRoutes);
 app.use('/api', comandaRoutes);
 app.use('/api/lotes', loteRoutes);
-
-
+app.use('/api/notificacoes', notificacaoRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.get('/health', (req, res) => {
     res.json({ status: 'ok', message: 'Servidor funcionando' });

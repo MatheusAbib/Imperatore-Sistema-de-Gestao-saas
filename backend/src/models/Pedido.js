@@ -1,31 +1,32 @@
 const db = require('../config/database');
 
 class Pedido {
-static async criar(pedido) {
-    const { comanda_id, produto_id, quantidade, preco_unitario, criado_por, observacao } = pedido;
-    const [result] = await db.execute(
-        'INSERT INTO pedidos (comanda_id, produto_id, quantidade, preco_unitario, criado_por, observacao) VALUES (?, ?, ?, ?, ?, ?)',
-        [comanda_id, produto_id, quantidade, preco_unitario, criado_por, observacao]
-    );
-    
-    await db.execute(
-        'INSERT INTO status_pedido (pedido_id, status, criado_por) VALUES (?, ?, ?)',
-        [result.insertId, 'pendente', criado_por]
-    );
-    
-    return result.insertId;
-}
-static async listarPorComanda(comanda_id, estabelecimento_id) {
-    const [rows] = await db.execute(
-        `SELECT p.*, pr.nome as produto_nome 
-         FROM pedidos p 
-         JOIN produtos pr ON p.produto_id = pr.id 
-         WHERE p.comanda_id = ? AND pr.estabelecimento_id = ? 
-         ORDER BY p.created_at ASC`,
-        [comanda_id, estabelecimento_id]
-    );
-    return rows;
-}
+    static async criar(pedido) {
+        const { comanda_id, produto_id, quantidade, preco_unitario, criado_por, observacao } = pedido;
+        const [result] = await db.execute(
+            'INSERT INTO pedidos (comanda_id, produto_id, quantidade, preco_unitario, criado_por, observacao) VALUES (?, ?, ?, ?, ?, ?)',
+            [comanda_id, produto_id, quantidade, preco_unitario, criado_por, observacao]
+        );
+        
+        await db.execute(
+            'INSERT INTO status_pedido (pedido_id, status, criado_por) VALUES (?, ?, ?)',
+            [result.insertId, 'pendente', criado_por]
+        );
+        
+        return result.insertId;
+    }
+
+    static async listarPorComanda(comanda_id, estabelecimento_id) {
+        const [rows] = await db.execute(
+            `SELECT p.*, pr.nome as produto_nome 
+             FROM pedidos p 
+             JOIN produtos pr ON p.produto_id = pr.id 
+             WHERE p.comanda_id = ? AND pr.estabelecimento_id = ? 
+             ORDER BY p.created_at ASC`,
+            [comanda_id, estabelecimento_id]
+        );
+        return rows;
+    }
 
     static async listarPorCozinha(estabelecimento_id) {
         const [rows] = await db.execute(
@@ -45,7 +46,7 @@ static async listarPorComanda(comanda_id, estabelecimento_id) {
              ) s ON p.id = s.pedido_id
              WHERE pr.estabelecimento_id = ? 
              AND c.status = 'aberta'
-             ORDER BY p.created_at ASC`,
+             ORDER BY p.created_at DESC`,
             [estabelecimento_id]
         );
         return rows;
