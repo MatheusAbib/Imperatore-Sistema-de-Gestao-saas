@@ -497,118 +497,118 @@ function Dashboard() {
                                         <Paginacao />
                                     </div>
 
-<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginTop: 20 }}>
-    <div className="card">
-        <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <FiBox size={18} />
-            Ingredientes
-            <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-muted)' }}>
-                {ingredientes.length} registros
-            </span>
-        </h3>
-        <div className="table-responsive" style={{ maxHeight: 300, overflowY: 'auto' }}>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Ingrediente</th>
-                        <th>Unidade</th>
-                        <th>Custo Unitário</th>
-                        <th>Estoque Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {ingredientes.slice(0, 10).map(ing => {
-                        const lotesIng = lotes.filter(l => l.ingrediente_id === ing.id);
-                        const totalEstoque = lotesIng.reduce((sum, l) => sum + (parseFloat(l.quantidade) || 0), 0);
-                        return (
-                            <tr key={ing.id}>
-                                <td>{ing.nome}</td>
-                                <td>{ing.unidade}</td>
-                                <td>
-                                    R$ {(parseFloat(ing.custo_medio) / (parseFloat(ing.fator_conversao) || 1)).toFixed(2).replace('.', ',')} 
-                                    / {ing.unidade_uso || ing.unidade}
-                                </td>
-                                <td>{totalEstoque.toFixed(2)} {ing.unidade}</td>
-                            </tr>
-                        );
-                    })}
-                    {ingredientes.length === 0 && (
-                        <tr>
-                            <td colSpan="4" className="text-center text-muted">
-                                <p>Nenhum ingrediente cadastrado</p>
-                            </td>
-                        </tr>
-                    )}
-                    {ingredientes.length > 10 && (
-                        <tr>
-                            <td colSpan="4" className="text-center text-muted">
-                                <small>... e mais {ingredientes.length - 10} ingredientes</small>
-                            </td>
-                        </tr>
-                    )}
-                </tbody>
-            </table>
-        </div>
-    </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginTop: 20 }}>
+                                    <div className="card">
+                                        <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                            <FiBox size={18} />
+                                            Ingredientes
+                                            <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-muted)' }}>
+                                                {ingredientes.length} registros
+                                            </span>
+                                        </h3>
+                                        <div className="table-responsive" style={{ maxHeight: 300, overflowY: 'auto' }}>
+                                            <table>
+                                                <thead>
+                                                    <tr>
+                                                        <th>Ingrediente</th>
+                                                        <th>Unidade</th>
+                                                        <th>Custo Unitário</th>
+                                                        <th>Estoque Total</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {ingredientes.slice(0, 10).map(ing => {
+                                                        const lotesIng = lotes.filter(l => l.ingrediente_id === ing.id);
+                                                        const totalEstoque = lotesIng.reduce((sum, l) => sum + (parseFloat(l.quantidade) || 0), 0);
+                                                        return (
+                                                            <tr key={ing.id}>
+                                                                <td>{ing.nome}</td>
+                                                                <td>{ing.unidade}</td>
+                                                                <td>
+                                                                    R$ {(parseFloat(ing.custo_medio) / (parseFloat(ing.fator_conversao) || 1)).toFixed(2).replace('.', ',')} 
+                                                                    / {ing.unidade_uso || ing.unidade}
+                                                                </td>
+                                                                <td>{totalEstoque.toFixed(2)} {ing.unidade}</td>
+                                                            </tr>
+                                                        );
+                                                    })}
+                                                    {ingredientes.length === 0 && (
+                                                        <tr>
+                                                            <td colSpan="4" className="text-center text-muted">
+                                                                <p>Nenhum ingrediente cadastrado</p>
+                                                            </td>
+                                                        </tr>
+                                                    )}
+                                                    {ingredientes.length > 10 && (
+                                                        <tr>
+                                                            <td colSpan="4" className="text-center text-muted">
+                                                                <small>... e mais {ingredientes.length - 10} ingredientes</small>
+                                                            </td>
+                                                        </tr>
+                                                    )}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
 
-    <div className="card">
-        <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <FiCalendar size={18} />
-            Lotes
-            <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-muted)' }}>
-                {lotes.length} registros
-            </span>
-        </h3>
-        <div className="table-responsive" style={{ maxHeight: 300, overflowY: 'auto' }}>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Ingrediente</th>
-                        <th>Quantidade</th>
-                        <th>Validade</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {lotes.slice(0, 10).map(lote => {
-                        const dias = Math.ceil((new Date(lote.data_validade) - new Date()) / (1000 * 60 * 60 * 24));
-                        let cor = '#28a745';
-                        let status = 'OK';
-                        if (dias < 0) { cor = '#dc3545'; status = 'Vencido'; }
-                        else if (dias === 0) { cor = '#ffc107'; status = 'Vence Hoje'; }
-                        else if (dias <= 7) { cor = '#fd7e14'; status = 'Vence em breve'; }
-                        return (
-                            <tr key={lote.id}>
-                                <td>{lote.ingrediente_nome}</td>
-                                <td>{lote.quantidade} {lote.unidade}</td>
-                                <td style={{ color: cor }}>
-                                    {new Date(lote.data_validade).toLocaleDateString('pt-BR')}
-                                </td>
-                                <td style={{ color: cor, fontWeight: 'bold' }}>
-                                    {status} ({dias} dias)
-                                </td>
-                            </tr>
-                        );
-                    })}
-                    {lotes.length === 0 && (
-                        <tr>
-                            <td colSpan="4" className="text-center text-muted">
-                                <p>Nenhum lote registrado</p>
-                            </td>
-                        </tr>
-                    )}
-                    {lotes.length > 10 && (
-                        <tr>
-                            <td colSpan="4" className="text-center text-muted">
-                                <small>... e mais {lotes.length - 10} lotes</small>
-                            </td>
-                        </tr>
-                    )}
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
+                                    <div className="card">
+                                        <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                            <FiCalendar size={18} />
+                                            Lotes
+                                            <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-muted)' }}>
+                                                {lotes.length} registros
+                                            </span>
+                                        </h3>
+                                        <div className="table-responsive" style={{ maxHeight: 300, overflowY: 'auto' }}>
+                                            <table>
+                                                <thead>
+                                                    <tr>
+                                                        <th>Ingrediente</th>
+                                                        <th>Quantidade</th>
+                                                        <th>Validade</th>
+                                                        <th>Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {lotes.slice(0, 10).map(lote => {
+                                                        const dias = Math.ceil((new Date(lote.data_validade) - new Date()) / (1000 * 60 * 60 * 24));
+                                                        let cor = '#28a745';
+                                                        let status = 'OK';
+                                                        if (dias < 0) { cor = '#dc3545'; status = 'Vencido'; }
+                                                        else if (dias === 0) { cor = '#ffc107'; status = 'Vence Hoje'; }
+                                                        else if (dias <= 7) { cor = '#fd7e14'; status = 'Vence em breve'; }
+                                                        return (
+                                                            <tr key={lote.id}>
+                                                                <td>{lote.ingrediente_nome}</td>
+                                                                <td>{lote.quantidade} {lote.unidade}</td>
+                                                                <td style={{ color: cor }}>
+                                                                    {new Date(lote.data_validade).toLocaleDateString('pt-BR')}
+                                                                </td>
+                                                                <td style={{ color: cor, fontWeight: 'bold' }}>
+                                                                    {status} ({dias} dias)
+                                                                </td>
+                                                            </tr>
+                                                        );
+                                                    })}
+                                                    {lotes.length === 0 && (
+                                                        <tr>
+                                                            <td colSpan="4" className="text-center text-muted">
+                                                                <p>Nenhum lote registrado</p>
+                                                            </td>
+                                                        </tr>
+                                                    )}
+                                                    {lotes.length > 10 && (
+                                                        <tr>
+                                                            <td colSpan="4" className="text-center text-muted">
+                                                                <small>... e mais {lotes.length - 10} lotes</small>
+                                                            </td>
+                                                        </tr>
+                                                    )}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
                                 </>
                             )}
                         </>
