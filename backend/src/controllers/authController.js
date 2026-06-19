@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const Usuario = require('../models/Usuario');
 const { gerarToken } = require('../config/jwt');
+const { logAction } = require('../utils/logHelper');
 
 async function registrar(req, res) {
     const { nome, email, senha, perfil } = req.body;
@@ -42,8 +43,31 @@ async function login(req, res) {
 
     const token = gerarToken(usuario.id, usuario.estabelecimento_id);
 
-    res.json({ token, usuario: { id: usuario.id, nome: usuario.nome, email: usuario.email, perfil: usuario.perfil, estabelecimento_id: usuario.estabelecimento_id } });
+    let estabelecimento_nome = null;
+    if (usuario.estabelecimento_id) {
+        const db = require('../config/database');
+        const [rows] = await db.execute(
+            'SELECT nome FROM estabelecimentos WHERE id = ?',
+            [usuario.estabelecimento_id]
+        );
+        estabelecimento_nome = rows[0]?.nome || null;
+    }
+
+    await logAction(usuario.id, usuario.estabelecimento_id, 'Auth', 'Login', `Usuário ${usuario.email} fez login`, req.ip);
+
+    res.json({ 
+        token, 
+        usuario: { 
+            id: usuario.id, 
+            nome: usuario.nome, 
+            email: usuario.email, 
+            perfil: usuario.perfil, 
+            estabelecimento_id: usuario.estabelecimento_id,
+            estabelecimento_nome
+        } 
+    });
 }
+
 
 async function criarFuncionario(req, res) {
     const { nome, email, senha, perfil } = req.body;
@@ -80,8 +104,8 @@ async function listarUsuarios(req, res) {
     const usuario_id = req.usuarioId;
     const usuario = await Usuario.buscarPorId(usuario_id);
     
-    if (usuario.perfil !== 'dono') {
-        return res.status(403).json({ mensagem: 'Acesso negado. Apenas dono pode listar usuarios' });
+    if (usuario.perfil !== 'dono' && usuario.perfil !== 'gerente') {
+        return res.status(403).json({ mensagem: 'Acesso negado. Apenas dono ou gerente podem listar usuarios' });
     }
 
     const usuarios = await Usuario.listarPorEstabelecimento(usuario.estabelecimento_id, usuario_id);

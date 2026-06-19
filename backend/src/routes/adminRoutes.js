@@ -10,7 +10,10 @@ const {
     criarUsuarioAdmin,
     atualizarUsuarioAdmin,
     deletarUsuarioAdmin,
-    listarTodosUsuarios
+    listarTodosUsuarios,
+    listarUltimosEstabelecimentos,
+    getCrescimentoMensal,
+    getDistribuicaoPlanos
 } = require('../controllers/adminController');
 
 const router = express.Router();
@@ -27,5 +30,8 @@ router.get('/usuarios/todos', listarTodosUsuarios);
 router.post('/usuarios', criarUsuarioAdmin);
 router.put('/usuarios/:id', atualizarUsuarioAdmin);
 router.delete('/usuarios/:id', deletarUsuarioAdmin);
+router.get('/ultimos-estabelecimentos', listarUltimosEstabelecimentos);
+router.get('/crescimento-mensal', getCrescimentoMensal);
+router.get('/distribuicao-planos', getDistribuicaoPlanos);
 
 module.exports = router;

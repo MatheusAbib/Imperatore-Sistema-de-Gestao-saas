@@ -1,5 +1,6 @@
 const Ingrediente = require('../models/Ingrediente');
 const Usuario = require('../models/Usuario');
+const { logAction } = require('../utils/logHelper');
 
 async function getEstabelecimentoId(usuarioId) {
     const usuario = await Usuario.buscarPorId(usuarioId);
@@ -7,15 +8,24 @@ async function getEstabelecimentoId(usuarioId) {
 }
 
 async function criarIngrediente(req, res) {
-    const { nome, unidade, custo_medio } = req.body;
+    const { nome, unidade, custo_medio, fator_conversao, unidade_uso } = req.body;
     const estabelecimento_id = await getEstabelecimentoId(req.usuarioId);
 
     if (!nome || !unidade) {
         return res.status(400).json({ mensagem: 'Nome e unidade sao obrigatorios' });
     }
 
-    const id = await Ingrediente.criar({ nome, unidade, custo_medio: custo_medio || 0, estabelecimento_id });
+    const id = await Ingrediente.criar({ 
+        nome, 
+        unidade, 
+        custo_medio: custo_medio || 0, 
+        estabelecimento_id,
+        fator_conversao: fator_conversao || 1,
+        unidade_uso: unidade_uso || unidade
+    });
     const ingrediente = await Ingrediente.buscarPorId(id, estabelecimento_id);
+
+    await logAction(req.usuarioId, estabelecimento_id, 'Ingredientes', 'Criou', `Criou ingrediente "${nome}" (${unidade})`, req.ip);
 
     res.status(201).json(ingrediente);
 }
@@ -23,6 +33,11 @@ async function criarIngrediente(req, res) {
 async function listarIngredientes(req, res) {
     const estabelecimento_id = await getEstabelecimentoId(req.usuarioId);
     const ingredientes = await Ingrediente.listarPorEstabelecimento(estabelecimento_id);
+    
+    for (const ing of ingredientes) {
+        ing.custo_uso = parseFloat(ing.custo_medio) / (parseFloat(ing.fator_conversao) || 1);
+    }
+    
     res.json(ingredientes);
 }
 
@@ -35,12 +50,14 @@ async function buscarIngrediente(req, res) {
         return res.status(404).json({ mensagem: 'Ingrediente nao encontrado' });
     }
 
+    ingrediente.custo_uso = parseFloat(ingrediente.custo_medio) / (parseFloat(ingrediente.fator_conversao) || 1);
+
     res.json(ingrediente);
 }
 
 async function atualizarIngrediente(req, res) {
     const { id } = req.params;
-    const { nome, unidade, custo_medio } = req.body;
+    const { nome, unidade, custo_medio, fator_conversao, unidade_uso } = req.body;
     const estabelecimento_id = await getEstabelecimentoId(req.usuarioId);
 
     const ingrediente = await Ingrediente.buscarPorId(id, estabelecimento_id);
@@ -48,7 +65,16 @@ async function atualizarIngrediente(req, res) {
         return res.status(404).json({ mensagem: 'Ingrediente nao encontrado' });
     }
 
-    await Ingrediente.atualizar(id, estabelecimento_id, { nome, unidade, custo_medio });
+    await Ingrediente.atualizar(id, estabelecimento_id, { 
+        nome, 
+        unidade, 
+        custo_medio, 
+        fator_conversao: fator_conversao || 1,
+        unidade_uso: unidade_uso || unidade
+    });
+
+    await logAction(req.usuarioId, estabelecimento_id, 'Ingredientes', 'Editou', `Editou ingrediente "${nome}" (ID: ${id})`, req.ip);
+
     res.json({ mensagem: 'Ingrediente atualizado' });
 }
 
@@ -61,7 +87,11 @@ async function deletarIngrediente(req, res) {
         return res.status(404).json({ mensagem: 'Ingrediente nao encontrado' });
     }
 
+    const nome = ingrediente.nome;
     await Ingrediente.deletar(id, estabelecimento_id);
+
+    await logAction(req.usuarioId, estabelecimento_id, 'Ingredientes', 'Deletou', `Deletou ingrediente "${nome}" (ID: ${id})`, req.ip);
+
     res.json({ mensagem: 'Ingrediente deletado' });
 }
 

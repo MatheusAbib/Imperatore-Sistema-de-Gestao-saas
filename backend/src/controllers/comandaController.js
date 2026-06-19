@@ -2,6 +2,7 @@ const Comanda = require('../models/Comanda');
 const Pedido = require('../models/Pedido');
 const Produto = require('../models/Produto');
 const Usuario = require('../models/Usuario');
+const { logAction } = require('../utils/logHelper');
 
 async function getEstabelecimentoId(usuarioId) {
     const usuario = await Usuario.buscarPorId(usuarioId);
@@ -31,6 +32,8 @@ async function criarNotificacao(req, res) {
             [estabelecimento_id, mensagem, pedido_id || null]
         );
         
+        await logAction(req.usuarioId, estabelecimento_id, 'Notificacoes', 'Criou', `Criou notificação: ${mensagem}`, req.ip);
+        
         res.status(201).json({ mensagem: 'Notificação enviada com sucesso' });
     } catch (error) {
         console.error('Erro ao criar notificação:', error);
@@ -50,6 +53,7 @@ async function criarComanda(req, res) {
     const comanda = await Comanda.buscarPorId(id, estabelecimento_id);
 
     await registrarNotificacao(estabelecimento_id, `Comanda da Mesa ${numero_mesa} foi aberta${nome_cliente ? ` para ${nome_cliente}` : ''}`);
+    await logAction(req.usuarioId, estabelecimento_id, 'Comandas', 'Criou', `Criou comanda da Mesa ${numero_mesa}${nome_cliente ? ` para ${nome_cliente}` : ''}`, req.ip);
 
     res.status(201).json(comanda);
 }
@@ -98,6 +102,7 @@ async function adicionarItem(req, res) {
     });
 
     await registrarNotificacao(estabelecimento_id, `Pedido de ${produto.nome} (${quantidade}x) adicionado à Mesa ${comanda.numero_mesa}`);
+    await logAction(req.usuarioId, estabelecimento_id, 'Comandas', 'Adicionou Item', `Adicionou ${quantidade}x ${produto.nome} à comanda ${comanda_id} (Mesa ${comanda.numero_mesa})`, req.ip);
 
     const itens = await Pedido.listarPorComanda(comanda_id, estabelecimento_id);
     let total = 0;
@@ -138,6 +143,8 @@ async function removerItem(req, res) {
         total += item.quantidade * item.preco_unitario;
     }
     await Comanda.atualizarTotal(comanda_id, total);
+
+    await logAction(req.usuarioId, estabelecimento_id, 'Comandas', 'Removeu Item', `Removeu item da comanda ${comanda_id}`, req.ip);
 
     res.json({ mensagem: 'Item removido com sucesso' });
 }
@@ -183,6 +190,7 @@ async function atualizarStatusPedido(req, res) {
                 mensagem = `Status do pedido ${p.produto_nome} atualizado para ${status}`;
         }
         await registrarNotificacao(estabelecimento_id, mensagem, id);
+        await logAction(req.usuarioId, estabelecimento_id, 'Pedidos', 'Mudou Status', `Pedido ${id} - ${p.produto_nome} (${p.quantidade}x) - Status: ${status} (Mesa ${p.numero_mesa})`, req.ip);
     }
 
     res.json({ mensagem: 'Status atualizado com sucesso' });
@@ -197,8 +205,12 @@ async function fecharComanda(req, res) {
         return res.status(404).json({ mensagem: 'Comanda nao encontrada' });
     }
 
+    const total = comanda.total;
+    const numero_mesa = comanda.numero_mesa;
+
     await Comanda.fecharComanda(id);
-    await registrarNotificacao(estabelecimento_id, `Comanda da Mesa ${comanda.numero_mesa} foi fechada - Total: R$ ${parseFloat(comanda.total).toFixed(2)}`);
+    await registrarNotificacao(estabelecimento_id, `Comanda da Mesa ${numero_mesa} foi fechada - Total: R$ ${parseFloat(total).toFixed(2)}`);
+    await logAction(req.usuarioId, estabelecimento_id, 'Comandas', 'Fechou', `Fechou comanda da Mesa ${numero_mesa} - Total: R$ ${parseFloat(total).toFixed(2)}`, req.ip);
 
     res.json({ mensagem: 'Comanda fechada com sucesso' });
 }
@@ -228,6 +240,8 @@ async function marcarNotificacaoLida(req, res) {
         [id, estabelecimento_id]
     );
     
+    await logAction(req.usuarioId, estabelecimento_id, 'Notificacoes', 'Marcou Lida', `Marcou notificação ${id} como lida`, req.ip);
+    
     res.json({ mensagem: 'Notificação marcada como lida' });
 }
 
@@ -239,6 +253,8 @@ async function marcarTodasNotificacoesLidas(req, res) {
         'UPDATE notificacoes SET lida = 1 WHERE estabelecimento_id = ?',
         [estabelecimento_id]
     );
+    
+    await logAction(req.usuarioId, estabelecimento_id, 'Notificacoes', 'Marcou Todas Lidas', 'Marcou todas as notificações como lidas', req.ip);
     
     res.json({ mensagem: 'Todas notificações marcadas como lidas' });
 }

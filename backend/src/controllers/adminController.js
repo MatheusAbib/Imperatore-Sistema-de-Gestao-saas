@@ -1,4 +1,5 @@
 const db = require('../config/database');
+const { logAction } = require('../utils/logHelper');
 
 async function getStats(req, res) {
     try {
@@ -33,11 +34,25 @@ async function listarEstabelecimentos(req, res) {
 
 async function criarEstabelecimento(req, res) {
     try {
-        const { nome, cnpj, plano, status } = req.body;
+        const { 
+            nome, cnpj, plano, status, 
+            endereco, numero, telefone, 
+            cpf_dono, nome_dono, data_abertura, observacoes,
+            cep, estado
+        } = req.body;
+        
         const [result] = await db.execute(
-            'INSERT INTO estabelecimentos (nome, cnpj, plano, status) VALUES (?, ?, ?, ?)',
-            [nome, cnpj || null, plano || 'gratis', status || 'ativo']
+            `INSERT INTO estabelecimentos 
+            (nome, cnpj, plano, status, endereco, numero, telefone, cpf_dono, nome_dono, data_abertura, observacoes, cep, estado) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [nome, cnpj || null, plano || 'gratis', status || 'ativo', 
+             endereco || null, numero || null, telefone || null, 
+             cpf_dono || null, nome_dono || null, data_abertura || null, observacoes || null,
+             cep || null, estado || null]
         );
+
+        await logAction(req.usuarioId, result.insertId, 'Admin', 'Criou Estabelecimento', `Criou estabelecimento "${nome}" (ID: ${result.insertId})`, req.ip);
+
         res.status(201).json({ id: result.insertId, mensagem: 'Estabelecimento criado com sucesso' });
     } catch (error) {
         console.error('Erro ao criar estabelecimento:', error);
@@ -45,25 +60,101 @@ async function criarEstabelecimento(req, res) {
     }
 }
 
+async function listarUltimosEstabelecimentos(req, res) {
+    try {
+        const [rows] = await db.execute(
+            'SELECT id, nome, cnpj, plano, created_at FROM estabelecimentos ORDER BY created_at DESC LIMIT 5'
+        );
+        res.json(rows);
+    } catch (error) {
+        console.error('Erro ao listar ultimos estabelecimentos:', error);
+        res.status(500).json({ mensagem: 'Erro ao listar últimos estabelecimentos' });
+    }
+}
+
+async function getCrescimentoMensal(req, res) {
+    try {
+        const [rows] = await db.execute(
+            `SELECT 
+                DATE_FORMAT(created_at, '%b/%Y') as mes,
+                COUNT(*) as total
+             FROM estabelecimentos
+             WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
+             GROUP BY YEAR(created_at), MONTH(created_at)
+             ORDER BY created_at ASC`
+        );
+        res.json(rows);
+    } catch (error) {
+        console.error('Erro ao buscar crescimento mensal:', error);
+        res.status(500).json({ mensagem: 'Erro ao buscar crescimento mensal' });
+    }
+}
+
+async function getDistribuicaoPlanos(req, res) {
+    try {
+        const [rows] = await db.execute(
+            `SELECT 
+                plano as name,
+                COUNT(*) as value
+             FROM estabelecimentos
+             GROUP BY plano`
+        );
+        res.json(rows);
+    } catch (error) {
+        console.error('Erro ao buscar distribuição de planos:', error);
+        res.status(500).json({ mensagem: 'Erro ao buscar distribuição de planos' });
+    }
+}
+
 async function atualizarEstabelecimento(req, res) {
     try {
         const { id } = req.params;
-        const { nome, cnpj, plano, status } = req.body;
+        
+        const { 
+            nome, cnpj, plano, status, 
+            endereco, numero, telefone, 
+            cpf_dono, nome_dono, data_abertura, observacoes,
+            cep, estado
+        } = req.body;
+        
         await db.execute(
-            'UPDATE estabelecimentos SET nome = ?, cnpj = ?, plano = ?, status = ? WHERE id = ?',
-            [nome, cnpj || null, plano || 'gratis', status || 'ativo', id]
+            `UPDATE estabelecimentos SET 
+                nome = ?, cnpj = ?, plano = ?, status = ?,
+                endereco = ?, numero = ?, telefone = ?, 
+                cpf_dono = ?, nome_dono = ?, data_abertura = ?, observacoes = ?,
+                cep = ?, estado = ?
+            WHERE id = ?`,
+            [
+                nome, 
+                cnpj || null, 
+                plano || 'gratis', 
+                status || 'ativo',
+                endereco || null, 
+                numero || null, 
+                telefone || null,
+                cpf_dono || null, 
+                nome_dono || null, 
+                data_abertura || null, 
+                observacoes || null,
+                cep || null,
+                estado || null,
+                id
+            ]
         );
+
+        await logAction(req.usuarioId, id, 'Admin', 'Editou Estabelecimento', `Editou estabelecimento "${nome}" (ID: ${id})`, req.ip);
+
         res.json({ mensagem: 'Estabelecimento atualizado com sucesso' });
     } catch (error) {
         console.error('Erro ao atualizar estabelecimento:', error);
-        res.status(500).json({ mensagem: 'Erro ao atualizar estabelecimento' });
+        res.status(500).json({ mensagem: 'Erro ao atualizar estabelecimento', error: error.message });
     }
 }
 
 async function deletarEstabelecimento(req, res) {
     try {
         const { id } = req.params;
-        const db = require('../config/database');
+        const nome = req.body.nome || id;
         
         await db.execute('DELETE FROM notificacoes WHERE estabelecimento_id = ?', [id]);
         await db.execute('DELETE FROM movimentos_estoque WHERE lote_id IN (SELECT id FROM lotes WHERE estabelecimento_id = ?)', [id]);
@@ -76,6 +167,8 @@ async function deletarEstabelecimento(req, res) {
         await db.execute('DELETE FROM produtos WHERE estabelecimento_id = ?', [id]);
         await db.execute('DELETE FROM usuarios WHERE estabelecimento_id = ?', [id]);
         await db.execute('DELETE FROM estabelecimentos WHERE id = ?', [id]);
+
+        await logAction(req.usuarioId, id, 'Admin', 'Deletou Estabelecimento', `Deletou estabelecimento "${nome}" (ID: ${id})`, req.ip);
 
         res.json({ mensagem: 'Estabelecimento e todos os dados associados deletados com sucesso' });
     } catch (error) {
@@ -123,6 +216,9 @@ async function criarUsuarioAdmin(req, res) {
             'INSERT INTO usuarios (nome, email, senha, perfil, estabelecimento_id) VALUES (?, ?, ?, ?, ?)',
             [nome, email, senhaHash, perfil || 'atendente', estabelecimento_id]
         );
+
+        await logAction(req.usuarioId, estabelecimento_id, 'Admin', 'Criou Usuário', `Criou usuário "${nome}" (${email})`, req.ip);
+
         res.status(201).json({ id: result.insertId, mensagem: 'Usuário criado com sucesso' });
     } catch (error) {
         console.error('Erro ao criar usuario:', error);
@@ -148,7 +244,9 @@ async function atualizarUsuarioAdmin(req, res) {
                 [nome, email, perfil, id]
             );
         }
-        
+
+        await logAction(req.usuarioId, null, 'Admin', 'Editou Usuário', `Editou usuário "${nome}" (ID: ${id}, Email: ${email})`, req.ip);
+
         res.json({ mensagem: 'Usuário atualizado com sucesso' });
     } catch (error) {
         console.error('Erro ao atualizar usuario:', error);
@@ -159,7 +257,12 @@ async function atualizarUsuarioAdmin(req, res) {
 async function deletarUsuarioAdmin(req, res) {
     try {
         const { id } = req.params;
+        const nome = req.body.nome || id;
+        
         await db.execute('DELETE FROM usuarios WHERE id = ?', [id]);
+
+        await logAction(req.usuarioId, null, 'Admin', 'Deletou Usuário', `Deletou usuário "${nome}" (ID: ${id})`, req.ip);
+
         res.json({ mensagem: 'Usuário deletado com sucesso' });
     } catch (error) {
         console.error('Erro ao deletar usuario:', error);
@@ -177,5 +280,8 @@ module.exports = {
     criarUsuarioAdmin,
     atualizarUsuarioAdmin,
     deletarUsuarioAdmin,
-    listarTodosUsuarios 
+    listarTodosUsuarios,
+    listarUltimosEstabelecimentos,
+    getCrescimentoMensal,
+    getDistribuicaoPlanos
 };

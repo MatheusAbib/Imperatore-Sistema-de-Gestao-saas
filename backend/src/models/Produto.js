@@ -54,16 +54,16 @@ static async deletar(id, estabelecimento_id) {
     return result.affectedRows;
 }
 
-    static async calcularCusto(produto_id, estabelecimento_id) {
-        const [rows] = await db.execute(
-            `SELECT SUM(pi.quantidade * i.custo_medio) as custo_total
-             FROM produto_ingredientes pi
-             JOIN ingredientes i ON pi.ingrediente_id = i.id
-             WHERE pi.produto_id = ? AND i.estabelecimento_id = ?`,
-            [produto_id, estabelecimento_id]
-        );
-        return rows[0].custo_total || 0;
-    }
+static async calcularCusto(produto_id, estabelecimento_id) {
+    const [rows] = await db.execute(
+        `SELECT SUM(pi.quantidade * (i.custo_medio / i.fator_conversao)) as custo_total
+         FROM produto_ingredientes pi
+         JOIN ingredientes i ON pi.ingrediente_id = i.id
+         WHERE pi.produto_id = ? AND i.estabelecimento_id = ?`,
+        [produto_id, estabelecimento_id]
+    );
+    return rows[0].custo_total || 0;
+}
 }
 
 module.exports = Produto;

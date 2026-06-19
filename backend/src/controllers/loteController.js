@@ -1,6 +1,7 @@
 const Lote = require('../models/Lote');
 const Ingrediente = require('../models/Ingrediente');
 const Usuario = require('../models/Usuario');
+const { logAction } = require('../utils/logHelper');
 
 async function getEstabelecimentoId(usuarioId) {
     const usuario = await Usuario.buscarPorId(usuarioId);
@@ -30,6 +31,8 @@ async function registrarLote(req, res) {
             estabelecimento_id,
             usuario_id
         });
+
+        await logAction(req.usuarioId, estabelecimento_id, 'Lotes', 'Registrou', `Registrou lote de ${quantidade}x ${ingrediente.nome} (Validade: ${data_validade})`, req.ip);
 
         return res.status(201).json({ mensagem: 'Lote registrado com sucesso', id });
     } catch (error) {
@@ -72,10 +75,13 @@ async function deletarLote(req, res) {
         const { id } = req.params;
         const estabelecimento_id = await getEstabelecimentoId(req.usuarioId);
 
+        const loteInfo = await Lote.buscarPorId(id, estabelecimento_id);
         const result = await Lote.deletar(id, estabelecimento_id);
         if (result === 0) {
             return res.status(404).json({ mensagem: 'Lote nao encontrado' });
         }
+
+        await logAction(req.usuarioId, estabelecimento_id, 'Lotes', 'Deletou', `Deletou lote ID: ${id} (${loteInfo?.quantidade || ''}x ${loteInfo?.ingrediente_nome || ''})`, req.ip);
 
         return res.json({ mensagem: 'Lote deletado com sucesso' });
     } catch (error) {

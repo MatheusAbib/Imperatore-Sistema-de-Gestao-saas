@@ -1,6 +1,7 @@
 const Produto = require('../models/Produto');
 const Ingrediente = require('../models/Ingrediente');
 const Usuario = require('../models/Usuario');
+const { logAction } = require('../utils/logHelper');
 
 async function getEstabelecimentoId(usuarioId) {
     const usuario = await Usuario.buscarPorId(usuarioId);
@@ -17,6 +18,8 @@ async function criarProduto(req, res) {
 
     const id = await Produto.criar({ nome, preco_venda, categoria, estabelecimento_id });
     const produto = await Produto.buscarPorId(id, estabelecimento_id);
+
+    await logAction(req.usuarioId, estabelecimento_id, 'Produtos', 'Criou', `Criou produto "${nome}"`, req.ip);
 
     res.status(201).json(produto);
 }
@@ -63,6 +66,9 @@ async function atualizarProduto(req, res) {
     }
 
     await Produto.atualizar(id, estabelecimento_id, { nome, preco_venda, categoria });
+
+    await logAction(req.usuarioId, estabelecimento_id, 'Produtos', 'Editou', `Editou produto "${nome}" (ID: ${id})`, req.ip);
+
     res.json({ mensagem: 'Produto atualizado' });
 }
 
@@ -75,7 +81,11 @@ async function deletarProduto(req, res) {
         return res.status(404).json({ mensagem: 'Produto nao encontrado' });
     }
 
+    const nome = produto.nome;
     await Produto.deletar(id, estabelecimento_id);
+
+    await logAction(req.usuarioId, estabelecimento_id, 'Produtos', 'Deletou', `Deletou produto "${nome}" (ID: ${id})`, req.ip);
+
     res.json({ mensagem: 'Produto deletado' });
 }
 
@@ -100,6 +110,8 @@ async function adicionarIngrediente(req, res) {
         [id, ingrediente_id, quantidade]
     );
 
+    await logAction(req.usuarioId, estabelecimento_id, 'Produtos', 'Adicionou Ingrediente', `Adicionou ${quantidade}x ${ingrediente.nome} ao produto "${produto.nome}"`, req.ip);
+
     res.status(201).json({ mensagem: 'Ingrediente adicionado ao produto' });
 }
 
@@ -114,7 +126,7 @@ async function listarIngredientesDoProduto(req, res) {
 
     const db = require('../config/database');
     const [rows] = await db.execute(
-        `SELECT i.id, i.nome, i.unidade, i.custo_medio, pi.quantidade 
+        `SELECT i.id, i.nome, i.unidade, i.custo_medio, i.fator_conversao, i.unidade_uso, pi.quantidade 
          FROM produto_ingredientes pi 
          JOIN ingredientes i ON pi.ingrediente_id = i.id 
          WHERE pi.produto_id = ? AND i.estabelecimento_id = ?`,
@@ -138,6 +150,8 @@ async function removerIngredienteDoProduto(req, res) {
         'DELETE FROM produto_ingredientes WHERE produto_id = ? AND ingrediente_id = ?',
         [id, ingredienteId]
     );
+
+    await logAction(req.usuarioId, estabelecimento_id, 'Produtos', 'Removeu Ingrediente', `Removeu ingrediente ID ${ingredienteId} do produto "${produto.nome}"`, req.ip);
 
     res.json({ mensagem: 'Ingrediente removido com sucesso' });
 }
