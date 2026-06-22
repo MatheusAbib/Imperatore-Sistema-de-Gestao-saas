@@ -4,7 +4,7 @@ class Comanda {
     static async criar(comanda) {
         const { numero_mesa, nome_cliente, estabelecimento_id } = comanda;
         const [result] = await db.execute(
-            'INSERT INTO comandas (numero_mesa, nome_cliente, estabelecimento_id) VALUES (?, ?, ?)',
+            'INSERT INTO comandas (numero_mesa, nome_cliente, estabelecimento_id, created_at, updated_at) VALUES (?, ?, ?, NOW(), NOW())',
             [numero_mesa, nome_cliente, estabelecimento_id]
         );
         return result.insertId;
@@ -28,14 +28,14 @@ class Comanda {
 
     static async atualizarTotal(id, total) {
         await db.execute(
-            'UPDATE comandas SET total = ? WHERE id = ?',
+            'UPDATE comandas SET total = ?, updated_at = NOW() WHERE id = ?',
             [total, id]
         );
     }
 
     static async fecharComanda(id) {
         await db.execute(
-            'UPDATE comandas SET status = "fechada" WHERE id = ?',
+            'UPDATE comandas SET status = "fechada", updated_at = NOW() WHERE id = ?',
             [id]
         );
     }

@@ -10,6 +10,7 @@ const loteRoutes = require('./routes/loteRoutes');
 const notificacaoRoutes = require('./routes/notificacaoRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const logRoutes = require('./routes/logRoutes');
+const analiseRoutes = require('./routes/analiseRoutes');
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use('/api/lotes', loteRoutes);
 app.use('/api/notificacoes', notificacaoRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/logs', logRoutes);
+app.use('/api/analise', analiseRoutes);
 
 app.get('/health', (req, res) => {
     res.json({ status: 'ok', message: 'Servidor funcionando' });

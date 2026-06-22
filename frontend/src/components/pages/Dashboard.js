@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { 
     PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, 
-    CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line,
-    AreaChart, Area, Legend
+    CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
 import api from '../../services/api';
 import { 
@@ -27,6 +26,7 @@ import Admin from './Admin';
 import UsuariosAdmin from './UsuariosAdmin';
 import Sobre from './Sobre';
 import Logs from './Logs';
+import AnaliseVendas from './AnaliseVendas';
 
 function Dashboard() {
     const [produtos, setProdutos] = useState([]);
@@ -42,6 +42,8 @@ function Dashboard() {
         bons: 0
     });
     const [paginaProdutos, setPaginaProdutos] = useState(1);
+    const [paginaIngredientes, setPaginaIngredientes] = useState(1);
+    const [paginaLotes, setPaginaLotes] = useState(1);
     const [tooltipAtivo, setTooltipAtivo] = useState(null);
     const itensPorPagina = 6;
 
@@ -165,37 +167,43 @@ function Dashboard() {
             margem: p.margem
         }));
 
-    const dadosLucro = produtosComMargem
-        .sort((a, b) => (b.preco - b.custo) - (a.preco - a.custo))
-        .slice(0, 8)
-        .map(p => ({
-            nome: p.nome.length > 12 ? p.nome.substring(0, 10) + '...' : p.nome,
-            lucro: (p.preco - p.custo)
-        }));
-
     const totalProdutos = produtos.length;
     const produtosPaginados = produtos.slice(
         (paginaProdutos - 1) * itensPorPagina,
         paginaProdutos * itensPorPagina
     );
-    const totalPaginas = Math.ceil(totalProdutos / itensPorPagina);
+    const totalPaginasProdutos = Math.ceil(totalProdutos / itensPorPagina);
 
-    const Paginacao = () => {
+    const totalIngredientes = ingredientes.length;
+    const ingredientesPaginados = ingredientes.slice(
+        (paginaIngredientes - 1) * itensPorPagina,
+        paginaIngredientes * itensPorPagina
+    );
+    const totalPaginasIngredientes = Math.ceil(totalIngredientes / itensPorPagina);
+
+    const totalLotes = lotes.length;
+    const lotesPaginados = lotes.slice(
+        (paginaLotes - 1) * itensPorPagina,
+        paginaLotes * itensPorPagina
+    );
+    const totalPaginasLotes = Math.ceil(totalLotes / itensPorPagina);
+
+    const Paginacao = ({ pagina, setPagina, totalPaginas }) => {
         if (totalPaginas <= 1) return null;
         return (
             <div className="pagination">
                 <button
                     className="btn btn-secondary"
-                    onClick={() => setPaginaProdutos(p => Math.max(1, p - 1))}
-                    disabled={paginaProdutos <= 1}
+                    onClick={() => setPagina(p => Math.max(1, p - 1))}
+                    disabled={pagina <= 1}
                 >
                     <FiChevronLeft size={16} />
                 </button>
-                <span>Página {paginaProdutos} de {totalPaginas}</span>
+                <span>Página {pagina} de {totalPaginas}</span>
                 <button
                     className="btn btn-secondary"
-                    onClick={() => setPaginaProdutos(p => Math.min(totalPaginas, p + 1))}
-                    disabled={paginaProdutos >= totalPaginas}
+                    onClick={() => setPagina(p => Math.min(totalPaginas, p + 1))}
+                    disabled={pagina >= totalPaginas}
                 >
                     <FiChevronRight size={16} />
                 </button>
@@ -203,60 +211,64 @@ function Dashboard() {
         );
     };
 
-    const StatusCard = ({ icon: Icon, title, value, color, subtitle }) => (
-        <div className="card status-card">
-            <div className="status-card-icon" style={{ backgroundColor: color + '22', color }}>
-                <Icon size={24} />
+const StatusCard = ({ icon: Icon, title, value, color, subtitle, tooltip }) => (
+    <div className="card status-card" style={{ position: 'relative' }}>
+        {tooltip && (
+            <div style={{ position: 'absolute', top: 8, right: 8, zIndex: 10 }}>
+                <TooltipInfo id={`tooltip-${title.replace(/\s/g, '')}`} texto={tooltip} />
             </div>
-            <div className="status-card-content">
-                <span className="status-card-value">{value}</span>
-                <span className="status-card-title">{title}</span>
-                {subtitle && <span className="status-card-subtitle">{subtitle}</span>}
-            </div>
+        )}
+        <div className="status-card-icon" style={{ backgroundColor: color + '22', color }}>
+            <Icon size={24} />
         </div>
-    );
+        <div className="status-card-content">
+            <span className="status-card-value">{value}</span>
+            <span className="status-card-title">{title}</span>
+            {subtitle && <span className="status-card-subtitle">{subtitle}</span>}
+        </div>
+    </div>
+);
 
-    const TooltipInfo = ({ id, texto }) => (
-        <div style={{ position: 'relative', display: 'inline-block' }}>
-            <FiHelpCircle 
-                size={16} 
-                color="var(--text-muted)" 
-                style={{ cursor: 'pointer', marginLeft: 6 }}
-                onMouseEnter={() => setTooltipAtivo(id)}
-                onMouseLeave={() => setTooltipAtivo(null)}
-            />
-            {tooltipAtivo === id && (
+   const TooltipInfo = ({ id, texto }) => (
+    <div style={{ position: 'relative', display: 'inline-block'}}>
+        <FiHelpCircle 
+            size={16} 
+            color="var(--text-muted)" 
+            style={{ cursor: 'pointer' }}
+            onMouseEnter={() => setTooltipAtivo(id)}
+            onMouseLeave={() => setTooltipAtivo(null)}
+        />
+        {tooltipAtivo === id && (
+            <div style={{
+                position: 'absolute',
+                top: '50px',
+                left: 'calc(100% + 12px)',
+                transform: 'translateY(-50%)',
+                backgroundColor: '#2c2c2c',
+                color: '#e8ddd8',
+                padding: '8px 12px',
+                borderRadius: 6,
+                fontSize: 11,
+                maxWidth: 220,
+                width: 'max-content',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                zIndex: 100,
+                textAlign: 'left',
+                lineHeight: 1.4
+            }}>
+                {texto}
                 <div style={{
                     position: 'absolute',
-                    bottom: 'calc(100% + 10px)',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    backgroundColor: '#2c2c2c',
-                    color: '#e8ddd8',
-                    padding: '10px 14px',
-                    borderRadius: 8,
-                    fontSize: 12,
-                    maxWidth: 280,
-                    width: 'max-content',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-                    zIndex: 100,
-                    textAlign: 'center',
-                    fontWeight: 'normal',
-                    lineHeight: 1.5
-                }}>
-                    {texto}
-                    <div style={{
-                        position: 'absolute',
-                        top: '100%',
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        border: '6px solid transparent',
-                        borderTopColor: '#2c2c2c'
-                    }} />
-                </div>
-            )}
-        </div>
-    );
+                    top: '50%',
+                    left: '-6px',
+                    transform: 'translateY(-50%)',
+                    border: '6px solid transparent',
+                    borderRightColor: '#2c2c2c'
+                }} />
+            </div>
+        )}
+    </div>
+);
 
     return (
         <div className="container">
@@ -281,45 +293,42 @@ function Dashboard() {
                                 <div className="loading-state">Carregando dados...</div>
                             ) : (
                                 <>
-                                    <div className="status-grid">
-                                        <StatusCard
-                                            icon={FiPackage}
-                                            title="Produtos"
-                                            value={totalProdutos}
-                                            color="#b85a3a"
-                                            subtitle="Total cadastrados"
-                                        />
-                                        <StatusCard
-                                            icon={FiTrendingUp}
-                                            title="Margem Média"
-                                            value={produtosComMargem.length > 0 ? 
-                                                (produtosComMargem.reduce((sum, p) => sum + p.margem, 0) / produtosComMargem.length).toFixed(1) + '%' : 
-                                                '0%'}
-                                            color="#6b8c4a"
-                                            subtitle="Média geral"
-                                        />
-                                        <StatusCard
-                                            icon={FiDollarSign}
-                                            title="Lucro Total"
-                                            value={'R$ ' + (produtosComMargem.reduce((sum, p) => sum + (p.preco - p.custo), 0)).toFixed(2).replace('.', ',')}
-                                            color="#d4a84a"
-                                            subtitle="Soma de todos os lucros"
-                                        />
-                                        <StatusCard
-                                            icon={FiAlertCircle}
-                                            title="Em Alerta"
-                                            value={produtosAlerta.length}
-                                            color="#b85a4a"
-                                            subtitle="Margem < 40%"
-                                        />
-                                        <StatusCard
-                                            icon={FiCheckCircle}
-                                            title="Excelentes"
-                                            value={produtosExcelente.length}
-                                            color="#6b8c4a"
-                                            subtitle="Margem > 60%"
-                                        />
-                                    </div>
+                                 <div className="status-grid">
+    <StatusCard
+        icon={FiPackage}
+        title="Produtos"
+        value={totalProdutos}
+        color="#b85a3a"
+        subtitle="Total cadastrados"
+        tooltip="Número total de produtos cadastrados no cardápio. Isso inclui todos os produtos, independente de estarem sendo vendidos ou não."
+    />
+    <StatusCard
+        icon={FiTrendingUp}
+        title="Margem Média"
+        value={produtosComMargem.length > 0 ? 
+            (produtosComMargem.reduce((sum, p) => sum + p.margem, 0) / produtosComMargem.length).toFixed(1) + '%' : 
+            '0%'}
+        color="#6b8c4a"
+        subtitle="Média geral"
+        tooltip="Média aritmética de todas as margens de lucro dos produtos cadastrados. Quanto maior, mais saudável é o negócio. Ideal: acima de 50%."
+    />
+    <StatusCard
+        icon={FiAlertCircle}
+        title="Em Alerta"
+        value={produtosAlerta.length}
+        color="#b85a4a"
+        subtitle="Margem < 40%"
+        tooltip="Produtos com margem de lucro abaixo de 40%. Isso significa que o lucro é baixo e pode indicar que o preço está muito próximo do custo. Considere aumentar o preço ou reduzir custos."
+    />
+    <StatusCard
+        icon={FiCheckCircle}
+        title="Excelentes"
+        value={produtosExcelente.length}
+        color="#6b8c4a"
+        subtitle="Margem > 60%"
+        tooltip="Produtos com margem de lucro acima de 60%. São os produtos mais rentáveis do cardápio. Ótimo para focar as vendas e promoções."
+    />
+</div>
 
                                     {produtosAlerta.length > 0 && (
                                         <div className="card card-warning">
@@ -372,49 +381,38 @@ function Dashboard() {
                                             </ResponsiveContainer>
                                         </div>
 
-                                        <div className="card">
-                                            <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                                <FiTrendingUp size={18} />
-                                                Top 10 Margens
-                                                <TooltipInfo 
-                                                    id="graf2" 
-                                                    texto="Ranking dos produtos com as maiores margens de lucro. Quanto maior a barra, mais rentável é o produto. Use esta lista para identificar seus produtos mais lucrativos."
-                                                />
-                                            </h3>
-                                            <ResponsiveContainer width="100%" height={280}>
-                                                <BarChart data={dadosBarra} layout="vertical">
-                                                    <CartesianGrid strokeDasharray="3 3" />
-                                                    <XAxis type="number" domain={[0, 100]} />
-                                                    <YAxis dataKey="nome" type="category" width={80} />
-                                                    <Tooltip />
-                                                    <Bar dataKey="margem" fill="#b88b4a">
-                                                        {dadosBarra.map((entry, index) => (
-                                                            <Cell key={`cell-${index}`} fill={entry.margem >= 60 ? '#6b8c4a' : (entry.margem >= 40 ? '#d4a84a' : '#b85a4a')} />
-                                                        ))}
-                                                    </Bar>
-                                                </BarChart>
-                                            </ResponsiveContainer>
-                                        </div>
-                                    </div>
-
-                                    <div className="card">
-                                        <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                            <FiDollarSign size={18} />
-                                            Lucro por Unidade
-                                            <TooltipInfo 
-                                                id="graf3" 
-                                                texto="Mostra quanto de lucro (em R$) cada produto gera por unidade vendida. Quanto maior a barra, mais dinheiro o produto traz para o negócio."
-                                            />
-                                        </h3>
-                                        <ResponsiveContainer width="100%" height={250}>
-                                            <BarChart data={dadosLucro}>
-                                                <CartesianGrid strokeDasharray="3 3" />
-                                                <XAxis dataKey="nome" />
-                                                <YAxis />
-                                                <Tooltip formatter={(value) => `R$ ${value.toFixed(2)}`} />
-                                                <Bar dataKey="lucro" fill="#6b8c4a" />
-                                            </BarChart>
-                                        </ResponsiveContainer>
+<div className="card">
+    <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <FiTrendingUp size={18} />
+        Top 10 Margens
+        <TooltipInfo 
+            id="graf2" 
+            texto="Ranking dos produtos com as maiores margens de lucro. Quanto maior a barra, mais rentável é o produto."
+        />
+    </h3>
+    <ResponsiveContainer width="100%" height={350}>
+        <BarChart data={dadosBarra} layout="vertical" margin={{  right: 20, top: 20, bottom: 20 }}>
+            <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+            <XAxis type="number" domain={[0, 100]} />
+            <YAxis 
+                dataKey="nome" 
+                type="category" 
+                width={120} 
+                tick={{ fontSize: 11, fill: 'var(--text-color)' }}
+                interval={0}
+            />
+            <Tooltip 
+                contentStyle={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}
+                formatter={(value) => `${value.toFixed(1)}%`}
+            />
+            <Bar dataKey="margem" fill="#b88b4a" barSize={20}>
+                {dadosBarra.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.margem >= 60 ? '#6b8c4a' : (entry.margem >= 40 ? '#d4a84a' : '#b85a4a')} />
+                ))}
+            </Bar>
+        </BarChart>
+    </ResponsiveContainer>
+</div>
                                     </div>
 
                                     <div className="validity-grid">
@@ -448,6 +446,9 @@ function Dashboard() {
                                         <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                                             <FiPackage size={18} />
                                             Lista de Produtos
+                                             <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-muted)' }}>
+                                                    {produtos.length} registros
+                                            </span>
                                         </h3>
                                         <div className="table-responsive">
                                             <table>
@@ -494,125 +495,114 @@ function Dashboard() {
                                                 </tbody>
                                             </table>
                                         </div>
-                                        <Paginacao />
+                                        <Paginacao pagina={paginaProdutos} setPagina={setPaginaProdutos} totalPaginas={totalPaginasProdutos} />
                                     </div>
 
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginTop: 20 }}>
-                                    <div className="card">
-                                        <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                            <FiBox size={18} />
-                                            Ingredientes
-                                            <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-muted)' }}>
-                                                {ingredientes.length} registros
-                                            </span>
-                                        </h3>
-                                        <div className="table-responsive" style={{ maxHeight: 300, overflowY: 'auto' }}>
-                                            <table>
-                                                <thead>
-                                                    <tr>
-                                                        <th>Ingrediente</th>
-                                                        <th>Unidade</th>
-                                                        <th>Custo Unitário</th>
-                                                        <th>Estoque Total</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {ingredientes.slice(0, 10).map(ing => {
-                                                        const lotesIng = lotes.filter(l => l.ingrediente_id === ing.id);
-                                                        const totalEstoque = lotesIng.reduce((sum, l) => sum + (parseFloat(l.quantidade) || 0), 0);
-                                                        return (
-                                                            <tr key={ing.id}>
-                                                                <td>{ing.nome}</td>
-                                                                <td>{ing.unidade}</td>
-                                                                <td>
-                                                                    R$ {(parseFloat(ing.custo_medio) / (parseFloat(ing.fator_conversao) || 1)).toFixed(2).replace('.', ',')} 
-                                                                    / {ing.unidade_uso || ing.unidade}
+                                    <div>
+                                        <div className="card">
+                                            <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                <FiBox size={18} />
+                                                Ingredientes
+                                                <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-muted)' }}>
+                                                    {ingredientes.length} registros
+                                                </span>
+                                            </h3>
+                                            <div className="table-responsive" style={{ maxHeight: 300, overflowY: 'auto' }}>
+                                                <table>
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Ingrediente</th>
+                                                            <th>Unidade</th>
+                                                            <th>Custo Unitário</th>
+                                                            <th>Estoque Total</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {ingredientesPaginados.map(ing => {
+                                                            const lotesIng = lotes.filter(l => l.ingrediente_id === ing.id);
+                                                            const totalEstoque = lotesIng.reduce((sum, l) => sum + (parseFloat(l.quantidade) || 0), 0);
+                                                            return (
+                                                                <tr key={ing.id}>
+                                                                    <td>{ing.nome}</td>
+                                                                    <td>{ing.unidade}</td>
+                                                                    <td>
+                                                                        R$ {(parseFloat(ing.custo_medio) / (parseFloat(ing.fator_conversao) || 1)).toFixed(2).replace('.', ',')} 
+                                                                        / {ing.unidade_uso || ing.unidade}
+                                                                    </td>
+                                                                    <td>{totalEstoque.toFixed(2)} {ing.unidade}</td>
+                                                                </tr>
+                                                            );
+                                                        })}
+                                                        {ingredientes.length === 0 && (
+                                                            <tr>
+                                                                <td colSpan="4" className="text-center text-muted">
+                                                                    <p>Nenhum ingrediente cadastrado</p>
                                                                 </td>
-                                                                <td>{totalEstoque.toFixed(2)} {ing.unidade}</td>
                                                             </tr>
-                                                        );
-                                                    })}
-                                                    {ingredientes.length === 0 && (
-                                                        <tr>
-                                                            <td colSpan="4" className="text-center text-muted">
-                                                                <p>Nenhum ingrediente cadastrado</p>
-                                                            </td>
-                                                        </tr>
-                                                    )}
-                                                    {ingredientes.length > 10 && (
-                                                        <tr>
-                                                            <td colSpan="4" className="text-center text-muted">
-                                                                <small>... e mais {ingredientes.length - 10} ingredientes</small>
-                                                            </td>
-                                                        </tr>
-                                                    )}
-                                                </tbody>
-                                            </table>
+                                                        )}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <Paginacao pagina={paginaIngredientes} setPagina={setPaginaIngredientes} totalPaginas={totalPaginasIngredientes} />
                                         </div>
-                                    </div>
 
-                                    <div className="card">
-                                        <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                            <FiCalendar size={18} />
-                                            Lotes
-                                            <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-muted)' }}>
-                                                {lotes.length} registros
-                                            </span>
-                                        </h3>
-                                        <div className="table-responsive" style={{ maxHeight: 300, overflowY: 'auto' }}>
-                                            <table>
-                                                <thead>
-                                                    <tr>
-                                                        <th>Ingrediente</th>
-                                                        <th>Quantidade</th>
-                                                        <th>Validade</th>
-                                                        <th>Status</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {lotes.slice(0, 10).map(lote => {
-                                                        const dias = Math.ceil((new Date(lote.data_validade) - new Date()) / (1000 * 60 * 60 * 24));
-                                                        let cor = '#28a745';
-                                                        let status = 'OK';
-                                                        if (dias < 0) { cor = '#dc3545'; status = 'Vencido'; }
-                                                        else if (dias === 0) { cor = '#ffc107'; status = 'Vence Hoje'; }
-                                                        else if (dias <= 7) { cor = '#fd7e14'; status = 'Vence em breve'; }
-                                                        return (
-                                                            <tr key={lote.id}>
-                                                                <td>{lote.ingrediente_nome}</td>
-                                                                <td>{lote.quantidade} {lote.unidade}</td>
-                                                                <td style={{ color: cor }}>
-                                                                    {new Date(lote.data_validade).toLocaleDateString('pt-BR')}
-                                                                </td>
-                                                                <td style={{ color: cor, fontWeight: 'bold' }}>
-                                                                    {status} ({dias} dias)
+                                        <div className="card">
+                                            <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                <FiCalendar size={18} />
+                                                Lotes
+                                                <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-muted)' }}>
+                                                    {lotes.length} registros
+                                                </span>
+                                            </h3>
+                                            <div className="table-responsive" style={{ maxHeight: 300, overflowY: 'auto' }}>
+                                                <table>
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Ingrediente</th>
+                                                            <th>Quantidade</th>
+                                                            <th>Validade</th>
+                                                            <th>Status</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {lotesPaginados.map(lote => {
+                                                            const dias = Math.ceil((new Date(lote.data_validade) - new Date()) / (1000 * 60 * 60 * 24));
+                                                            let cor = '#28a745';
+                                                            let status = 'OK';
+                                                            if (dias < 0) { cor = '#dc3545'; status = 'Vencido'; }
+                                                            else if (dias === 0) { cor = '#ffc107'; status = 'Vence Hoje'; }
+                                                            else if (dias <= 7) { cor = '#fd7e14'; status = 'Vence em breve'; }
+                                                            return (
+                                                                <tr key={lote.id}>
+                                                                    <td>{lote.ingrediente_nome}</td>
+                                                                    <td>{lote.quantidade} {lote.unidade}</td>
+                                                                    <td style={{ color: cor }}>
+                                                                        {new Date(lote.data_validade).toLocaleDateString('pt-BR')}
+                                                                    </td>
+                                                                    <td style={{ color: cor, fontWeight: 'bold' }}>
+                                                                        {status} ({dias} dias)
+                                                                    </td>
+                                                                </tr>
+                                                            );
+                                                        })}
+                                                        {lotes.length === 0 && (
+                                                            <tr>
+                                                                <td colSpan="4" className="text-center text-muted">
+                                                                    <p>Nenhum lote registrado</p>
                                                                 </td>
                                                             </tr>
-                                                        );
-                                                    })}
-                                                    {lotes.length === 0 && (
-                                                        <tr>
-                                                            <td colSpan="4" className="text-center text-muted">
-                                                                <p>Nenhum lote registrado</p>
-                                                            </td>
-                                                        </tr>
-                                                    )}
-                                                    {lotes.length > 10 && (
-                                                        <tr>
-                                                            <td colSpan="4" className="text-center text-muted">
-                                                                <small>... e mais {lotes.length - 10} lotes</small>
-                                                            </td>
-                                                        </tr>
-                                                    )}
-                                                </tbody>
-                                            </table>
+                                                        )}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <Paginacao pagina={paginaLotes} setPagina={setPaginaLotes} totalPaginas={totalPaginasLotes} />
                                         </div>
                                     </div>
-                                </div>
                                 </>
                             )}
                         </>
                     )}
+                    {pagina === 'analise' && <AnaliseVendas />}
                     {pagina === 'produtos' && <Produtos />}
                     {pagina === 'ingredientes' && <Ingredientes />}
                     {pagina === 'lotes' && <Lotes />}

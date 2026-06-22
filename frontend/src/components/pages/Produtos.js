@@ -317,8 +317,8 @@ function Produtos() {
                                     <th>Categoria</th>
                                     <th>Preço de Venda</th>
                                     <th>Custo de Preparo</th>
-                                    <th>Margem de Lucro</th>
                                     <th>Lucro (R$)</th>
+                                    <th>Margem de Lucro</th>
                                     <th className="text-center">Ações</th>
                                 </tr>
                             </thead>
@@ -334,11 +334,12 @@ function Produtos() {
                                         <td><span className="badge">{produto.categoria || '-'}</span></td>
                                         <td className="text-strong">R$ {parseFloat(produto.preco_venda).toFixed(2).replace('.', ',')}</td>
                                         <td>R$ {parseFloat(produto.custo).toFixed(2).replace('.', ',')}</td>
-                                        <td className={getMargemClass(parseFloat(produto.margem))}>
-                                            {produto.margem}%
-                                        </td>
+                                 
                                         <td className={getMargemClass(parseFloat(produto.margem))}>
                                             R$ {(parseFloat(produto.preco_venda) - parseFloat(produto.custo)).toFixed(2).replace('.', ',')}
+                                        </td>
+                                        <td className={getMargemClass(parseFloat(produto.margem))}>
+                                            {produto.margem}%
                                         </td>
                                         <td>
                                             <div className="acoes">

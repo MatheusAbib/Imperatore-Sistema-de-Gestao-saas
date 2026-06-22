@@ -17,6 +17,17 @@ class Lote {
         return result.insertId;
     }
 
+    static async buscarPorId(id, estabelecimento_id) {
+        const [rows] = await db.execute(
+            `SELECT l.*, i.nome as ingrediente_nome, i.unidade 
+             FROM lotes l 
+             JOIN ingredientes i ON l.ingrediente_id = i.id 
+             WHERE l.id = ? AND l.estabelecimento_id = ?`,
+            [id, estabelecimento_id]
+        );
+        return rows[0];
+    }
+
     static async listarPorEstabelecimento(estabelecimento_id) {
         const [rows] = await db.execute(
             `SELECT l.*, i.nome as ingrediente_nome, i.unidade 
@@ -68,11 +79,29 @@ class Lote {
     }
 
     static async deletar(id, estabelecimento_id) {
-        const [result] = await db.execute(
-            'DELETE FROM lotes WHERE id = ? AND estabelecimento_id = ?',
-            [id, estabelecimento_id]
-        );
-        return result.affectedRows;
+        const connection = await db.getConnection();
+        await connection.beginTransaction();
+
+        try {
+            await connection.execute(
+                'DELETE FROM movimentos_estoque WHERE lote_id = ?',
+                [id]
+            );
+
+            const [result] = await connection.execute(
+                'DELETE FROM lotes WHERE id = ? AND estabelecimento_id = ?',
+                [id, estabelecimento_id]
+            );
+
+            await connection.commit();
+            connection.release();
+            
+            return result.affectedRows;
+        } catch (error) {
+            await connection.rollback();
+            connection.release();
+            throw error;
+        }
     }
 }
 

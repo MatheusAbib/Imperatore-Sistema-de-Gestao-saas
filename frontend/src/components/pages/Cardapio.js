@@ -115,9 +115,6 @@ function Cardapio() {
                     <div className="cardapio-grid">
                         {produtosFiltrados.map(produto => (
                             <div key={produto.id} className="cardapio-item">
-                                <div className="cardapio-icon">
-                                    {getIcon(produto)}
-                                </div>
                                 <h3>{produto.nome}</h3>
                                 {produto.categoria && (
                                     <span className="badge">{produto.categoria}</span>

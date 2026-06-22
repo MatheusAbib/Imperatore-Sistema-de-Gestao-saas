@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
-import { FiPlus, FiTrash2, FiPackage, FiBox, FiSearch, FiX, FiAlertCircle, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { FiPlus, FiTrash2, FiPackage, FiBox, FiSearch, FiX, FiAlertCircle, FiChevronLeft, FiChevronRight, FiFilter } from 'react-icons/fi';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -18,6 +18,7 @@ function Lotes() {
     const [modalConfirmacao, setModalConfirmacao] = useState(null);
     const [mostrarForm, setMostrarForm] = useState(false);
     const [modalNovoLote, setModalNovoLote] = useState(false);
+    const [filtroIngrediente, setFiltroIngrediente] = useState('');
     
     const [paginaTodos, setPaginaTodos] = useState(1);
     const [paginaIngrediente, setPaginaIngrediente] = useState(1);
@@ -85,9 +86,9 @@ function Lotes() {
             setUnidadeSelecionada('');
             setModalNovoLote(false);
             setMostrarForm(false);
-            carregarLotes();
+            await carregarLotes();
             if (ingredienteSelecionado) {
-                carregarLotesPorIngrediente(ingredienteSelecionado);
+                await carregarLotesPorIngrediente(ingredienteSelecionado);
             }
             toast.success('Lote registrado com sucesso!');
         } catch (error) {
@@ -99,7 +100,7 @@ function Lotes() {
     };
 
     const handleDelete = async (id) => {
-        const loteEncontrado = lotes.find(l => l.id === id);
+        const loteEncontrado = [...lotes, ...lotesIngrediente].find(l => l.id === id);
         setModalConfirmacao({
             id,
             nome: loteEncontrado?.ingrediente_nome || 'lote',
@@ -109,17 +110,19 @@ function Lotes() {
 
     const confirmarExclusao = async () => {
         if (!modalConfirmacao) return;
+        setLoading(true);
         try {
             await api.delete(`/lotes/${modalConfirmacao.id}`);
-            carregarLotes();
+            await carregarLotes();
             if (ingredienteSelecionado) {
-                carregarLotesPorIngrediente(ingredienteSelecionado);
+                await carregarLotesPorIngrediente(ingredienteSelecionado);
             }
             toast.success('Lote excluído com sucesso');
         } catch (error) {
             console.error('Erro ao deletar lote', error);
             toast.error('Erro ao excluir lote');
         } finally {
+            setLoading(false);
             setModalConfirmacao(null);
         }
     };
@@ -145,6 +148,20 @@ function Lotes() {
         if (dias <= 7) return 'Vence em breve';
         return 'OK';
     };
+
+    const lotesFiltrados = filtroIngrediente 
+        ? lotes.filter(l => l.ingrediente_id === parseInt(filtroIngrediente))
+        : lotes;
+
+    const lotesPaginados = lotesFiltrados.slice(
+        (paginaTodos - 1) * itensPorPagina,
+        paginaTodos * itensPorPagina
+    );
+
+    const lotesIngredientePaginados = lotesIngrediente.slice(
+        (paginaIngrediente - 1) * itensPorPagina,
+        paginaIngrediente * itensPorPagina
+    );
 
     const Paginacao = ({ pagina, total, onChange }) => {
         const totalPaginas = Math.ceil(total / itensPorPagina);
@@ -174,16 +191,6 @@ function Lotes() {
             </div>
         );
     };
-
-    const lotesPaginados = lotes.slice(
-        (paginaTodos - 1) * itensPorPagina,
-        paginaTodos * itensPorPagina
-    );
-
-    const lotesIngredientePaginados = lotesIngrediente.slice(
-        (paginaIngrediente - 1) * itensPorPagina,
-        paginaIngrediente * itensPorPagina
-    );
 
     return (
         <>
@@ -278,7 +285,7 @@ function Lotes() {
                                                         <td>{lote.quantidade} {unidadeSelecionada}</td>
                                                         <td>{new Date(lote.data_validade).toLocaleDateString('pt-BR')}</td>
                                                         <td style={{ color: getStatusCor(dias), fontWeight: 'bold' }}>
-                                                            {getStatusTexto(dias)} ({dias} dias restante)
+                                                            {getStatusTexto(dias)} ({dias} dias)
                                                         </td>
                                                         <td>
                                                             <div className="acoes">
@@ -309,7 +316,32 @@ function Lotes() {
             </div>
 
             <div className="card">
-                <h2>Todos os Lotes</h2>
+                <h2 style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+                    <FiBox size={20} />
+                    Todos os Lotes
+                </h2>
+                
+                <div style={{ display: 'flex', gap: 12, marginBottom: 16, alignItems: 'center' }}>
+                    <div style={{ flex: 1, maxWidth: 300 }}>
+                        <select 
+                            value={filtroIngrediente} 
+                            onChange={(e) => {
+                                setFiltroIngrediente(e.target.value);
+                                setPaginaTodos(1);
+                            }}
+                            style={{ width: '100%' }}
+                        >
+                            <option value="">Todos os ingredientes</option>
+                            {ingredientes.map(ing => (
+                                <option key={ing.id} value={ing.id}>{ing.nome}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+                        {lotesFiltrados.length} lotes encontrados
+                    </span>
+                </div>
+
                 <div className="table-responsive">
                     <table>
                         <thead>
@@ -337,7 +369,7 @@ function Lotes() {
                                         <td>{lote.quantidade} {lote.unidade}</td>
                                         <td>{new Date(lote.data_validade).toLocaleDateString('pt-BR')}</td>
                                         <td style={{ color: getStatusCor(dias), fontWeight: 'bold' }}>
-                                            {getStatusTexto(dias)} ({dias} dias restante)
+                                            {getStatusTexto(dias)} ({dias} dias)
                                         </td>
                                         <td>
                                             <div className="acoes">
@@ -353,12 +385,11 @@ function Lotes() {
                                     </tr>
                                 );
                             })}
-                            {lotes.length === 0 && (
+                            {lotesFiltrados.length === 0 && (
                                 <tr>
                                     <td colSpan="6" className="text-center text-muted">
                                         <FiBox size={32} />
-                                        <p>Nenhum lote registrado</p>
-                                        <span>Registre seu primeiro lote</span>
+                                        <p>Nenhum lote encontrado</p>
                                     </td>
                                 </tr>
                             )}
@@ -367,7 +398,7 @@ function Lotes() {
                 </div>
                 <Paginacao 
                     pagina={paginaTodos}
-                    total={lotes.length}
+                    total={lotesFiltrados.length}
                     onChange={setPaginaTodos}
                 />
             </div>
@@ -461,7 +492,7 @@ function Lotes() {
                             <button className="btn btn-secondary" onClick={() => setModalConfirmacao(null)}>
                                 Cancelar
                             </button>
-                            <button className="btn btn-danger" onClick={confirmarExclusao}>
+                            <button className="btn btn-danger" onClick={confirmarExclusao} disabled={loading}>
                                 <FiTrash2 size={16} />
                                 Excluir
                             </button>

@@ -102,6 +102,17 @@ a:hover {
     padding: 0;
 }
 
+.logs-filtros {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+}
+
+.logs-filtros.quatro-colunas {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+
 .card {
     background: var(--bg-card);
     border-radius: 8px;
@@ -285,12 +296,6 @@ th {
     color: var(--text-muted);
 }
 
-@media (max-width: 768px) {
-    .status-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
 .badge {
     display: inline-block;
     padding: 2px 12px;
@@ -458,12 +463,6 @@ th {
     gap: 8px;
 }
 
-@media (max-width: 768px) {
-    .cozinha-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
 .pedido-card {
     border: 1px solid var(--border-color);
     border-radius: 8px;
@@ -536,12 +535,6 @@ th {
 .pedido-card-footer .btn {
     padding: 6px 14px;
     font-size: 13px;
-}
-
-@media (max-width: 768px) {
-    .cozinha-grid {
-        grid-template-columns: 1fr;
-    }
 }
 
 .page-header {
@@ -627,7 +620,7 @@ th {
 
 .cardapio-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 16px;
 }
 
@@ -1102,11 +1095,14 @@ th {
 
 .produtos-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
     margin-bottom: 16px;
-    max-height: 300px;
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 4px;
 }
+
 
 .produto-btn {
     display: flex;
@@ -1123,7 +1119,6 @@ th {
 .produto-btn:hover {
     border-color: var(--primary);
     background: var(--bg-hover);
-    transform: translateY(-2px);
 }
 
 .produto-btn-icon {
@@ -1461,129 +1456,4 @@ th {
 .login-submit:disabled {
     opacity: 0.6;
     cursor: not-allowed;
-}
-
-@media (max-width: 768px) {
-    .login-header-full {
-        flex-direction: column;
-        gap: 8px;
-        text-align: center;
-        padding: 12px 20px;
-    }
-    .login-footer-full {
-        flex-direction: column;
-        text-align: center;
-        padding: 12px 20px;
-    }
-    .login-card {
-        padding: 24px 16px;
-    }
-    .login-brand h1 {
-        font-size: 24px;
-    }
-    .login-card-header h2 {
-        font-size: 20px;
-    }
-    .login-input-wrapper input {
-        padding: 10px 36px 10px 36px;
-        font-size: 14px;
-    }
-}
-
-@media (max-width: 768px) {
-    .sidebar {
-        width: 60px;
-        padding: 16px 10px;
-    }
-    .sidebar-header h1 {
-        font-size: 18px;
-        text-align: center;
-    }
-    .sidebar-perfil {
-        font-size: 9px;
-        text-align: center;
-    }
-    .sidebar-btn span {
-        display: none;
-    }
-    .sidebar-btn {
-        justify-content: center;
-        padding: 12px 0;
-    }
-    .sidebar-usuario span {
-        display: none;
-    }
-    .sidebar-usuario {
-        justify-content: center;
-        padding: 8px 0;
-    }
-    .sidebar-footer .sidebar-btn span {
-        display: none;
-    }
-    .sidebar-footer .sidebar-btn {
-        justify-content: center;
-    }
-    .container {
-        margin-left: 90px;
-        padding: 16px 16px;
-    }
-    .notificacoes-dropdown {
-        width: 300px;
-        right: 10px;
-        top: 60px;
-    }
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
-    .charts-grid {
-        grid-template-columns: 1fr;
-    }
-    .validity-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    .cozinha-grid {
-        grid-template-columns: 1fr;
-    }
-    .page-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    .view-toggle {
-        width: 100%;
-    }
-    .view-toggle .btn {
-        flex: 1;
-        text-align: center;
-    }
-    .cardapio-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    h1 {
-        font-size: 1.5rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .cardapio-grid {
-        grid-template-columns: 1fr 1fr;
-    }
-    .cardapio-item {
-        padding: 14px 10px;
-    }
-    .cardapio-preco {
-        font-size: 18px;
-    }
-    .cardapio-list-item {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-    }
-    .cardapio-list-preco {
-        font-size: 16px;
-    }
-    .notificacoes-dropdown {
-        width: 280px;
-        right: 8px;
-        top: 55px;
-    }
 }

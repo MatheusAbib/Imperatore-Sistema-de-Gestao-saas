@@ -1,0 +1,873 @@
+.mobile-header {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: #2c2c2c;
+    z-index: 999;
+    padding: 0 16px;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.mobile-header h1 {
+    font-family: var(--font-title);
+    font-size: 20px;
+    color: #ffffff;
+    margin: 0;
+}
+
+.hamburger-btn {
+    background: none;
+    border: none;
+    color: #e8ddd8;
+    font-size: 28px;
+    cursor: pointer;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hamburger-btn:hover {
+    color: #ffffff;
+}
+
+.mobile-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 998;
+}
+
+.mobile-overlay.open {
+    display: block;
+}
+
+@media (max-width: 991px) {
+    .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        width: 280px;
+        z-index: 1000;
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .mobile-header {
+        display: flex;
+    }
+
+    .container {
+        margin-left: 0 !important;
+        padding-top: 70px !important;
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+    }
+
+    .sidebar-header h1 {
+        font-size: 22px !important;
+    }
+
+    .sidebar-perfil {
+        font-size: 10px !important;
+    }
+
+    .sidebar-btn span {
+        display: inline !important;
+    }
+
+    .sidebar-btn {
+        justify-content: flex-start !important;
+        padding: 10px 14px !important;
+    }
+
+    .sidebar-usuario span {
+        display: inline !important;
+    }
+
+    .sidebar-usuario {
+        justify-content: flex-start !important;
+        padding: 8px 14px !important;
+    }
+
+    .sidebar-footer .sidebar-btn span {
+        display: inline !important;
+    }
+
+    .sidebar-footer .sidebar-btn {
+        justify-content: flex-start !important;
+    }
+
+    .notificacoes-dropdown {
+        left: auto !important;
+        right: 10px !important;
+        top: 65px !important;
+        width: 340px !important;
+    }
+
+    .lotes-container {
+        grid-template-columns: 1fr !important;
+    }
+
+    .lotes-ingredientes-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .lotes-ingredientes-list {
+        max-height: 250px !important;
+    }
+
+    .comandas-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .sobre-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .sobre-grid-2 {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+        font-size: 13px;
+        min-width: 600px;
+    }
+
+    th, td {
+        padding: 8px 10px;
+    }
+
+    .btn {
+        padding: 6px 14px;
+        font-size: 13px;
+    }
+
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .page-header h1 {
+        font-size: 1.3rem !important;
+    }
+
+    .page-header p {
+        font-size: 14px !important;
+    }
+
+    .page-header .btn {
+        width: 100%;
+        text-align: center;
+        justify-content: center;
+    }
+
+    .card {
+        padding: 14px;
+    }
+
+    .card h2 {
+        font-size: 1.2rem;
+    }
+
+    .card h3 {
+        font-size: 1rem;
+    }
+
+    .status-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px;
+    }
+
+    .status-card {
+        padding: 12px 14px;
+        gap: 10px;
+    }
+
+    .status-card-icon {
+        width: 38px;
+        height: 38px;
+    }
+
+    .status-card-icon svg {
+        width: 18px !important;
+        height: 18px !important;
+    }
+
+    .status-card-value {
+        font-size: 18px;
+    }
+
+    .status-card-title {
+        font-size: 11px;
+    }
+
+    .status-card-subtitle {
+        font-size: 10px;
+    }
+
+    .charts-grid {
+        grid-template-columns: 1fr !important;
+        gap: 14px;
+    }
+
+    .validity-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px;
+    }
+
+    .validity-grid .card {
+        padding: 12px;
+    }
+
+    .validity-grid .stats-number {
+        font-size: 24px;
+    }
+
+    .form-group {
+        margin-bottom: 10px;
+    }
+
+    .modal {
+        max-width: 95%;
+        width: 95%;
+        margin: 10px;
+    }
+
+    .modal-header {
+        padding: 12px 16px;
+    }
+
+    .modal-header h3 {
+        font-size: 16px;
+    }
+
+    .modal-body {
+        padding: 16px;
+        max-height: 50vh;
+    }
+
+    .modal-footer {
+        padding: 12px 16px;
+        flex-wrap: wrap;
+    }
+
+    .modal-footer .btn {
+        flex: 1;
+        min-width: 80px;
+        text-align: center;
+    }
+
+    .produtos-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 8px;
+        max-height: 300px !important;
+    }
+
+    .produto-btn {
+        padding: 8px 6px;
+        min-height: 60px;
+    }
+
+    .produto-btn-nome {
+        font-size: 11px;
+    }
+
+    .produto-btn-preco {
+        font-size: 10px;
+    }
+
+    .produto-btn-icon {
+        font-size: 16px;
+    }
+
+    .comanda-item {
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+
+    .comanda-total {
+        font-size: 13px;
+    }
+
+    .cozinha-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .pedido-card {
+        padding: 10px 12px;
+    }
+
+    .pedido-card-header {
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+
+    .pedido-card-mesa {
+        font-size: 13px;
+    }
+
+    .pedido-card-body {
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+
+    .pedido-card-produto {
+        font-size: 13px;
+    }
+
+    .pedido-card-footer {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .pedido-card-footer .btn {
+        padding: 4px 12px;
+        font-size: 12px;
+    }
+
+    .cardapio-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px;
+    }
+
+    .cardapio-item {
+        padding: 14px 10px;
+    }
+
+    .cardapio-item h3 {
+        font-size: 14px;
+    }
+
+    .cardapio-preco {
+        font-size: 18px;
+    }
+
+    .cardapio-list-item {
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 10px 12px;
+    }
+
+    .cardapio-list-info h4 {
+        font-size: 13px;
+    }
+
+    .cardapio-list-preco {
+        font-size: 16px;
+    }
+
+    .pagination {
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .pagination span {
+        font-size: 12px;
+    }
+
+    .pagination .btn {
+        padding: 4px 10px;
+        font-size: 12px;
+    }
+
+    .search-box input {
+        font-size: 14px;
+        padding: 8px 12px 8px 36px;
+    }
+
+    .suggestions-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .sobre-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .sobre-grid-2 {
+        grid-template-columns: 1fr !important;
+    }
+
+    .sobre-cards {
+        grid-template-columns: 1fr !important;
+    }
+
+    .logs-filtros {
+        grid-template-columns: 1fr 1fr !important;
+    }
+
+    .logs-filtros.quatro-colunas {
+        grid-template-columns: 1fr 1fr !important;
+    }
+    .lotes-container {
+        grid-template-columns: 1fr !important;
+    }
+
+    .lotes-ingredientes-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .lotes-ingredientes-list {
+        max-height: 250px !important;
+    }
+
+    .comandas-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .comandas-atendente {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .mobile-header h1 {
+        font-size: 16px;
+    }
+
+    .hamburger-btn {
+        font-size: 24px;
+        padding: 6px;
+    }
+
+    .container {
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+        padding-top: 65px !important;
+    }
+
+    .status-grid {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 8px;
+    }
+
+    .status-card {
+        padding: 10px 12px;
+        gap: 8px;
+    }
+
+    .status-card-icon {
+        width: 32px;
+        height: 32px;
+    }
+
+    .status-card-icon svg {
+        width: 16px !important;
+        height: 16px !important;
+    }
+
+    .status-card-value {
+        font-size: 16px;
+    }
+
+    .status-card-title {
+        font-size: 10px;
+    }
+
+    .validity-grid {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 8px;
+    }
+
+    .validity-grid .card {
+        padding: 10px;
+    }
+
+    .validity-grid .stats-number {
+        font-size: 20px;
+    }
+
+    .cardapio-grid {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 6px;
+    }
+
+    .cardapio-item {
+        padding: 10px 8px;
+    }
+
+    .cardapio-item h3 {
+        font-size: 12px;
+    }
+
+    .cardapio-preco {
+        font-size: 15px;
+    }
+
+    .produtos-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 6px;
+        max-height: 250px !important;
+    }
+
+    .produto-btn {
+        padding: 6px 4px;
+        min-height: 50px;
+    }
+
+    .produto-btn-nome {
+        font-size: 10px;
+    }
+
+    .produto-btn-preco {
+        font-size: 9px;
+    }
+
+    .produto-btn-icon {
+        font-size: 14px;
+    }
+
+    .notificacoes-dropdown {
+        width: 280px !important;
+        right: 8px !important;
+        top: 60px !important;
+    }
+
+    .notificacao-item-dropdown {
+        padding: 10px 14px;
+        flex-wrap: wrap;
+    }
+
+    .notificacao-item-dropdown .notificacao-text {
+        font-size: 12px;
+    }
+
+    .notificacao-tempo {
+        font-size: 10px;
+    }
+
+    table {
+        font-size: 11px;
+        min-width: 400px;
+    }
+
+    th, td {
+        padding: 6px 8px;
+    }
+
+    .modal {
+        max-width: 98%;
+        width: 98%;
+        margin: 5px;
+    }
+
+    .modal-header h3 {
+        font-size: 14px;
+    }
+
+    .modal-body {
+        padding: 12px;
+        max-height: 40vh;
+    }
+
+    .modal-footer .btn {
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+
+    .btn {
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+
+    .page-header h1 {
+        font-size: 1.1rem !important;
+    }
+
+    .page-header p {
+        font-size: 12px !important;
+    }
+
+    .page-header .btn {
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+
+    .card {
+        padding: 10px;
+        border-radius: 6px;
+    }
+
+    .card h2 {
+        font-size: 1rem;
+    }
+
+    .card h3 {
+        font-size: 0.9rem;
+    }
+
+    .sidebar {
+        width: 260px !important;
+    }
+
+    .sidebar-header h1 {
+        font-size: 18px !important;
+    }
+
+    .sidebar-btn {
+        font-size: 13px !important;
+        padding: 8px 12px !important;
+    }
+
+    .sidebar-usuario {
+        font-size: 12px !important;
+        padding: 6px 12px !important;
+    }
+
+    .filter-group {
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .filter-group select,
+    .filter-group input {
+        width: 100%;
+    }
+
+    .view-toggle {
+        flex-wrap: wrap;
+    }
+
+    .view-toggle .btn {
+        flex: 1;
+        min-width: 60px;
+        text-align: center;
+        font-size: 12px;
+        padding: 6px 10px;
+    }
+
+    .login-card {
+        padding: 20px 14px;
+    }
+
+    .login-brand h1 {
+        font-size: 22px;
+    }
+
+    .login-input-wrapper input {
+        font-size: 13px;
+        padding: 8px 32px 8px 32px;
+    }
+
+    .logs-filtros {
+        grid-template-columns: 1fr !important;
+    }
+
+    .logs-filtros.quatro-colunas {
+        grid-template-columns: 1fr !important;
+    }
+
+    .sobre-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .sobre-grid-2 {
+        grid-template-columns: 1fr !important;
+    }
+
+    .sobre-cards {
+        grid-template-columns: 1fr !important;
+    }
+
+    .lotes-container {
+        grid-template-columns: 1fr !important;
+    }
+
+    .comandas-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .comandas-atendente {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+@media (max-width: 360px) {
+    .status-grid {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 6px;
+    }
+
+    .status-card {
+        padding: 8px 10px;
+    }
+
+    .status-card-value {
+        font-size: 14px;
+    }
+
+    .status-card-title {
+        font-size: 9px;
+    }
+
+    .cardapio-grid {
+        grid-template-columns: 1fr 1fr !important;
+    }
+
+    .produtos-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    .validity-grid {
+        grid-template-columns: 1fr 1fr !important;
+    }
+
+    .modal-footer {
+        flex-direction: column;
+    }
+
+    .modal-footer .btn {
+        width: 100%;
+    }
+
+    .notificacoes-dropdown {
+        width: 250px !important;
+        right: 5px !important;
+    }
+
+    .logs-filtros {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+    .status-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+    }
+
+    .charts-grid {
+        grid-template-columns: 1fr 1fr !important;
+    }
+
+    .validity-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    .produtos-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+    }
+
+    .cardapio-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+    }
+
+    .cozinha-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    .logs-filtros {
+        grid-template-columns: 1fr 1fr 1fr !important;
+    }
+
+    .sobre-grid {
+        grid-template-columns: 1fr 1fr !important;
+    }
+
+    .sobre-grid-2 {
+        grid-template-columns: 1fr 1fr !important;
+    }
+
+    .comandas-grid {
+        grid-template-columns: 1fr 1fr !important;
+    }
+
+    .lotes-container {
+        grid-template-columns: 1fr 1fr !important;
+    }
+}
+
+@media (min-width: 1200px) {
+    .container {
+        padding: 24px 40px;
+    }
+
+    .card {
+        padding: 24px;
+    }
+
+    .status-grid {
+        grid-template-columns: repeat(5, 1fr) !important;
+    }
+
+    .produtos-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+    }
+
+    .logs-filtros {
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr !important;
+    }
+}
+
+.hide-mobile {
+    display: block;
+}
+
+.show-mobile {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .hide-mobile {
+        display: none !important;
+    }
+
+    .show-mobile {
+        display: block !important;
+    }
+
+    .text-center-mobile {
+        text-align: center !important;
+    }
+
+    .flex-column-mobile {
+        flex-direction: column !important;
+    }
+
+    .gap-mobile {
+        gap: 8px !important;
+    }
+
+    .w-full-mobile {
+        width: 100% !important;
+    }
+}
+
+::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-body);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}

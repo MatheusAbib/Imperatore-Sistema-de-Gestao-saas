@@ -147,7 +147,7 @@ function Logs() {
             </div>
 
             <div className="card" style={{ marginBottom: 20 }}>
-                <div style={{ display: 'grid', gridTemplateColumns: isAdmin ? '1fr 1fr 1fr 1fr 1fr' : '1fr 1fr 1fr 1fr', gap: 16 }}>
+                <div className={`logs-filtros ${!isAdmin ? 'quatro-colunas' : ''}`}>
                     <div className="form-group">
                         <label>Módulo</label>
                         <select 
@@ -282,7 +282,7 @@ function Logs() {
                                                     {log.acao}
                                                 </span>
                                             </td>
-                                            <td style={{ maxWidth: 300, wordBreak: 'break-word' }}>{log.descricao}</td>
+                                            <td style={{ maxWidth: 300 }}>{log.descricao}</td>
                                         </tr>
                                     ))}
                                     {logsFiltrados.length === 0 && (

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
-import { FiServer } from 'react-icons/fi';
+import { FiServer, FiMenu, FiX } from 'react-icons/fi';
+
 import { 
     FiHome, 
     FiPackage, 
@@ -9,6 +10,7 @@ import {
     FiClipboard, 
     FiFileText, 
     FiUsers, 
+    FiGrid,
     FiCoffee, 
     FiBell, 
     FiUser, 
@@ -20,8 +22,8 @@ import {
     FiTrash2,
     FiBellOff,
     FiAlertCircle,
-    FiX,
-    FiInfo
+    FiInfo,
+    FiBarChart2
 } from 'react-icons/fi';
 
 function Header({ setPagina, paginaAtual }) {
@@ -29,6 +31,7 @@ function Header({ setPagina, paginaAtual }) {
     const [notificacoes, setNotificacoes] = useState([]);
     const [mostrarNotificacoes, setMostrarNotificacoes] = useState(false);
     const [modalLogout, setModalLogout] = useState(false);
+    const [menuAberto, setMenuAberto] = useState(false);
 
     useEffect(() => {
         if (usuario) {
@@ -58,15 +61,15 @@ function Header({ setPagina, paginaAtual }) {
         }
     };
 
-const limparTodas = async () => {
-    try {
-        await api.delete('/notificacoes');
-        setNotificacoes([]);
-        setMostrarNotificacoes(false);
-    } catch (error) {
-        console.error('Erro ao limpar notificacoes', error);
-    }
-};
+    const limparTodas = async () => {
+        try {
+            await api.delete('/notificacoes');
+            setNotificacoes([]);
+            setMostrarNotificacoes(false);
+        } catch (error) {
+            console.error('Erro ao limpar notificacoes', error);
+        }
+    };
 
     const confirmarLogout = () => {
         setModalLogout(false);
@@ -77,25 +80,27 @@ const limparTodas = async () => {
 
     const menus = {
         admin: [
-            { id: 'admin', label: 'Painel Admin', icon: FiHome },
+            { id: 'admin', label: 'Painel Admin', icon: FiGrid },
             { id: 'estabelecimentos', label: 'Estabelecimentos', icon: FiServer },
             { id: 'usuarios', label: 'Usuários', icon: FiUsers },
             { id: 'logs', label: 'Logs', icon: FiFileText },
         ],
         dono: [
-            { id: 'dashboard', label: 'Dashboard', icon: FiHome },
+            { id: 'dashboard', label: 'Painel de Controle', icon: FiGrid },
+            { id: 'analise', label: 'Análise Vendas', icon: FiBarChart2 },
             { id: 'ingredientes', label: 'Ingredientes', icon: FiBox },
-            { id: 'lotes', label: 'Lotes', icon: FiCalendar },
             { id: 'produtos', label: 'Produtos', icon: FiPackage },
+            { id: 'lotes', label: 'Lotes', icon: FiCalendar },
             { id: 'relatorios', label: 'Relatórios', icon: FiFileText },
             { id: 'usuarios', label: 'Usuários', icon: FiUsers },
             { id: 'logs', label: 'Logs', icon: FiFileText },
         ],
         gerente: [
-            { id: 'dashboard', label: 'Dashboard', icon: FiHome },
+            { id: 'dashboard', label: 'Painel de Controle', icon: FiGrid },
+            { id: 'analise', label: 'Análise Vendas', icon: FiBarChart2 },
             { id: 'ingredientes', label: 'Ingredientes', icon: FiBox },
-            { id: 'lotes', label: 'Lotes', icon: FiCalendar },
             { id: 'produtos', label: 'Produtos', icon: FiPackage },
+            { id: 'lotes', label: 'Lotes', icon: FiCalendar },
             { id: 'relatorios', label: 'Relatórios', icon: FiFileText },
             { id: 'cardapio', label: 'Cardápio', icon: FiCoffee },
             { id: 'logs', label: 'Logs', icon: FiFileText },
@@ -114,46 +119,57 @@ const limparTodas = async () => {
 
     return (
         <>
-            <div className="sidebar">
-<div className="sidebar-header">
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <img 
-                src="/crown.png" 
-                alt="Imperatore" 
-                style={{ width: 24, height: 24 }}
-            />
-            <div>
-                <h1 style={{ margin: 0, fontSize: 20 }}>Imperatore</h1>
-                {usuario?.estabelecimento_nome && (
-                    <span style={{ 
-                        fontSize: 12, 
-                        color: 'var(--gold)', 
-                        opacity: 0.8,
-                        display: 'block',
-                        marginTop: -2
-                    }}>
-                        {usuario?.estabelecimento_nome}
-                    </span>
-                )}
+            <div className="mobile-header">
+                <button className="hamburger-btn" onClick={() => setMenuAberto(!menuAberto)}>
+                    {menuAberto ? <FiX size={28} /> : <FiMenu size={28} />}
+                </button>
+                <h1>Imperatore</h1>
+                <div style={{ width: 40 }}></div>
             </div>
-        </div>
-{usuario?.perfil !== 'admin' && (
-    <div style={{ position: 'relative' }}>
-        <button 
-            className="sidebar-bell"
-            onClick={() => setMostrarNotificacoes(!mostrarNotificacoes)}
-        >
-            <FiBell size={20} />
-            {notificacoesNaoLidas > 0 && (
-                <span className="badge-bell">{notificacoesNaoLidas}</span>
-            )}
-        </button>
-    </div>
-)}
-    </div>
-    <span className="sidebar-perfil">{usuario?.perfil}</span>
-</div>
+
+            <div className={`mobile-overlay ${menuAberto ? 'open' : ''}`} onClick={() => setMenuAberto(false)} />
+
+            <div className={`sidebar ${menuAberto ? 'open' : ''}`}>
+                <div className="sidebar-header">
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <img 
+                                src="/crown.png" 
+                                alt="Imperatore" 
+                                style={{ width: 24, height: 24 }}
+                            />
+                            <div>
+                                <h1 style={{ margin: 0, fontSize: 20 }}>Imperatore</h1>
+                                {usuario?.estabelecimento_nome && (
+                                    <span style={{ 
+                                        fontSize: 12, 
+                                        color: 'var(--gold)', 
+                                        opacity: 0.8,
+                                        display: 'block',
+                                        marginTop: -2
+                                    }}>
+                                        {usuario?.estabelecimento_nome}
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                        {usuario?.perfil !== 'admin' && (
+                            <div style={{ position: 'relative' }}>
+                                <button 
+                                    className="sidebar-bell"
+                                    onClick={() => setMostrarNotificacoes(!mostrarNotificacoes)}
+                                >
+                                    <FiBell size={20} />
+                                    {notificacoesNaoLidas > 0 && (
+                                        <span className="badge-bell">{notificacoesNaoLidas}</span>
+                                    )}
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                    <span className="sidebar-perfil">{usuario?.perfil}</span>
+                </div>
+
                 <nav className="sidebar-nav">
                     {itensMenu.map((item) => {
                         const Icon = item.icon;
@@ -162,7 +178,10 @@ const limparTodas = async () => {
                             <button
                                 key={item.id}
                                 className={`sidebar-btn ${isActive ? 'active' : ''}`}
-                                onClick={() => setPagina(item.id)}
+                                onClick={() => {
+                                    setPagina(item.id);
+                                    setMenuAberto(false);
+                                }}
                             >
                                 <Icon size={20} />
                                 <span>{item.label}</span>
@@ -172,24 +191,30 @@ const limparTodas = async () => {
                 </nav>
 
                 <div className="sidebar-footer">
-<div className="sidebar-usuario">
-    <div style={{ display: 'flex', flexDirection: 'column' }}>
-        <span style={{ fontWeight: 600, fontSize: 14 }}>{usuario?.nome}</span>
-        <span style={{ fontSize: 11, color: 'var(--gold)', opacity: 0.8 }}>
-            {usuario?.estabelecimento_nome || 'Sem estabelecimento'}
-        </span>
-    </div>
-</div>
+                    <div className="sidebar-usuario">
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                            <span style={{ fontWeight: 600, fontSize: 14 }}>{usuario?.nome}</span>
+                            <span style={{ fontSize: 11, color: 'var(--gold)', opacity: 0.8 }}>
+                                {usuario?.estabelecimento_nome || 'Sem estabelecimento'}
+                            </span>
+                        </div>
+                    </div>
                     <button 
                         className="sidebar-btn sidebar-config"
-                        onClick={() => setPagina('configuracoes')}
+                        onClick={() => {
+                            setPagina('configuracoes');
+                            setMenuAberto(false);
+                        }}
                     >
                         <FiSettings size={20} />
                         <span>Configurações</span>
                     </button>
                     <button 
                         className="sidebar-btn sidebar-sobre"
-                        onClick={() => setPagina('sobre')}
+                        onClick={() => {
+                            setPagina('sobre');
+                            setMenuAberto(false);
+                        }}
                     >
                         <FiInfo size={20} />
                         <span>Sobre</span>

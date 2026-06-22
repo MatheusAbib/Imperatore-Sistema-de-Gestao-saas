@@ -3,7 +3,8 @@ import api from '../../services/api';
 import { 
     FiPlus, FiTrash2, FiSearch, FiX, FiCoffee, FiPackage, 
     FiShoppingBag, FiCreditCard, FiUser, FiClipboard, 
-    FiCheckCircle, FiClock, FiAlertCircle, FiDollarSign 
+    FiCheckCircle, FiClock, FiAlertCircle, FiDollarSign,
+    FiChevronLeft, FiChevronRight
 } from 'react-icons/fi';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -25,6 +26,8 @@ function Atendente() {
     const [statusPedidos, setStatusPedidos] = useState([]);
     const [modalConfirmacao, setModalConfirmacao] = useState(null);
     const [modalFecharComanda, setModalFecharComanda] = useState(false);
+    const [paginaProdutos, setPaginaProdutos] = useState(1);
+    const itensPorPagina = 15;
 
     useEffect(() => {
         carregarProdutos();
@@ -32,13 +35,13 @@ function Atendente() {
     }, []);
 
     useEffect(() => {
-    const interval = setInterval(() => {
-        if (comandaAtual) {
-            carregarStatusPedidos(comandaAtual.id);
-        }
-    }, 5000);
-    return () => clearInterval(interval);
-}, [comandaAtual]);
+        const interval = setInterval(() => {
+            if (comandaAtual) {
+                carregarStatusPedidos(comandaAtual.id);
+            }
+        }, 5000);
+        return () => clearInterval(interval);
+    }, [comandaAtual]);
 
     const carregarProdutos = async () => {
         try {
@@ -119,34 +122,34 @@ function Atendente() {
         setObservacao('');
     };
 
-const confirmarAdicionarItem = async () => {
-    if (!produtoSelecionado) return;
-    
-    if (!quantidade || parseFloat(quantidade) <= 0) {
-        toast.warning('Digite uma quantidade válida');
-        return;
-    }
+    const confirmarAdicionarItem = async () => {
+        if (!produtoSelecionado) return;
+        
+        if (!quantidade || parseFloat(quantidade) <= 0) {
+            toast.warning('Digite uma quantidade válida');
+            return;
+        }
 
-    setLoading(true);
-    try {
-        await api.post('/comandas/itens', {
-            comanda_id: comandaAtual.id,
-            produto_id: produtoSelecionado.id,
-            quantidade: parseFloat(quantidade),
-            observacao: observacao || null
-        });
-        await carregarItensComanda(comandaAtual.id);
-        await carregarStatusPedidos(comandaAtual.id);
-        await carregarComandas();
-        fecharModal();
-        toast.success('Item adicionado com sucesso!');
-    } catch (error) {
-        console.error('Erro ao adicionar item', error);
-        toast.error('Erro ao adicionar item');
-    } finally {
-        setLoading(false);
-    }
-};
+        setLoading(true);
+        try {
+            await api.post('/comandas/itens', {
+                comanda_id: comandaAtual.id,
+                produto_id: produtoSelecionado.id,
+                quantidade: parseFloat(quantidade),
+                observacao: observacao || null
+            });
+            await carregarItensComanda(comandaAtual.id);
+            await carregarStatusPedidos(comandaAtual.id);
+            await carregarComandas();
+            fecharModal();
+            toast.success('Item adicionado com sucesso!');
+        } catch (error) {
+            console.error('Erro ao adicionar item', error);
+            toast.error('Erro ao adicionar item');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const removerItem = async (itemId) => {
         setModalConfirmacao({
@@ -172,54 +175,61 @@ const confirmarAdicionarItem = async () => {
         }
     };
 
-const marcarEntregue = async (itemId) => {
-    setLoading(true);
-    try {
-        await api.put(`/pedidos/${itemId}/status`, { status: 'entregue' });
-        
-        setStatusPedidos(prev => 
-            prev.map(s => 
-                s.id === itemId 
-                    ? { ...s, status: 'entregue' } 
-                    : s
-            )
-        );
-        
-        toast.success('Pedido marcado como entregue!');
-    } catch (error) {
-        console.error('Erro ao marcar entregue', error);
-        toast.error('Erro ao marcar entregue');
-    } finally {
-        setLoading(false);
-    }
-};
+    const marcarEntregue = async (itemId) => {
+        setLoading(true);
+        try {
+            await api.put(`/pedidos/${itemId}/status`, { status: 'entregue' });
+            
+            setStatusPedidos(prev => 
+                prev.map(s => 
+                    s.id === itemId 
+                        ? { ...s, status: 'entregue' } 
+                        : s
+                )
+            );
+            
+            toast.success('Pedido marcado como entregue!');
+        } catch (error) {
+            console.error('Erro ao marcar entregue', error);
+            toast.error('Erro ao marcar entregue');
+        } finally {
+            setLoading(false);
+        }
+    };
 
-        const fecharComanda = async () => {
-            setModalFecharComanda(true);
-        };
+    const fecharComanda = async () => {
+        setModalFecharComanda(true);
+    };
 
-        const confirmarFecharComanda = async () => {
-    setLoading(true);
-    try {
-        await api.put(`/comandas/${comandaAtual.id}/fechar`);
-        setComandaAtual(null);
-        setItensComanda([]);
-        setMostrarProdutos(false);
-        await carregarComandas();
-        toast.success('Comanda fechada com sucesso!');
-    } catch (error) {
-        console.error('Erro ao fechar comanda', error);
-        toast.error('Erro ao fechar comanda');
-    } finally {
-        setLoading(false);
-        setModalFecharComanda(false);
-    }
-};
+    const confirmarFecharComanda = async () => {
+        setLoading(true);
+        try {
+            await api.put(`/comandas/${comandaAtual.id}/fechar`);
+            setComandaAtual(null);
+            setItensComanda([]);
+            setMostrarProdutos(false);
+            await carregarComandas();
+            toast.success('Comanda fechada com sucesso!');
+        } catch (error) {
+            console.error('Erro ao fechar comanda', error);
+            toast.error('Erro ao fechar comanda');
+        } finally {
+            setLoading(false);
+            setModalFecharComanda(false);
+        }
+    };
 
     const produtosFiltrados = produtos.filter(p =>
         p.nome.toLowerCase().includes(busca.toLowerCase()) ||
         (p.categoria && p.categoria.toLowerCase().includes(busca.toLowerCase()))
     );
+
+    const produtosPaginados = produtosFiltrados.slice(
+        (paginaProdutos - 1) * itensPorPagina,
+        paginaProdutos * itensPorPagina
+    );
+
+    const totalPaginas = Math.ceil(produtosFiltrados.length / itensPorPagina);
 
     const totalComanda = itensComanda.reduce((sum, item) => sum + (item.quantidade * item.preco_unitario), 0);
 
@@ -257,6 +267,33 @@ const marcarEntregue = async (itemId) => {
         if (produto.categoria === 'Lanche') return <FiCoffee size={18} />;
         if (produto.categoria === 'Bebida') return <FiDollarSign size={18} />;
         return <FiPackage size={18} />;
+    };
+
+    const PaginacaoProdutos = () => {
+        if (totalPaginas <= 1) return null;
+        return (
+            <div className="pagination" style={{ marginTop: 12, justifyContent: 'center' }}>
+                <button
+                    className="btn btn-secondary"
+                    onClick={() => setPaginaProdutos(p => Math.max(1, p - 1))}
+                    disabled={paginaProdutos <= 1}
+                    style={{ padding: '4px 12px' }}
+                >
+                    <FiChevronLeft size={16} />
+                </button>
+                <span style={{ fontSize: 13, margin: '0 8px' }}>
+                    Página {paginaProdutos} de {totalPaginas}
+                </span>
+                <button
+                    className="btn btn-secondary"
+                    onClick={() => setPaginaProdutos(p => Math.min(totalPaginas, p + 1))}
+                    disabled={paginaProdutos >= totalPaginas}
+                    style={{ padding: '4px 12px' }}
+                >
+                    <FiChevronRight size={16} />
+                </button>
+            </div>
+        );
     };
 
     return (
@@ -314,6 +351,7 @@ const marcarEntregue = async (itemId) => {
                                 className={`comanda-item ${comandaAtual?.id === comanda.id ? 'active' : ''}`}
                                 onClick={async () => {
                                     setComandaAtual(comanda);
+                                    setPaginaProdutos(1);
                                     await carregarItensComanda(comanda.id);
                                     await carregarStatusPedidos(comanda.id);
                                     setMostrarProdutos(true);
@@ -359,18 +397,20 @@ const marcarEntregue = async (itemId) => {
                                     type="text"
                                     placeholder="Buscar produto..."
                                     value={busca}
-                                    onChange={(e) => setBusca(e.target.value)}
+                                    onChange={(e) => {
+                                        setBusca(e.target.value);
+                                        setPaginaProdutos(1);
+                                    }}
                                 />
                             </div>
 
                             <div className="produtos-grid">
-                                {produtosFiltrados.slice(0, 8).map(produto => (
+                                {produtosPaginados.map(produto => (
                                     <button
                                         key={produto.id}
                                         className="btn produto-btn"
                                         onClick={() => abrirModal(produto)}
                                     >
-                                        <span className="produto-btn-icon">{getIcon(produto)}</span>
                                         <span className="produto-btn-nome">{produto.nome}</span>
                                         <span className="produto-btn-preco">
                                             R$ {parseFloat(produto.preco_venda).toFixed(2)}
@@ -378,6 +418,14 @@ const marcarEntregue = async (itemId) => {
                                     </button>
                                 ))}
                             </div>
+
+                            <PaginacaoProdutos />
+
+                            {produtosFiltrados.length === 0 && (
+                                <p className="text-muted" style={{ textAlign: 'center', marginTop: 16 }}>
+                                    Nenhum produto encontrado
+                                </p>
+                            )}
 
                             <h3 style={{ marginTop: 16 }}>Itens da Comanda</h3>
                             {itensComanda.length === 0 ? (
@@ -393,7 +441,6 @@ const marcarEntregue = async (itemId) => {
                                                 <th>Total</th>
                                                 <th>Status</th>
                                                 <th>Ações</th>
-                                                <th></th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -547,32 +594,32 @@ const marcarEntregue = async (itemId) => {
             )}
 
             {modalFecharComanda && comandaAtual && (
-            <div className="modal-overlay" onClick={() => setModalFecharComanda(false)}>
-                <div className="modal" onClick={(e) => e.stopPropagation()}>
-                    <div className="modal-header">
-                        <h3>Fechar Comanda</h3>
-                        <button className="modal-close" onClick={() => setModalFecharComanda(false)}>
-                            <FiX size={20} />
-                        </button>
-                    </div>
-                    <div className="modal-body">
-                        <FiAlertCircle size={32} className="modal-icon-warning" />
-                        <p>Tem certeza que deseja fechar a comanda da <strong>Mesa {comandaAtual.numero_mesa}</strong>?</p>
-                        <p className="text-muted">Total: R$ {totalComanda.toFixed(2)}</p>
-                        <p className="text-muted" style={{ fontSize: 12 }}>Esta ação não pode ser desfeita.</p>
-                    </div>
-                    <div className="modal-footer">
-                        <button className="btn btn-secondary" onClick={() => setModalFecharComanda(false)}>
-                            Cancelar
-                        </button>
-                        <button className="btn btn-danger" onClick={confirmarFecharComanda} disabled={loading}>
-                            <FiX size={16} style={{ marginRight: 6 }} />
-                            Fechar Comanda
-                        </button>
+                <div className="modal-overlay" onClick={() => setModalFecharComanda(false)}>
+                    <div className="modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h3>Fechar Comanda</h3>
+                            <button className="modal-close" onClick={() => setModalFecharComanda(false)}>
+                                <FiX size={20} />
+                            </button>
+                        </div>
+                        <div className="modal-body">
+                            <FiAlertCircle size={32} className="modal-icon-warning" />
+                            <p>Tem certeza que deseja fechar a comanda da <strong>Mesa {comandaAtual.numero_mesa}</strong>?</p>
+                            <p className="text-muted">Total: R$ {totalComanda.toFixed(2)}</p>
+                            <p className="text-muted" style={{ fontSize: 12 }}>Esta ação não pode ser desfeita.</p>
+                        </div>
+                        <div className="modal-footer">
+                            <button className="btn btn-secondary" onClick={() => setModalFecharComanda(false)}>
+                                Cancelar
+                            </button>
+                            <button className="btn btn-danger" onClick={confirmarFecharComanda} disabled={loading}>
+                                <FiX size={16} style={{ marginRight: 6 }} />
+                                Fechar Comanda
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
-        )}
+            )}
         </>
     );
 }
