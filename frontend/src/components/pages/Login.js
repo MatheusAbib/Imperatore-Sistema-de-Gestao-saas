@@ -22,25 +22,20 @@ function Login() {
     return (
         <div className="login-page">
             <div className="login-header-full">
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <img src="/crown.png" alt="Imperatore" style={{ width: 28, height: 28 }} />
-                    <span style={{ fontWeight: 600, fontSize: 18, color: 'var(--text-primary)' }}>Imperatore</span>
-                </div>
-                <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-         
+                <div className="login-header-brand">
+                    <img src="/crown.png" alt="Imperatore" />
+                    <span>Imperatore</span>
                 </div>
             </div>
 
             <div className="login-center">
                 <div className="login-wrapper">
-             
-
                     <div className="login-card">
-                               <div className="login-brand">
-                        <img src="/crown.png" alt="Imperatore" className="login-brand-icon" />
-                        <h1>Imperatore</h1>
-                        <span>Sistema de Gestão</span>
-                    </div>
+                        <div className="login-brand">
+                            <img src="/crown.png" alt="Imperatore" className="login-brand-icon" />
+                            <h1>Imperatore</h1>
+                            <span>Sistema de Gestão</span>
+                        </div>
                         <div className="login-card-header">
                             <p>Faça login para acessar o sistema</p>
                         </div>
@@ -98,14 +93,14 @@ function Login() {
             </div>
 
             <div className="login-footer-full">
-                <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-                    <strong>Imperatore</strong> - Sistema de Gestão para Restaurantes, Bares e Cafés
+                <span className="login-footer-text">
+                    <strong>Imperatore</strong> - Sistema de Gestão para seu Negócio
                 </span>
-                <div style={{ display: 'flex', gap: 16, fontSize: 13 }}>
-                    <a href="mailto:matheus.abib.ma@gmail.com" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>
+                <div className="login-footer-links">
+                    <a href="mailto:matheus.abib.ma@gmail.com">
                         matheus.abib.ma@gmail.com
                     </a>
-                    <a href="https://wa.me/5511975072008" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>
+                    <a href="https://wa.me/5511975072008" target="_blank" rel="noopener noreferrer">
                         (11) 97507-2008
                     </a>
                 </div>

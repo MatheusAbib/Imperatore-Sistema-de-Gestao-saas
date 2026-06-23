@@ -87,7 +87,7 @@ function Header({ setPagina, paginaAtual }) {
         ],
         dono: [
             { id: 'dashboard', label: 'Painel de Controle', icon: FiGrid },
-            { id: 'analise', label: 'Análise Vendas', icon: FiBarChart2 },
+            { id: 'analise', label: 'Análise de Vendas', icon: FiBarChart2 },
             { id: 'ingredientes', label: 'Ingredientes', icon: FiBox },
             { id: 'produtos', label: 'Produtos', icon: FiPackage },
             { id: 'lotes', label: 'Lotes', icon: FiCalendar },
@@ -97,7 +97,7 @@ function Header({ setPagina, paginaAtual }) {
         ],
         gerente: [
             { id: 'dashboard', label: 'Painel de Controle', icon: FiGrid },
-            { id: 'analise', label: 'Análise Vendas', icon: FiBarChart2 },
+            { id: 'analise', label: 'Análise de Vendas', icon: FiBarChart2 },
             { id: 'ingredientes', label: 'Ingredientes', icon: FiBox },
             { id: 'produtos', label: 'Produtos', icon: FiPackage },
             { id: 'lotes', label: 'Lotes', icon: FiCalendar },
@@ -123,8 +123,15 @@ function Header({ setPagina, paginaAtual }) {
                 <button className="hamburger-btn" onClick={() => setMenuAberto(!menuAberto)}>
                     {menuAberto ? <FiX size={28} /> : <FiMenu size={28} />}
                 </button>
-                <h1>Imperatore</h1>
-                <div style={{ width: 40 }}></div>
+                <div className="mobile-header-center">
+                    <img src="/crown.png" alt="Imperatore" />
+                    <span>Imperatore</span>
+                </div>
+                <div className="mobile-header-estabelecimento">
+                    {usuario?.estabelecimento_nome && (
+                        <span>{usuario.estabelecimento_nome}</span>
+                    )}
+                </div>
             </div>
 
             <div className={`mobile-overlay ${menuAberto ? 'open' : ''}`} onClick={() => setMenuAberto(false)} />
@@ -217,7 +224,7 @@ function Header({ setPagina, paginaAtual }) {
                         }}
                     >
                         <FiInfo size={20} />
-                        <span>Sobre</span>
+                        <span>Sobre o Sistema</span>
                     </button>
 
                     <button 

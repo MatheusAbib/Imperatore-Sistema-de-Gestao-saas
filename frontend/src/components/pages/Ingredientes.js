@@ -14,7 +14,7 @@ function Ingredientes() {
     const [editandoId, setEditandoId] = useState(null);
     const [loading, setLoading] = useState(false);
     const [busca, setBusca] = useState('');
-    const [mostrarForm, setMostrarForm] = useState(false);
+    const [modalEdicao, setModalEdicao] = useState(false);
     const [modalConfirmacao, setModalConfirmacao] = useState(null);
 
     const unidades = [
@@ -82,7 +82,7 @@ function Ingredientes() {
             setFatorConversao('1');
             setUnidadeUso('');
             setEditandoId(null);
-            setMostrarForm(false);
+            setModalEdicao(false);
             carregarIngredientes();
         } catch (error) {
             console.error('Erro ao salvar', error);
@@ -92,14 +92,33 @@ function Ingredientes() {
         }
     };
 
-    const handleEdit = (ingrediente) => {
-        setNome(ingrediente.nome);
-        setUnidade(ingrediente.unidade);
-        setCustoMedio(ingrediente.custo_medio);
-        setFatorConversao(ingrediente.fator_conversao || '1');
-        setUnidadeUso(ingrediente.unidade_uso || ingrediente.unidade);
-        setEditandoId(ingrediente.id);
-        setMostrarForm(true);
+    const abrirModalEdicao = (ingrediente = null) => {
+        if (ingrediente) {
+            setNome(ingrediente.nome);
+            setUnidade(ingrediente.unidade);
+            setCustoMedio(ingrediente.custo_medio);
+            setFatorConversao(ingrediente.fator_conversao || '1');
+            setUnidadeUso(ingrediente.unidade_uso || ingrediente.unidade);
+            setEditandoId(ingrediente.id);
+        } else {
+            setNome('');
+            setUnidade('un');
+            setCustoMedio('');
+            setFatorConversao('1');
+            setUnidadeUso('');
+            setEditandoId(null);
+        }
+        setModalEdicao(true);
+    };
+
+    const fecharModalEdicao = () => {
+        setModalEdicao(false);
+        setNome('');
+        setUnidade('un');
+        setCustoMedio('');
+        setFatorConversao('1');
+        setUnidadeUso('');
+        setEditandoId(null);
     };
 
     const handleDelete = async (id) => {
@@ -142,15 +161,7 @@ function Ingredientes() {
                 </div>
                 <button 
                     className="btn btn-primary" 
-                    onClick={() => { 
-                        setMostrarForm(true); 
-                        setEditandoId(null); 
-                        setNome(''); 
-                        setUnidade('un'); 
-                        setCustoMedio(''); 
-                        setFatorConversao('1');
-                        setUnidadeUso('');
-                    }}
+                    onClick={() => abrirModalEdicao()}
                 >
                     <FiPlus size={18} style={{ marginRight: 6 }} />
                     Novo Ingrediente
@@ -171,79 +182,6 @@ function Ingredientes() {
                     </button>
                 )}
             </div>
-
-            {mostrarForm && (
-                <div className="card">
-                    <h2>{editandoId ? 'Editar Ingrediente' : 'Novo Ingrediente'}</h2>
-                    <form onSubmit={handleSubmit}>
-                        <div className="form-group">
-                            <label>Nome</label>
-                            <input type="text" value={nome} onChange={(e) => setNome(e.target.value)} required  placeholder="Ex: Pão Francês"/>
-                        </div>
-                        <div className="form-group">
-                            <label>Unidade (como você compra)</label>
-                            <select value={unidade} onChange={(e) => setUnidade(e.target.value)} required>
-                                {unidades.map(u => (
-                                    <option key={u.valor} value={u.valor}>{u.label}</option>
-                                ))}
-                            </select>
-                        </div>
-                        <div className="form-group">
-                            <label>Custo por unidade (R$)</label>
-                            <input type="number" step="0.01" value={custoMedio} onChange={(e) => setCustoMedio(e.target.value)} placeholder="Ex: 30.00" />
-                        </div>
-                        <div className="form-group" style={{ border: '1px solid var(--border-color)', borderRadius: 8, padding: 16, backgroundColor: 'var(--bg-hover)' }}>
-                            <label style={{ fontWeight: 'bold', color: 'var(--primary)' }}>
-                                Conversão para uso na receita
-                            </label>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 8 }}>
-                                <div>
-                                    <label style={{ fontSize: 13 }}>1 {unidade} equivale a</label>
-                                    <input 
-                                        type="number" 
-                                        step="0.01" 
-                                        value={fatorConversao} 
-                                        onChange={(e) => setFatorConversao(e.target.value)} 
-                                        placeholder="Ex: 5"
-                                        required
-                                    />
-                                </div>
-                            <div>
-                            <label style={{ fontSize: 13 }}>Unidade de uso</label>
-                            <select 
-                                value={unidadeUso} 
-                                onChange={(e) => setUnidadeUso(e.target.value)}
-                                style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid var(--border-color)' }}
-                            >
-                                {unidades.map(u => (
-                                    <option key={u.valor} value={u.valor}>{u.label}</option>
-                                ))}
-                            </select>
-                            <small style={{ color: 'var(--text-muted)' }}>Como você usa na receita</small>
-                        </div>
-                            </div>
-                            {custoMedio && fatorConversao && parseFloat(fatorConversao) > 0 && (
-                                <div style={{ marginTop: 12, color: 'var(--green)', fontWeight: 'bold' }}>
-                                    Custo por unidade de uso: R$ {(parseFloat(custoMedio) / parseFloat(fatorConversao)).toFixed(2).replace('.', ',')}
-                                </div>
-                            )}
-                            {custoMedio && fatorConversao && parseFloat(fatorConversao) <= 0 && (
-                                <div style={{ marginTop: 12, color: 'var(--red)' }}>
-                                    Fator de conversão deve ser maior que 0
-                                </div>
-                            )}
-                        </div>
-                        <div style={{ display: 'flex', gap: 10 }}>
-                            <button type="submit" className="btn btn-primary" disabled={loading}>
-                                {loading ? 'Salvando...' : (editandoId ? 'Atualizar' : 'Cadastrar')}
-                            </button>
-                            <button type="button" className="btn btn-secondary" onClick={() => { setMostrarForm(false); setEditandoId(null); setNome(''); setUnidade('un'); setCustoMedio(''); setFatorConversao('1'); setUnidadeUso(''); }}>
-                                Cancelar
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            )}
 
             <div className="card">
                 {loading ? (
@@ -278,7 +216,7 @@ function Ingredientes() {
                                         </td>
                                         <td>
                                             <div className="acoes">
-                                                <button className="btn-icon btn-edit" onClick={() => handleEdit(ing)} title="Editar">
+                                                <button className="btn-icon btn-edit" onClick={() => abrirModalEdicao(ing)} title="Editar">
                                                     <FiEdit2 size={16} />
                                                 </button>
                                                 <button className="btn-icon btn-delete" onClick={() => handleDelete(ing.id)} title="Excluir">
@@ -302,6 +240,88 @@ function Ingredientes() {
                     </div>
                 )}
             </div>
+
+            {modalEdicao && (
+                <div className="modal-overlay" onClick={fecharModalEdicao}>
+                    <div className="modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h3>{editandoId ? 'Editar Ingrediente' : 'Novo Ingrediente'}</h3>
+                            <button className="modal-close" onClick={fecharModalEdicao}>
+                                <FiX size={20} />
+                            </button>
+                        </div>
+                        <div className="modal-body">
+                            <form onSubmit={handleSubmit}>
+                                <div className="form-group">
+                                    <label>Nome</label>
+                                    <input type="text" value={nome} onChange={(e) => setNome(e.target.value)} required placeholder="Ex: Pão Francês"/>
+                                </div>
+                                <div className="form-group">
+                                    <label>Unidade (como você compra)</label>
+                                    <select value={unidade} onChange={(e) => setUnidade(e.target.value)} required>
+                                        {unidades.map(u => (
+                                            <option key={u.valor} value={u.valor}>{u.label}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label>Custo por unidade (R$)</label>
+                                    <input type="number" step="0.01" value={custoMedio} onChange={(e) => setCustoMedio(e.target.value)} placeholder="Ex: 30.00" />
+                                </div>
+                                <div className="form-group" style={{ border: '1px solid var(--border-color)', borderRadius: 8, padding: 16, backgroundColor: 'var(--bg-hover)' }}>
+                                    <label style={{ fontWeight: 'bold', color: 'var(--primary)' }}>
+                                        Conversão para uso na receita
+                                    </label>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 8 }}>
+                                        <div>
+                                            <label style={{ fontSize: 13 }}>1 {unidade} equivale a</label>
+                                            <input 
+                                                type="number" 
+                                                step="0.01" 
+                                                value={fatorConversao} 
+                                                onChange={(e) => setFatorConversao(e.target.value)} 
+                                                placeholder="Ex: 5"
+                                                required
+                                            />
+                                        </div>
+                                        <div>
+                                            <label style={{ fontSize: 13 }}>Unidade de uso</label>
+                                            <select 
+                                                value={unidadeUso} 
+                                                onChange={(e) => setUnidadeUso(e.target.value)}
+                                                style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid var(--border-color)' }}
+                                            >
+                                                {unidades.map(u => (
+                                                    <option key={u.valor} value={u.valor}>{u.label}</option>
+                                                ))}
+                                            </select>
+                                            <small style={{ color: 'var(--text-muted)' }}>Como você usa na receita</small>
+                                        </div>
+                                    </div>
+                                    {custoMedio && fatorConversao && parseFloat(fatorConversao) > 0 && (
+                                        <div style={{ marginTop: 12, color: 'var(--green)', fontWeight: 'bold' }}>
+                                            Custo por unidade de uso: R$ {(parseFloat(custoMedio) / parseFloat(fatorConversao)).toFixed(2).replace('.', ',')}
+                                        </div>
+                                    )}
+                                    {custoMedio && fatorConversao && parseFloat(fatorConversao) <= 0 && (
+                                        <div style={{ marginTop: 12, color: 'var(--red)' }}>
+                                            Fator de conversão deve ser maior que 0
+                                        </div>
+                                    )}
+                                </div>
+                                <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
+                                    <button type="submit" className="btn btn-primary" disabled={loading}>
+                                        {loading ? 'Salvando...' : (editandoId ? 'Atualizar' : 'Cadastrar')}
+                                    </button>
+                                    <button type="button" className="btn btn-secondary" onClick={fecharModalEdicao}>
+                                        Cancelar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {modalConfirmacao && (
                 <div className="modal-overlay">

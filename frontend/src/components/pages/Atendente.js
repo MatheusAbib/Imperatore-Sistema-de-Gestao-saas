@@ -272,23 +272,19 @@ function Atendente() {
     const PaginacaoProdutos = () => {
         if (totalPaginas <= 1) return null;
         return (
-            <div className="pagination" style={{ marginTop: 12, justifyContent: 'center' }}>
+            <div className="pagination pagination-produtos">
                 <button
                     className="btn btn-secondary"
                     onClick={() => setPaginaProdutos(p => Math.max(1, p - 1))}
                     disabled={paginaProdutos <= 1}
-                    style={{ padding: '4px 12px' }}
                 >
                     <FiChevronLeft size={16} />
                 </button>
-                <span style={{ fontSize: 13, margin: '0 8px' }}>
-                    Página {paginaProdutos} de {totalPaginas}
-                </span>
+                <span>Página {paginaProdutos} de {totalPaginas}</span>
                 <button
                     className="btn btn-secondary"
                     onClick={() => setPaginaProdutos(p => Math.min(totalPaginas, p + 1))}
                     disabled={paginaProdutos >= totalPaginas}
-                    style={{ padding: '4px 12px' }}
                 >
                     <FiChevronRight size={16} />
                 </button>
@@ -308,39 +304,36 @@ function Atendente() {
                 {loading && <span className="text-muted">Carregando...</span>}
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: 20 }}>
-                <div className="card">
-                    <h2 style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div className="atendente-grid">
+                <div className="card comandas-list">
+                    <h2>
                         <FiClipboard size={20} />
                         Comandas Abertas
                     </h2>
-                    <div style={{ marginBottom: 15 }}>
-                        <div style={{ display: 'flex', gap: 10 }}>
-                            <input
-                                type="number"
-                                placeholder="Número da mesa"
-                                value={numeroMesa}
-                                onChange={(e) => setNumeroMesa(e.target.value)}
-                                style={{ flex: 1 }}
-                            />
-                            <button 
-                                className="btn btn-primary" 
-                                onClick={criarComanda} 
-                                disabled={loading}
-                                style={{ display: 'flex', alignItems: 'center', gap: 6 }}
-                            >
-                                <FiPlus size={16} />
-                                Nova
-                            </button>
-                        </div>
-                        <input
-                            type="text"
-                            placeholder="Nome do cliente (opcional)"
-                            value={nomeCliente}
-                            onChange={(e) => setNomeCliente(e.target.value)}
-                            style={{ width: '100%', marginTop: 10 }}
-                        />
-                    </div>
+   <div className="comanda-form">
+    <div className="comanda-inputs">
+        <input
+            type="number"
+            placeholder="Número da mesa"
+            value={numeroMesa}
+            onChange={(e) => setNumeroMesa(e.target.value)}
+        />
+        <input
+            type="text"
+            placeholder="Nome do cliente (opcional)"
+            value={nomeCliente}
+            onChange={(e) => setNomeCliente(e.target.value)}
+        />
+    </div>
+    <button 
+        className="btn btn-primary btn-nova-comanda" 
+        onClick={criarComanda} 
+        disabled={loading}
+    >
+        <FiPlus size={16} />
+        Nova Mesa
+    </button>
+</div>
 
                     {comandas.length === 0 ? (
                         <p className="text-muted">Nenhuma comanda aberta</p>
@@ -369,7 +362,7 @@ function Atendente() {
                     )}
                 </div>
 
-                <div className="card">
+                <div className="card comanda-detalhes">
                     {!mostrarProdutos ? (
                         <div className="empty-state">
                             <FiClipboard size={48} />
@@ -378,13 +371,12 @@ function Atendente() {
                         </div>
                     ) : (
                         <>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                                <h2 style={{ margin: 0 }}>Mesa {comandaAtual?.numero_mesa}</h2>
+                            <div className="comanda-header">
+                                <h2>Mesa {comandaAtual?.numero_mesa}</h2>
                                 <button 
                                     className="btn btn-danger" 
                                     onClick={fecharComanda} 
                                     disabled={loading}
-                                    style={{ display: 'flex', alignItems: 'center', gap: 6 }}
                                 >
                                     <FiX size={16} />
                                     Fechar Comanda
@@ -422,12 +414,12 @@ function Atendente() {
                             <PaginacaoProdutos />
 
                             {produtosFiltrados.length === 0 && (
-                                <p className="text-muted" style={{ textAlign: 'center', marginTop: 16 }}>
+                                <p className="text-muted produtos-vazio">
                                     Nenhum produto encontrado
                                 </p>
                             )}
 
-                            <h3 style={{ marginTop: 16 }}>Itens da Comanda</h3>
+                            <h3>Itens da Comanda</h3>
                             {itensComanda.length === 0 ? (
                                 <p className="text-muted">Nenhum item adicionado</p>
                             ) : (
@@ -457,36 +449,18 @@ function Atendente() {
                                                         <td>R$ {parseFloat(item.preco_unitario).toFixed(2)}</td>
                                                         <td>R$ {(item.quantidade * item.preco_unitario).toFixed(2)}</td>
                                                         <td>
-                                                            <span style={{ 
-                                                                color: statusConfig.cor,
-                                                                display: 'flex',
-                                                                alignItems: 'center',
-                                                                gap: 4,
-                                                                fontSize: 12
-                                                            }}>
+                                                            <span className="status-badge" style={{ color: statusConfig.cor }}>
                                                                 <StatusIcon size={14} />
                                                                 {statusConfig.label}
                                                             </span>
                                                         </td>
                                                         <td>
-                                                            <div style={{ display: 'flex', gap: 4 }}>
+                                                            <div className="acoes-comanda">
                                                                 {statusAtual === 'pronto' && (
                                                                     <button 
                                                                         className="btn-icon btn-success" 
                                                                         onClick={() => marcarEntregue(item.id)}
                                                                         title="Marcar como entregue"
-                                                                        style={{ 
-                                                                            background: 'var(--green)', 
-                                                                            color: 'white',
-                                                                            borderRadius: '50%',
-                                                                            width: 28,
-                                                                            height: 28,
-                                                                            display: 'flex',
-                                                                            alignItems: 'center',
-                                                                            justifyContent: 'center',
-                                                                            border: 'none',
-                                                                            cursor: 'pointer'
-                                                                        }}
                                                                     >
                                                                         <FiCheckCircle size={14} />
                                                                     </button>
@@ -509,8 +483,8 @@ function Atendente() {
                             )}
 
                             <hr />
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <h3 style={{ margin: 0 }}>Total: R$ {totalComanda.toFixed(2)}</h3>
+                            <div className="comanda-total-footer">
+                                <h3>Total: R$ {totalComanda.toFixed(2)}</h3>
                             </div>
                         </>
                     )}
@@ -522,7 +496,7 @@ function Atendente() {
                     <div className="modal" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
                             <h3>
-                                <FiShoppingBag size={18} style={{ marginRight: 8 }} />
+                                <FiShoppingBag size={18} />
                                 {produtoSelecionado.nome}
                             </h3>
                             <button className="modal-close" onClick={fecharModal}>
@@ -530,7 +504,7 @@ function Atendente() {
                             </button>
                         </div>
                         <div className="modal-body">
-                            <p style={{ color: 'var(--primary)', fontWeight: 'bold', marginBottom: 16 }}>
+                            <p className="produto-preco-modal">
                                 Preço: R$ {parseFloat(produtoSelecionado.preco_venda).toFixed(2)}
                             </p>
                             
@@ -559,7 +533,7 @@ function Atendente() {
                         <div className="modal-footer">
                             <button className="btn btn-secondary" onClick={fecharModal}>Cancelar</button>
                             <button className="btn btn-primary" onClick={confirmarAdicionarItem} disabled={loading}>
-                                <FiPlus size={16} style={{ marginRight: 6 }} />
+                                <FiPlus size={16} />
                                 Adicionar
                             </button>
                         </div>
@@ -585,7 +559,7 @@ function Atendente() {
                                 Cancelar
                             </button>
                             <button className="btn btn-danger" onClick={confirmarRemocao}>
-                                <FiTrash2 size={16} style={{ marginRight: 6 }} />
+                                <FiTrash2 size={16} />
                                 Remover
                             </button>
                         </div>
@@ -606,14 +580,14 @@ function Atendente() {
                             <FiAlertCircle size={32} className="modal-icon-warning" />
                             <p>Tem certeza que deseja fechar a comanda da <strong>Mesa {comandaAtual.numero_mesa}</strong>?</p>
                             <p className="text-muted">Total: R$ {totalComanda.toFixed(2)}</p>
-                            <p className="text-muted" style={{ fontSize: 12 }}>Esta ação não pode ser desfeita.</p>
+                            <p className="text-muted">Esta ação não pode ser desfeita.</p>
                         </div>
                         <div className="modal-footer">
                             <button className="btn btn-secondary" onClick={() => setModalFecharComanda(false)}>
                                 Cancelar
                             </button>
                             <button className="btn btn-danger" onClick={confirmarFecharComanda} disabled={loading}>
-                                <FiX size={16} style={{ marginRight: 6 }} />
+                                <FiX size={16} />
                                 Fechar Comanda
                             </button>
                         </div>

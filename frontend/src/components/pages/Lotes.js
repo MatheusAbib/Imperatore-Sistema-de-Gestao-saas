@@ -168,23 +168,19 @@ function Lotes() {
         if (totalPaginas <= 1) return null;
 
         return (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12, marginTop: 16 }}>
+            <div className="paginacao-lotes">
                 <button
                     className="btn btn-secondary"
                     onClick={() => onChange(pagina - 1)}
                     disabled={pagina <= 1}
-                    style={{ padding: '6px 12px' }}
                 >
                     <FiChevronLeft size={16} />
                 </button>
-                <span style={{ fontSize: 14, color: 'var(--text-muted)' }}>
-                    Página {pagina} de {totalPaginas}
-                </span>
+                <span>Página {pagina} de {totalPaginas}</span>
                 <button
                     className="btn btn-secondary"
                     onClick={() => onChange(pagina + 1)}
                     disabled={pagina >= totalPaginas}
-                    style={{ padding: '6px 12px' }}
                 >
                     <FiChevronRight size={16} />
                 </button>
@@ -206,47 +202,36 @@ function Lotes() {
             <div className="card">
                 <h2>Controle de Estoque por Lote</h2>
                 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 20 }}>
-                    <div>
-                        <div style={{ maxHeight: 400, overflowY: 'auto' }}>
-                            {ingredientes.map(ing => {
-                                const lotesIng = lotes.filter(l => l.ingrediente_id === ing.id);
-                                const totalEstoque = lotesIng.reduce((sum, l) => sum + (parseFloat(l.quantidade) || 0), 0);
-                                return (
-                                    <div
-                                        key={ing.id}
-                                        style={{
-                                            border: ingredienteSelecionado === ing.id ? '2px solid var(--primary)' : '1px solid var(--border-color)',
-                                            borderRadius: 8,
-                                            padding: 10,
-                                            marginBottom: 10,
-                                            marginTop: 10,
-                                            cursor: 'pointer',
-                                            backgroundColor: ingredienteSelecionado === ing.id ? 'var(--bg-hover)' : 'var(--bg-card)',
-                                            transition: 'all 0.2s'
-                                        }}
-                                        onClick={async () => {
-                                            setIngredienteSelecionado(ing.id);
-                                            await carregarLotesPorIngrediente(ing.id);
-                                        }}
-                                    >
-                                        <strong>{ing.nome}</strong>
-                                        <br />
-                                        <small style={{ color: 'var(--text-muted)' }}>
-                                            Estoque: {totalEstoque.toFixed(2)} {ing.unidade}
-                                        </small>
-                                    </div>
-                                );
-                            })}
-                        </div>
+                <div className="lotes-container">
+                    <div className="lotes-ingredientes-list">
+                        {ingredientes.map(ing => {
+                            const lotesIng = lotes.filter(l => l.ingrediente_id === ing.id);
+                            const totalEstoque = lotesIng.reduce((sum, l) => sum + (parseFloat(l.quantidade) || 0), 0);
+                            return (
+                                <div
+                                    key={ing.id}
+                                    className={`lotes-ingrediente-item ${ingredienteSelecionado === ing.id ? 'selected' : ''}`}
+                                    onClick={async () => {
+                                        setIngredienteSelecionado(ing.id);
+                                        await carregarLotesPorIngrediente(ing.id);
+                                    }}
+                                >
+                                    <strong>{ing.nome}</strong>
+                                    <br />
+                                    <small className="text-muted">
+                                        Estoque: {totalEstoque.toFixed(2)} {ing.unidade}
+                                    </small>
+                                </div>
+                            );
+                        })}
                     </div>
 
                     <div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                            <h3 style={{ margin: 0 }}>Lotes</h3>
+                        <div className="lotes-header">
+                            <h3>Lotes</h3>
                             {ingredienteSelecionado && (
                                 <button 
-                                    className="btn btn-primary" 
+                                    className="btn btn-primary btn-novo-lote"
                                     onClick={() => {
                                         const ingrediente = ingredientes.find(ing => ing.id === ingredienteSelecionado);
                                         setIngredienteId(ingredienteSelecionado);
@@ -254,7 +239,6 @@ function Lotes() {
                                         setModalNovoLote(true);
                                         setMostrarForm(false);
                                     }}
-                                    style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', fontSize: 13 }}
                                 >
                                     <FiPlus size={16} />
                                     Novo Lote
@@ -316,20 +300,19 @@ function Lotes() {
             </div>
 
             <div className="card">
-                <h2 style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+                <h2 className="lotes-todos-title">
                     <FiBox size={20} />
                     Todos os Lotes
                 </h2>
                 
-                <div style={{ display: 'flex', gap: 12, marginBottom: 16, alignItems: 'center' }}>
-                    <div style={{ flex: 1, maxWidth: 300 }}>
+                <div className="lotes-filtros">
+                    <div className="lotes-filtro-select">
                         <select 
                             value={filtroIngrediente} 
                             onChange={(e) => {
                                 setFiltroIngrediente(e.target.value);
                                 setPaginaTodos(1);
                             }}
-                            style={{ width: '100%' }}
                         >
                             <option value="">Todos os ingredientes</option>
                             {ingredientes.map(ing => (
@@ -337,7 +320,7 @@ function Lotes() {
                             ))}
                         </select>
                     </div>
-                    <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+                    <span className="lotes-count">
                         {lotesFiltrados.length} lotes encontrados
                     </span>
                 </div>
@@ -425,24 +408,16 @@ function Lotes() {
                                 </div>
                                 <div className="form-group">
                                     <label>Quantidade *</label>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                    <div className="quantidade-wrapper">
                                         <input 
                                             type="number" 
                                             step="0.01" 
                                             value={quantidade} 
                                             onChange={(e) => setQuantidade(e.target.value)} 
                                             required 
-                                            style={{ flex: 1 }}
                                             placeholder="Digite a quantidade"
                                         />
-                                        <span style={{ 
-                                            minWidth: 60, 
-                                            fontWeight: 'bold',
-                                            padding: '8px 12px',
-                                            background: 'var(--bg-hover)',
-                                            borderRadius: 6,
-                                            textAlign: 'center'
-                                        }}>
+                                        <span className="unidade-badge">
                                             {unidadeSelecionada || '?'}
                                         </span>
                                     </div>
@@ -455,7 +430,7 @@ function Lotes() {
                                     <label>Identificador do Lote (opcional)</label>
                                     <input type="text" value={loteNome} onChange={(e) => setLoteNome(e.target.value)} placeholder="Ex: LOTE001, Fornecedor X" />
                                 </div>
-                                <div style={{ display: 'flex', gap: 10 }}>
+                                <div className="lote-botoes">
                                     <button type="submit" className="btn btn-primary" disabled={loading}>
                                         {loading ? 'Registrando...' : 'Registrar Lote'}
                                     </button>

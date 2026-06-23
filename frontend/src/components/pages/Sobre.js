@@ -17,27 +17,27 @@ function Sobre() {
                 </div>
             </div>
 
-            <div className="card" style={{ marginBottom: 20 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16 }}>
-                    <img src="/crown.png" alt="Imperatore" style={{ width: 34, height: 34 }} />
+            <div className="card sobre-card-header">
+                <div className="sobre-header">
+                    <img src="/crown.png" alt="Imperatore" />
                     <div>
-                        <h2 style={{ margin: 0 }}>Imperatore</h2>
-                        <p style={{ margin: 0, color: 'var(--text-muted)' }}>Sistema de Gestão</p>
+                        <h2>Imperatore</h2>
+                        <p>Sistema de Gestão</p>
                     </div>
                 </div>
-                <p style={{ fontSize: 15, lineHeight: 1.6 }}>
+                <p className="sobre-descricao">
                     Sistema completo para gestão de restaurantes, bares e cafés. 
                     Gerencie produtos, ingredientes, estoque, comandas e pedidos em um único lugar.
                 </p>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 20 }}>
+            <div className="sobre-grid">
                 <div className="card">
-                    <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <h3>
                         <FiInfo size={18} color="var(--primary)" />
                         Informações do Sistema
                     </h3>
-                    <div style={{ display: 'grid', gap: 8, marginTop: 12 }}>
+                    <div className="sobre-info-item">
                         <div><strong>Versão:</strong> 1.0.0</div>
                         <div><strong>Desenvolvido por:</strong> Matheus Bilítardo Abib</div>
                         <div><strong>Ano de lançamento:</strong> 2026</div>
@@ -45,32 +45,32 @@ function Sobre() {
                 </div>
 
                 <div className="card">
-                    <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <h3>
                         <FiUser size={18} color="var(--primary)" />
                         Contato com o Administrador
                     </h3>
-                    <div style={{ display: 'grid', gap: 8, marginTop: 12 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div className="sobre-info-item">
+                        <div>
                             <FiMail size={16} color="var(--text-muted)" />
-                            <a href="mailto:matheus.abib.ma@gmail.com" style={{ color: 'var(--primary)', textDecoration: 'none' }}>
+                            <a href="mailto:matheus.abib.ma@gmail.com">
                                 matheus.abib.ma@gmail.com
                             </a>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div>
                             <FiMessageCircle size={16} color="var(--text-muted)" />
-                            <a href="https://wa.me/5511975072008" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', textDecoration: 'none' }}>
+                            <a href="https://wa.me/5511975072008" target="_blank" rel="noopener noreferrer">
                                 (11) 97507-2008
                             </a>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
+                        <div>
                             <FiGithub size={16} color="var(--text-muted)" />
-                            <a href="https://github.com/MatheusAbib" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', textDecoration: 'none' }}>
+                            <a href="https://github.com/MatheusAbib" target="_blank" rel="noopener noreferrer">
                                 GitHub
                             </a>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div>
                             <FiLinkedin size={16} color="var(--text-muted)" />
-                            <a href="https://www.linkedin.com/in/matheusabib/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', textDecoration: 'none' }}>
+                            <a href="https://www.linkedin.com/in/matheusabib/" target="_blank" rel="noopener noreferrer">
                                 LinkedIn
                             </a>
                         </div>
@@ -78,44 +78,44 @@ function Sobre() {
                 </div>
             </div>
 
-            <div className="card" style={{ marginBottom: 20 }}>
-                <h3 style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+            <div className="card sobre-fluxo">
+                <h3>
                     <FiBookOpen size={18} color="var(--primary)" />
                     Como funciona o Imperatore?
                 </h3>
 
-                <div style={{ marginBottom: 24 }}>
-                    <h4 style={{ color: 'var(--primary)', marginBottom: 8 }}>Fluxo completo do sistema</h4>
-                    <p style={{ fontSize: 14, lineHeight: 1.7, color: 'var(--text-secondary)' }}>
+                <div className="sobre-fluxo-texto">
+                    <h4>Fluxo completo do sistema</h4>
+                    <p>
                         O Imperatore foi projetado para organizar todo o fluxo de um restaurante, bar ou café, desde a criação do cardápio até a entrega do pedido na mesa. 
                         O sistema conecta quatro áreas principais: <strong>Gestão</strong> (Dono e Gerente), <strong>Salão</strong> (Atendente), <strong>Cozinha</strong> e <strong>Administração</strong> (Admin).
                     </p>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 24 }}>
-                    <div style={{ border: '1px solid var(--border-color)', borderRadius: 8, padding: 18, backgroundColor: 'var(--bg-card)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                <div className="sobre-grid-cards">
+                    <div className="sobre-card">
+                        <div>
                             <FiCoffee size={22} color="#b85a3a" />
-                            <h4 style={{ margin: 0, fontSize: 16 }}>1. Cadastro do Cardápio (Dono / Gerente)</h4>
+                            <h4>1. Cadastro do Cardápio (Dono / Gerente)</h4>
                         </div>
-                        <p style={{ fontSize: 13, lineHeight: 1.6, color: 'var(--text-muted)', margin: 0 }}>
+                        <p>
                             O processo começa com o cadastro dos <strong>ingredientes</strong>. Cada ingrediente tem nome, unidade de compra, custo e <strong>fator de conversão</strong> 
                             (ex: 1kg de carne = 10 porções). O sistema calcula automaticamente o custo por unidade de uso.
                             Depois, o <strong>produto</strong> é criado com nome, preço de venda e categoria. Em seguida, é montada a ficha técnica: 
                             você associa os ingredientes ao produto com as quantidades necessárias. 
                             O sistema calcula automaticamente o custo total, a margem de lucro e o lucro em reais de cada produto.
                         </p>
-                        <div style={{ marginTop: 8, fontSize: 12, color: 'var(--text-muted)', background: 'var(--bg-hover)', padding: 8, borderRadius: 4 }}>
+                        <div className="sobre-exemplo">
                             Exemplo: X-Burger = Pão (1un) + Carne (1 porção) + Queijo (2 fatias) → Custo R$ 6,25 → Margem 75% → Lucro R$ 18,75
                         </div>
                     </div>
 
-                    <div style={{ border: '1px solid var(--border-color)', borderRadius: 8, padding: 18, backgroundColor: 'var(--bg-card)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                    <div className="sobre-card">
+                        <div>
                             <FiBox size={22} color="#5a7a8c" />
-                            <h4 style={{ margin: 0, fontSize: 16 }}>2. Controle de Estoque (Lotes)</h4>
+                            <h4>2. Controle de Estoque (Lotes)</h4>
                         </div>
-                        <p style={{ fontSize: 13, lineHeight: 1.6, color: 'var(--text-muted)', margin: 0 }}>
+                        <p>
                             O sistema gerencia o estoque por <strong>lotes</strong>. Cada lote registra a quantidade, data de validade e um identificador.
                             O dono ou gerente pode registrar múltiplos lotes do mesmo ingrediente com datas diferentes.
                             Os lotes próximos do vencimento são destacados em cores: <span style={{ color: '#dc3545' }}>vermelho (vencido)</span>, 
@@ -126,13 +126,13 @@ function Sobre() {
                     </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 24 }}>
-                    <div style={{ border: '1px solid var(--border-color)', borderRadius: 8, padding: 18, backgroundColor: 'var(--bg-card)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                <div className="sobre-grid-cards">
+                    <div className="sobre-card">
+                        <div>
                             <FiClipboard size={22} color="#d4a84a" />
-                            <h4 style={{ margin: 0, fontSize: 16 }}>3. Comandas e Pedidos (Atendente)</h4>
+                            <h4>3. Comandas e Pedidos (Atendente)</h4>
                         </div>
-                        <p style={{ fontSize: 13, lineHeight: 1.6, color: 'var(--text-muted)', margin: 0 }}>
+                        <p>
                             O atendente abre uma <strong>comanda</strong> para uma mesa ou cliente, seleciona os produtos do cardápio, 
                             define a quantidade e adiciona observações (ex: "sem cebola", "bem passado").
                             Cada item da comanda tem um <strong>status</strong> que acompanha todo o processo: 
@@ -141,12 +141,12 @@ function Sobre() {
                         </p>
                     </div>
 
-                    <div style={{ border: '1px solid var(--border-color)', borderRadius: 8, padding: 18, backgroundColor: 'var(--bg-card)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                    <div className="sobre-card">
+                        <div>
                             <FiShoppingBag size={22} color="#17a2b8" />
-                            <h4 style={{ margin: 0, fontSize: 16 }}>4. Painel da Cozinha (Cozinha)</h4>
+                            <h4>4. Painel da Cozinha (Cozinha)</h4>
                         </div>
-                        <p style={{ fontSize: 13, lineHeight: 1.6, color: 'var(--text-muted)', margin: 0 }}>
+                        <p>
                             A cozinha recebe os pedidos em <strong>tempo real</strong> (atualização a cada 5 segundos). 
                             Os pedidos são organizados em três colunas: <strong>Pendentes, Em preparo e Prontos</strong>.
                             O cozinheiro inicia o preparo, marca como pronto e, se o pedido ficar pronto por mais de 5 minutos,
@@ -156,34 +156,39 @@ function Sobre() {
                     </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-                    <div style={{ border: '1px solid var(--border-color)', borderRadius: 8, padding: 18, backgroundColor: 'var(--bg-card)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-                            <FiTrendingUp size={22} color="#6b8c4a" />
-                            <h4 style={{ margin: 0, fontSize: 16 }}>5. Dashboard e Relatórios (Dono / Gerente)</h4>
-                        </div>
-                        <p style={{ fontSize: 13, lineHeight: 1.6, color: 'var(--text-muted)', margin: 0 }}>
-                            O dashboard do dono e gerente oferece uma visão completa do negócio:
-                            <br /><br />
-                            <FiBarChart2 size={16} style={{ marginRight: 6, color: 'var(--primary)' }} />
-                            <strong>Gráficos:</strong> distribuição de margens, top 10 produtos, lucro por unidade.<br />
-                            <FiDollarSign size={16} style={{ marginRight: 6, color: 'var(--yellow)' }} />
-                            <strong>Sugestões de preço:</strong> o sistema sugere novos preços para produtos com margem abaixo de 50%.<br />
-                            <FiTrendingUp size={16} style={{ marginRight: 6, color: 'var(--green)' }} />
-                            <strong>Produtos mais rentáveis:</strong> ranking dos produtos com maior margem.<br />
-                            <FiCalendar size={16} style={{ marginRight: 6, color: 'var(--orange)' }} />
-                            <strong>Alertas de validade:</strong> produtos vencidos, vencendo hoje ou nos próximos 7 dias.<br />
-                            <FiFileText size={16} style={{ marginRight: 6, color: 'var(--blue)' }} />
-                            <strong>Relatórios:</strong> exporte dados em Excel, PDF ou imprima diretamente.
-                        </p>
-                    </div>
+                <div className="sobre-grid-cards">
+<div className="sobre-card">
+    <div>
+        <FiTrendingUp size={22} color="#6b8c4a" />
+        <h4>5. Dashboard, Análise de Vendas e Relatórios (Dono / Gerente)</h4>
+    </div>
+    <p>
+        O dono e gerente têm acesso a ferramentas completas para análise e gestão do negócio:
+        <br /><br />
+        <FiGrid size={16} style={{ marginRight: 6, color: 'var(--primary)' }} />
+        <strong>Painel de Controle:</strong> visão geral com gráficos de distribuição de margens, top 10 produtos mais rentáveis e alertas de validade.<br />
+        <FiBarChart2 size={16} style={{ marginRight: 6, color: 'var(--blue)' }} />
+        <strong>Análise de Vendas:</strong> ranking de produtos mais vendidos e mais lucrativos, distribuição do faturamento, resumo geral (faturamento total, lucro total, margem geral) e identificação de produtos sem venda.<br />
+        <FiDollarSign size={16} style={{ marginRight: 6, color: 'var(--yellow)' }} />
+        <strong>Sugestões de preço:</strong> o sistema sugere novos preços para produtos com margem abaixo de 50%.<br />
+        <FiCalendar size={16} style={{ marginRight: 6, color: 'var(--orange)' }} />
+        <strong>Alertas de validade:</strong> produtos vencidos, vencendo hoje ou nos próximos 7 dias.<br />
+        <FiFileText size={16} style={{ marginRight: 6, color: 'var(--green)' }} />
+        <strong>Relatórios:</strong> exporte dados em Excel ou PDF de produtos, ingredientes, lotes, análise de vendas e relatório completo com todos os dados.<br />
+        <br />
+        <span style={{ color: 'var(--primary)', fontWeight: 'bold' }}>
+            Os dados da análise de vendas são calculados com base no preço registrado no momento da venda, 
+            garantindo que alterações futuras no preço não distorçam o histórico.
+        </span>
+    </p>
+</div>
 
-                    <div style={{ border: '1px solid var(--border-color)', borderRadius: 8, padding: 18, backgroundColor: 'var(--bg-card)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                    <div className="sobre-card">
+                        <div>
                             <FiUsers size={22} color="#8a6b8c" />
-                            <h4 style={{ margin: 0, fontSize: 16 }}>6. Perfis e Permissões</h4>
+                            <h4>6. Perfis e Permissões</h4>
                         </div>
-                        <p style={{ fontSize: 13, lineHeight: 1.6, color: 'var(--text-muted)', margin: 0 }}>
+                        <p>
                             O Imperatore possui cinco perfis de acesso, cada um com funções específicas:
                             <br /><br />
                             <FiUserCheck size={16} style={{ marginRight: 6, color: '#b85a3a' }} />
@@ -199,13 +204,13 @@ function Sobre() {
                         </p>
                     </div>
                 </div>
-
-                <div style={{ border: '1px solid var(--border-color)', borderRadius: 8, padding: 18, backgroundColor: 'var(--bg-card)', marginTop: 20 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+            <div className="sobre-grid-cards">
+                <div className="sobre-card">
+                    <div>
                         <FiFileText size={22} color="#b85a3a" />
-                        <h4 style={{ margin: 0, fontSize: 16 }}>7. Logs de Ações (Admin, Dono e Gerente)</h4>
+                        <h4>7. Logs de Ações (Admin, Dono e Gerente)</h4>
                     </div>
-                    <p style={{ fontSize: 13, lineHeight: 1.6, color: 'var(--text-muted)', margin: 0 }}>
+                    <p>
                         O sistema registra <strong>todas as ações</strong> realizadas pelos usuários, criando um histórico completo de atividades.
                         <br /><br />
                         <FiPlusCircle size={14} style={{ marginRight: 4, color: 'var(--green)' }} />
@@ -224,12 +229,12 @@ function Sobre() {
                     </p>
                 </div>
 
-                <div style={{ border: '1px solid var(--border-color)', borderRadius: 8, padding: 18, backgroundColor: 'var(--bg-card)', marginTop: 20 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                <div className="sobre-card">
+                    <div>
                         <FiBox size={22} color="#5a7a8c" />
-                        <h4 style={{ margin: 0, fontSize: 16 }}>8. Conversão de Unidades (Ingredientes)</h4>
+                        <h4>8. Conversão de Unidades (Ingredientes)</h4>
                     </div>
-                    <p style={{ fontSize: 13, lineHeight: 1.6, color: 'var(--text-muted)', margin: 0 }}>
+                    <p>
                         Para calcular o custo correto de cada ingrediente no produto, o sistema utiliza um <strong>fator de conversão</strong>:
                         <br /><br />
                         <strong>Como funciona:</strong>
@@ -244,11 +249,12 @@ function Sobre() {
                         • 1 pacote de pão = R$ 8,00 → 12 unidades → R$ 0,67 por unidade<br />
                         • 1 L de leite = R$ 5,00 → 1000 ml → R$ 0,005 por ml
                         <br /><br />
-                        <span style={{ color: 'var(--primary)', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span className="sobre-destaque">
                             <FiInfo size={16} />
                             Isso garante que o custo de cada produto seja calculado com precisão!
                         </span>
                     </p>
+                </div>
                 </div>
             </div>
         </div>

@@ -231,7 +231,7 @@ function AnaliseVendas() {
                 </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 20 }}>
+            <div className="analise-grid">
                 <div className="card">
                     <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <FiBarChart2 size={18} />
@@ -245,7 +245,7 @@ function AnaliseVendas() {
                             <YAxis 
                                 dataKey="nome" 
                                 type="category" 
-                                width={130} 
+                                width={100}
                                 tick={{ fontSize: 11, fill: 'var(--text-color)' }}
                                 interval={0}
                             />
@@ -272,7 +272,7 @@ function AnaliseVendas() {
                             <YAxis 
                                 dataKey="nome" 
                                 type="category" 
-                                width={130} 
+                                width={100}
                                 tick={{ fontSize: 11, fill: 'var(--text-color)' }}
                                 interval={0}
                             />
@@ -293,7 +293,7 @@ function AnaliseVendas() {
                     Distribuicao do Faturamento
                     <TooltipInfo id="faturamento" texto="Participacao de cada produto no faturamento total. Mostra quais produtos sao responsaveis pela maior parte da receita do negocio." />
                 </h3>
-                <ResponsiveContainer width="100%" height={280}>
+                <ResponsiveContainer>
                     <PieChart>
                         <Pie
                             data={dadosVendidos}

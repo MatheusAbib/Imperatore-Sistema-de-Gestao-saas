@@ -12,7 +12,7 @@ function Produtos() {
     const [categoria, setCategoria] = useState('');
     const [editandoId, setEditandoId] = useState(null);
     const [loading, setLoading] = useState(false);
-    const [mostrarForm, setMostrarForm] = useState(false);
+    const [modalEdicao, setModalEdicao] = useState(false);
     const [produtoSelecionado, setProdutoSelecionado] = useState(null);
     const [ingredienteId, setIngredienteId] = useState('');
     const [quantidade, setQuantidade] = useState('');
@@ -97,7 +97,7 @@ function Produtos() {
             setPrecoVenda('');
             setCategoria('');
             setEditandoId(null);
-            setMostrarForm(false);
+            setModalEdicao(false);
             carregarProdutos();
             carregarCategorias();
         } catch (error) {
@@ -108,12 +108,27 @@ function Produtos() {
         }
     };
 
-    const handleEdit = (produto) => {
-        setNome(produto.nome);
-        setPrecoVenda(produto.preco_venda);
-        setCategoria(produto.categoria || '');
-        setEditandoId(produto.id);
-        setMostrarForm(true);
+    const abrirModalEdicao = (produto = null) => {
+        if (produto) {
+            setNome(produto.nome);
+            setPrecoVenda(produto.preco_venda);
+            setCategoria(produto.categoria || '');
+            setEditandoId(produto.id);
+        } else {
+            setNome('');
+            setPrecoVenda('');
+            setCategoria('');
+            setEditandoId(null);
+        }
+        setModalEdicao(true);
+    };
+
+    const fecharModalEdicao = () => {
+        setModalEdicao(false);
+        setNome('');
+        setPrecoVenda('');
+        setCategoria('');
+        setEditandoId(null);
     };
 
     const handleDelete = async (id) => {
@@ -234,16 +249,10 @@ function Produtos() {
                 </div>
                 <button 
                     className="btn btn-primary" 
-                    onClick={() => { 
-                        setMostrarForm(!mostrarForm); 
-                        setEditandoId(null); 
-                        setNome(''); 
-                        setPrecoVenda(''); 
-                        setCategoria(''); 
-                    }}
+                    onClick={() => abrirModalEdicao()}
                 >
                     <FiPlus size={18} style={{ marginRight: 6 }} />
-                    {mostrarForm ? 'Cancelar' : 'Novo Produto'}
+                    Novo Produto
                 </button>
             </div>
 
@@ -265,45 +274,6 @@ function Produtos() {
                     </button>
                 )}
             </div>
-
-            {mostrarForm && (
-                <div className="card">
-                    <h2>{editandoId ? 'Editar Produto' : 'Novo Produto'}</h2>
-                    <form onSubmit={handleSubmit}>
-                        <div className="form-group">
-                            <label>Nome</label>
-                            <input type="text" value={nome} onChange={(e) => setNome(e.target.value)} required placeholder="Ex: Risoto de Camarão" />
-                        </div>
-                        <div className="form-group">
-                            <label>Preço de Venda (R$)</label>
-                            <input type="number" step="0.01" value={precoVenda} onChange={(e) => setPrecoVenda(e.target.value)} required placeholder="Ex: 20.00" />
-                        </div>
-                        <div className="form-group">
-                            <label>Categoria</label>
-                            <input
-                                type="text"
-                                list="categoriasList"
-                                value={categoria}
-                                onChange={(e) => setCategoria(e.target.value)}
-                                placeholder="Digite ou selecione uma categoria"
-                            />
-                            <datalist id="categoriasList">
-                                {categoriasExistentes.map((cat, index) => (
-                                    <option key={index} value={cat} />
-                                ))}
-                            </datalist>
-                        </div>
-                        <div style={{ display: 'flex', gap: 10 }}>
-                            <button type="submit" className="btn btn-primary" disabled={loading}>
-                                {loading ? 'Salvando...' : (editandoId ? 'Atualizar' : 'Cadastrar')}
-                            </button>
-                            <button type="button" className="btn btn-secondary" onClick={() => { setMostrarForm(false); setEditandoId(null); setNome(''); setPrecoVenda(''); setCategoria(''); }}>
-                                Cancelar
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            )}
 
             <div className="card">
                 {loading ? (
@@ -345,7 +315,7 @@ function Produtos() {
                                             <div className="acoes">
                                                 <button 
                                                     className="btn-icon btn-edit" 
-                                                    onClick={() => handleEdit(produto)}
+                                                    onClick={() => abrirModalEdicao(produto)}
                                                     title="Editar"
                                                 >
                                                     <FiEdit2 size={16} />
@@ -382,6 +352,54 @@ function Produtos() {
                     </div>
                 )}
             </div>
+
+            {modalEdicao && (
+                <div className="modal-overlay" onClick={fecharModalEdicao}>
+                    <div className="modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h3>{editandoId ? 'Editar Produto' : 'Novo Produto'}</h3>
+                            <button className="modal-close" onClick={fecharModalEdicao}>
+                                <FiX size={20} />
+                            </button>
+                        </div>
+                        <div className="modal-body">
+                            <form onSubmit={handleSubmit}>
+                                <div className="form-group">
+                                    <label>Nome</label>
+                                    <input type="text" value={nome} onChange={(e) => setNome(e.target.value)} required placeholder="Ex: Risoto de Camarão" />
+                                </div>
+                                <div className="form-group">
+                                    <label>Preço de Venda (R$)</label>
+                                    <input type="number" step="0.01" value={precoVenda} onChange={(e) => setPrecoVenda(e.target.value)} required placeholder="Ex: 20.00" />
+                                </div>
+                                <div className="form-group">
+                                    <label>Categoria</label>
+                                    <input
+                                        type="text"
+                                        list="categoriasList"
+                                        value={categoria}
+                                        onChange={(e) => setCategoria(e.target.value)}
+                                        placeholder="Digite ou selecione uma categoria"
+                                    />
+                                    <datalist id="categoriasList">
+                                        {categoriasExistentes.map((cat, index) => (
+                                            <option key={index} value={cat} />
+                                        ))}
+                                    </datalist>
+                                </div>
+                                <div style={{ display: 'flex', gap: 10 }}>
+                                    <button type="submit" className="btn btn-primary" disabled={loading}>
+                                        {loading ? 'Salvando...' : (editandoId ? 'Atualizar' : 'Cadastrar')}
+                                    </button>
+                                    <button type="button" className="btn btn-secondary" onClick={fecharModalEdicao}>
+                                        Cancelar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {modalConfirmacao && (
                 <div className="modal-overlay">
