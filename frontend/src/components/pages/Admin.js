@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
-import { FiUsers, FiServer, FiPackage, FiTrendingUp, FiAlertCircle, FiCheckCircle, FiDollarSign, FiClock, FiPlus } from 'react-icons/fi';
+import { FiUsers, FiServer, FiPackage, FiTrendingUp, FiAlertCircle, FiCheckCircle, FiDollarSign, FiClock, FiPlus, FiAward, FiPieChart, FiBarChart2 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
@@ -9,11 +9,17 @@ function Admin() {
         totalEstabelecimentos: 0,
         totalUsuarios: 0,
         totalProdutos: 0,
-        totalPedidos: 0
+        totalPedidos: 0,
+        totalFaturamento: 0,
+        totalLotesVencidos: 0,
+        mediaProdutosPorEstabelecimento: 0
     });
     const [ultimosEstabelecimentos, setUltimosEstabelecimentos] = useState([]);
     const [crescimentoMensal, setCrescimentoMensal] = useState([]);
     const [distribuicaoPlanos, setDistribuicaoPlanos] = useState([]);
+    const [topProdutos, setTopProdutos] = useState([]);
+    const [topEstabelecimentos, setTopEstabelecimentos] = useState([]);
+    const [distribuicaoPerfis, setDistribuicaoPerfis] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -22,17 +28,23 @@ function Admin() {
 
     const carregarDados = async () => {
         try {
-            const [statsRes, estabelecimentosRes, crescimentoRes, planosRes] = await Promise.all([
+            const [statsRes, estabelecimentosRes, crescimentoRes, planosRes, topProdRes, topEstabRes, perfisRes] = await Promise.all([
                 api.get('/admin/stats'),
                 api.get('/admin/ultimos-estabelecimentos'),
                 api.get('/admin/crescimento-mensal'),
-                api.get('/admin/distribuicao-planos')
+                api.get('/admin/distribuicao-planos'),
+                api.get('/admin/top-produtos'),
+                api.get('/admin/top-estabelecimentos'),
+                api.get('/admin/distribuicao-perfis')
             ]);
             
             setStats(statsRes.data);
             setUltimosEstabelecimentos(estabelecimentosRes.data);
             setCrescimentoMensal(crescimentoRes.data);
             setDistribuicaoPlanos(planosRes.data);
+            setTopProdutos(topProdRes.data);
+            setTopEstabelecimentos(topEstabRes.data);
+            setDistribuicaoPerfis(perfisRes.data);
         } catch (error) {
             console.error('Erro ao carregar dados', error);
             toast.error('Erro ao carregar dados');
@@ -48,6 +60,8 @@ function Admin() {
     };
 
     const coresCrescimento = ['#b85a3a', '#b88b4a', '#6b8c4a', '#5a7a8c', '#d4a84a', '#8a6b8c'];
+    const coresPerfis = ['#b85a3a', '#28a745', '#007bff', '#fd7e14', '#6c757d'];
+    const coresTop = ['#b85a3a', '#b88b4a', '#6b8c4a', '#5a7a8c', '#d4a84a'];
 
     if (loading) return <div className="loading-state">Carregando...</div>;
 
@@ -88,6 +102,7 @@ function Admin() {
                     <div className="status-card-content">
                         <span className="status-card-value">{stats.totalProdutos}</span>
                         <span className="status-card-title">Produtos</span>
+                        <span className="status-card-subtitle">Média: {stats.mediaProdutosPorEstabelecimento} por estabelecimento</span>
                     </div>
                 </div>
 
@@ -125,7 +140,7 @@ function Admin() {
 
                 <div className="card">
                     <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <FiDollarSign size={18} />
+                        <FiPieChart size={18} />
                         Distribuição de Planos
                     </h3>
                     <ResponsiveContainer width="100%" height={280}>
@@ -142,6 +157,56 @@ function Admin() {
                             >
                                 {distribuicaoPlanos.map((entry, index) => (
                                     <Cell key={`cell-${index}`} fill={coresPlanos[entry.name] || '#6c757d'} />
+                                ))}
+                            </Pie>
+                            <Tooltip />
+                        </PieChart>
+                    </ResponsiveContainer>
+                </div>
+            </div>
+
+            <div className="charts-grid">
+
+
+                <div className="card">
+                    <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <FiAward size={18} />
+                        Estabelecimentos com Maior Faturamento
+                    </h3>
+                    <ResponsiveContainer width="100%" height={280}>
+                        <BarChart data={topEstabelecimentos} layout="vertical">
+                            <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                            <XAxis type="number" />
+                            <YAxis dataKey="nome" type="category" width={100} />
+                            <Tooltip formatter={(value) => `R$ ${parseFloat(value || 0).toFixed(2)}`} />
+                            <Bar dataKey="faturamento" fill="#6b8c4a">
+                                {topEstabelecimentos.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={coresTop[index % coresTop.length]} />
+                                ))}
+                            </Bar>
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
+       
+                <div className="card">
+                    <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <FiUsers size={18} />
+                        Distribuição de Perfis
+                    </h3>
+                    <ResponsiveContainer width="100%" height={280}>
+                        <PieChart>
+                            <Pie
+                                data={distribuicaoPerfis}
+                                cx="50%"
+                                cy="50%"
+                                labelLine={true}
+                                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                                outerRadius={80}
+                                fill="#8884d8"
+                                dataKey="value"
+                            >
+                                {distribuicaoPerfis.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={coresPerfis[index % coresPerfis.length]} />
                                 ))}
                             </Pie>
                             <Tooltip />

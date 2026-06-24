@@ -19,6 +19,7 @@ function Lotes() {
     const [mostrarForm, setMostrarForm] = useState(false);
     const [modalNovoLote, setModalNovoLote] = useState(false);
     const [filtroIngrediente, setFiltroIngrediente] = useState('');
+    const [dataCompra, setDataCompra] = useState('');
     
     const [paginaTodos, setPaginaTodos] = useState(1);
     const [paginaIngrediente, setPaginaIngrediente] = useState(1);
@@ -77,6 +78,7 @@ function Lotes() {
                 ingrediente_id: parseInt(ingredienteId),
                 quantidade: parseFloat(quantidade),
                 data_validade: dataValidade,
+                data_compra: dataCompra || null,
                 lote: loteNome || null
             });
             setIngredienteId('');
@@ -84,6 +86,7 @@ function Lotes() {
             setDataValidade('');
             setLoteNome('');
             setUnidadeSelecionada('');
+            setDataCompra('');
             setModalNovoLote(false);
             setMostrarForm(false);
             await carregarLotes();
@@ -236,6 +239,7 @@ function Lotes() {
                                         const ingrediente = ingredientes.find(ing => ing.id === ingredienteSelecionado);
                                         setIngredienteId(ingredienteSelecionado);
                                         setUnidadeSelecionada(ingrediente?.unidade || '');
+                                        setDataCompra('');
                                         setModalNovoLote(true);
                                         setMostrarForm(false);
                                     }}
@@ -255,6 +259,7 @@ function Lotes() {
                                             <tr>
                                                 <th>Lote</th>
                                                 <th>Quantidade</th>
+                                                <th>Data Compra</th>
                                                 <th>Validade</th>
                                                 <th>Status</th>
                                                 <th className="text-center">Ações</th>
@@ -267,6 +272,7 @@ function Lotes() {
                                                     <tr key={lote.id}>
                                                         <td>{lote.lote || 'N/A'}</td>
                                                         <td>{lote.quantidade} {unidadeSelecionada}</td>
+                                                        <td>{lote.data_compra ? new Date(lote.data_compra).toLocaleDateString('pt-BR') : '-'}</td>
                                                         <td>{new Date(lote.data_validade).toLocaleDateString('pt-BR')}</td>
                                                         <td style={{ color: getStatusCor(dias), fontWeight: 'bold' }}>
                                                             {getStatusTexto(dias)} ({dias} dias)
@@ -332,6 +338,7 @@ function Lotes() {
                                 <th>Ingrediente</th>
                                 <th>Lote</th>
                                 <th>Quantidade</th>
+                                <th>Data Compra</th>
                                 <th>Validade</th>
                                 <th>Status</th>
                                 <th className="text-center">Ações</th>
@@ -350,6 +357,7 @@ function Lotes() {
                                         </td>
                                         <td>{lote.lote || 'N/A'}</td>
                                         <td>{lote.quantidade} {lote.unidade}</td>
+                                        <td>{lote.data_compra ? new Date(lote.data_compra).toLocaleDateString('pt-BR') : '-'}</td>
                                         <td>{new Date(lote.data_validade).toLocaleDateString('pt-BR')}</td>
                                         <td style={{ color: getStatusCor(dias), fontWeight: 'bold' }}>
                                             {getStatusTexto(dias)} ({dias} dias)
@@ -370,7 +378,7 @@ function Lotes() {
                             })}
                             {lotesFiltrados.length === 0 && (
                                 <tr>
-                                    <td colSpan="6" className="text-center text-muted">
+                                    <td colSpan="7" className="text-center text-muted">
                                         <FiBox size={32} />
                                         <p>Nenhum lote encontrado</p>
                                     </td>
@@ -391,7 +399,10 @@ function Lotes() {
                     <div className="modal" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
                             <h3>Registrar Novo Lote</h3>
-                            <button className="modal-close" onClick={() => setModalNovoLote(false)}>
+                            <button className="modal-close" onClick={() => {
+                                setModalNovoLote(false);
+                                setDataCompra('');
+                            }}>
                                 <FiX size={20} />
                             </button>
                         </div>
@@ -423,6 +434,10 @@ function Lotes() {
                                     </div>
                                 </div>
                                 <div className="form-group">
+                                    <label>Data de Compra (opcional)</label>
+                                    <input type="date" value={dataCompra} onChange={(e) => setDataCompra(e.target.value)} />
+                                </div>
+                                <div className="form-group">
                                     <label>Data de Validade *</label>
                                     <input type="date" value={dataValidade} onChange={(e) => setDataValidade(e.target.value)} required />
                                 </div>
@@ -434,7 +449,10 @@ function Lotes() {
                                     <button type="submit" className="btn btn-primary" disabled={loading}>
                                         {loading ? 'Registrando...' : 'Registrar Lote'}
                                     </button>
-                                    <button type="button" className="btn btn-secondary" onClick={() => setModalNovoLote(false)}>
+                                    <button type="button" className="btn btn-secondary" onClick={() => {
+                                        setModalNovoLote(false);
+                                        setDataCompra('');
+                                    }}>
                                         Cancelar
                                     </button>
                                 </div>

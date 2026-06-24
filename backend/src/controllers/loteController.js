@@ -10,7 +10,7 @@ async function getEstabelecimentoId(usuarioId) {
 
 async function registrarLote(req, res) {
     try {
-        const { ingrediente_id, quantidade, data_validade, lote } = req.body;
+        const { ingrediente_id, quantidade, data_validade, data_compra, lote } = req.body;
         const estabelecimento_id = await getEstabelecimentoId(req.usuarioId);
         const usuario_id = req.usuarioId;
 
@@ -27,6 +27,7 @@ async function registrarLote(req, res) {
             ingrediente_id: parseInt(ingrediente_id), 
             quantidade: parseFloat(quantidade), 
             data_validade, 
+            data_compra: data_compra || null,
             lote: lote || null, 
             estabelecimento_id,
             usuario_id

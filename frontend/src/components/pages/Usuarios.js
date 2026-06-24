@@ -9,7 +9,7 @@ function Usuarios() {
     const { usuario } = useAuth();
     const [usuarios, setUsuarios] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [mostrarForm, setMostrarForm] = useState(false);
+    const [modalEdicao, setModalEdicao] = useState(false);
     const [nome, setNome] = useState('');
     const [email, setEmail] = useState('');
     const [senha, setSenha] = useState('');
@@ -29,19 +29,19 @@ function Usuarios() {
         }
     }, [usuario]);
 
-const carregarUsuarios = async () => {
-    setLoading(true);
-    try {
-        const response = await api.get('/auth/usuarios');
-        console.log('Resposta da API:', response.data); // ADICIONE ESTA LINHA
-        setUsuarios(response.data);
-    } catch (error) {
-        console.error('Erro ao carregar usuarios', error);
-        toast.error('Erro ao carregar usuários');
-    } finally {
-        setLoading(false);
-    }
-};
+    const carregarUsuarios = async () => {
+        setLoading(true);
+        try {
+            const response = await api.get('/auth/usuarios');
+            setUsuarios(response.data);
+        } catch (error) {
+            console.error('Erro ao carregar usuarios', error);
+            toast.error('Erro ao carregar usuários');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!nome || !email || !senha) {
@@ -56,7 +56,7 @@ const carregarUsuarios = async () => {
             setEmail('');
             setSenha('');
             setPerfil('atendente');
-            setMostrarForm(false);
+            setModalEdicao(false);
             carregarUsuarios();
             toast.success('Usuário criado com sucesso!');
         } catch (error) {
@@ -65,6 +65,22 @@ const carregarUsuarios = async () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const abrirModal = () => {
+        setNome('');
+        setEmail('');
+        setSenha('');
+        setPerfil('atendente');
+        setModalEdicao(true);
+    };
+
+    const fecharModal = () => {
+        setModalEdicao(false);
+        setNome('');
+        setEmail('');
+        setSenha('');
+        setPerfil('atendente');
     };
 
     const handleMudarPerfil = async (id, novoPerfil) => {
@@ -107,15 +123,15 @@ const carregarUsuarios = async () => {
         return p ? p.label : perfil;
     };
 
-if (usuario?.perfil !== 'dono' && usuario?.perfil !== 'gerente') {
-    return (
-        <div className="card" style={{ textAlign: 'center', padding: 60 }}>
-            <FiAlertCircle size={48} color="var(--red)" />
-            <h2>Acesso Negado</h2>
-            <p className="text-muted">Apenas dono ou gerente podem gerenciar usuários.</p>
-        </div>
-    );
-}
+    if (usuario?.perfil !== 'dono' && usuario?.perfil !== 'gerente') {
+        return (
+            <div className="card" style={{ textAlign: 'center', padding: 60 }}>
+                <FiAlertCircle size={48} color="var(--red)" />
+                <h2>Acesso Negado</h2>
+                <p className="text-muted">Apenas dono ou gerente podem gerenciar usuários.</p>
+            </div>
+        );
+    }
 
     const podeCriar = usuario?.perfil === 'dono';
 
@@ -129,51 +145,12 @@ if (usuario?.perfil !== 'dono' && usuario?.perfil !== 'gerente') {
                     <p className="text-muted">Gerencie os usuários do estabelecimento</p>
                 </div>
                 {podeCriar && (
-                    <button 
-                        className="btn btn-primary" 
-                        onClick={() => setMostrarForm(!mostrarForm)}
-                    >
+                    <button className="btn btn-primary" onClick={abrirModal}>
                         <FiPlus size={18} style={{ marginRight: 6 }} />
-                        {mostrarForm ? 'Cancelar' : 'Novo Usuário'}
+                        Novo Usuário
                     </button>
                 )}
             </div>
-
-            {mostrarForm && podeCriar && (
-                <div className="card">
-                    <h2>Novo Usuário</h2>
-                    <form onSubmit={handleSubmit}>
-                        <div className="form-group">
-                            <label>Nome</label>
-                            <input type="text" value={nome} onChange={(e) => setNome(e.target.value)} required />
-                        </div>
-                        <div className="form-group">
-                            <label>Email</label>
-                            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-                        </div>
-                        <div className="form-group">
-                            <label>Senha</label>
-                            <input type="password" value={senha} onChange={(e) => setSenha(e.target.value)} required />
-                        </div>
-                        <div className="form-group">
-                            <label>Perfil</label>
-                            <select value={perfil} onChange={(e) => setPerfil(e.target.value)}>
-                                {perfis.map(p => (
-                                    <option key={p.valor} value={p.valor}>{p.label}</option>
-                                ))}
-                            </select>
-                        </div>
-                        <div style={{ display: 'flex', gap: 10 }}>
-                            <button type="submit" className="btn btn-primary" disabled={loading}>
-                                {loading ? 'Cadastrando...' : 'Cadastrar'}
-                            </button>
-                            <button type="button" className="btn btn-secondary" onClick={() => { setMostrarForm(false); setNome(''); setEmail(''); setSenha(''); setPerfil('atendente'); }}>
-                                Cancelar
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            )}
 
             <div className="card">
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
@@ -225,6 +202,14 @@ if (usuario?.perfil !== 'dono' && usuario?.perfil !== 'gerente') {
                                                     onChange={(e) => handleMudarPerfil(user.id, e.target.value)}
                                                     className="perfil-select"
                                                     disabled={!podeCriar}
+                                                    style={{
+                                                        padding: '4px 8px',
+                                                        borderRadius: 4,
+                                                        border: '1px solid var(--border-color)',
+                                                        fontSize: 12,
+                                                        background: 'var(--bg-card)',
+                                                        cursor: podeCriar ? 'pointer' : 'default'
+                                                    }}
                                                 >
                                                     {perfis.map(p => (
                                                         <option key={p.valor} value={p.valor}>{p.label}</option>
@@ -257,6 +242,51 @@ if (usuario?.perfil !== 'dono' && usuario?.perfil !== 'gerente') {
                     </div>
                 )}
             </div>
+
+            {modalEdicao && (
+                <div className="modal-overlay" onClick={fecharModal}>
+                    <div className="modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h3>Novo Usuário</h3>
+                            <button className="modal-close" onClick={fecharModal}>
+                                <FiX size={20} />
+                            </button>
+                        </div>
+                        <div className="modal-body">
+                            <form onSubmit={handleSubmit}>
+                                <div className="form-group">
+                                    <label>Nome</label>
+                                    <input type="text" value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Digite o nome completo" required />
+                                </div>
+                                <div className="form-group">
+                                    <label>Email</label>
+                                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Digite o e-mail" required />
+                                </div>
+                                <div className="form-group">
+                                    <label>Senha</label>
+                                    <input type="password" value={senha} onChange={(e) => setSenha(e.target.value)} placeholder="Digite a senha" required />
+                                </div>
+                                <div className="form-group">
+                                    <label>Perfil</label>
+                                    <select value={perfil} onChange={(e) => setPerfil(e.target.value)}>
+                                        {perfis.map(p => (
+                                            <option key={p.valor} value={p.valor}>{p.label}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div style={{ display: 'flex', gap: 10 }}>
+                                    <button type="submit" className="btn btn-primary" disabled={loading}>
+                                        {loading ? 'Cadastrando...' : 'Cadastrar'}
+                                    </button>
+                                    <button type="button" className="btn btn-secondary" onClick={fecharModal}>
+                                        Cancelar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {modalConfirmacao && (
                 <div className="modal-overlay">

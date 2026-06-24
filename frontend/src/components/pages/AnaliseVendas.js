@@ -111,6 +111,15 @@ function AnaliseVendas() {
         custo_unitario: p.custo
     }));
 
+const produtosComMargem = dadosTabela.map(p => ({
+    nome: p.nome,
+    margem: parseFloat(p.margem) || 0,
+    preco: parseFloat(p.preco) || 0,
+    custo: parseFloat(p.custo_unitario) || 0
+}));
+
+    const produtosAlerta = produtosComMargem.filter(p => p.margem < 40);
+
     const idsComVenda = new Set(dadosTabela.map(p => p.id));
     const produtosSemVenda = todosProdutos
         .filter(p => !idsComVenda.has(p.id))
@@ -231,6 +240,56 @@ function AnaliseVendas() {
                 </div>
             </div>
 
+            {produtosAlerta.length > 0 && (
+                <div className="card alerta-margem">
+                    <div className="alerta-margem-header">
+                        <div className="alerta-margem-titulo">
+                            <FiAlertCircle size={20} color="#b85a4a" />
+                            <h3>Produtos com Margem Baixa</h3>
+                            <span className="alerta-margem-badge">{produtosAlerta.length}</span>
+                            <TooltipInfo 
+                                id="alerta-margem"
+                                texto="Produtos com margem abaixo de 40%. Recomenda-se revisar o preço de venda ou reduzir custos para aumentar a rentabilidade."
+                            />
+                        </div>
+                    </div>
+                    <div className="alerta-margem-grid">
+                        {produtosAlerta.slice(0, 6).map((p, idx) => (
+                            <div key={idx} className="alerta-margem-item">
+                                <div className="alerta-margem-item-info">
+                                    <span className="alerta-margem-item-nome">{p.nome}</span>
+                                    <span className="alerta-margem-item-margem" style={{ color: '#b85a4a' }}>
+                                        {p.margem.toFixed(1)}%
+                                    </span>
+                                </div>
+                                <div className="alerta-margem-bar">
+                                    <div 
+                                        className="alerta-margem-bar-fill" 
+                                        style={{ width: `${Math.min(p.margem, 40)}%`, backgroundColor: '#b85a4a' }}
+                                    />
+                                </div>
+                                <div className="alerta-margem-item-precos">
+                                    <span>Preço: R$ {p.preco.toFixed(2)}</span>
+                                    <span>Custo: R$ {p.custo.toFixed(2)}</span>
+                                <span style={{ color: '#b85a4a', fontWeight: 'bold' }}>
+                                    Lucro: R$ {(parseFloat(p.preco) - parseFloat(p.custo)).toFixed(2).replace('.', ',')}
+                                </span>
+                                </div>
+                            </div>
+                        ))}
+                        {produtosAlerta.length > 6 && (
+                            <div className="alerta-margem-mais">
+                                + {produtosAlerta.length - 6} produtos com margem baixa
+                            </div>
+                        )}
+                    </div>
+                    <div className="alerta-margem-footer">
+                        <FiInfo size={14} color="#b0a89c" />
+                        <span>Produtos com margem abaixo de 40% precisam de atenção. Considere ajustar preços ou reduzir custos.</span>
+                    </div>
+                </div>
+            )}
+
             <div className="analise-grid">
                 <div className="card">
                     <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -293,7 +352,7 @@ function AnaliseVendas() {
                     Distribuicao do Faturamento
                     <TooltipInfo id="faturamento" texto="Participacao de cada produto no faturamento total. Mostra quais produtos sao responsaveis pela maior parte da receita do negocio." />
                 </h3>
-                <ResponsiveContainer>
+                <ResponsiveContainer width="100%" height={280}>
                     <PieChart>
                         <Pie
                             data={dadosVendidos}

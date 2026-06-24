@@ -4,12 +4,11 @@ import { FiPlus, FiTrash2, FiEdit2, FiServer, FiSearch, FiX, FiAlertCircle, FiUs
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-
 function Estabelecimentos() {
     const [estabelecimentos, setEstabelecimentos] = useState([]);
     const [usuarios, setUsuarios] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [mostrarForm, setMostrarForm] = useState(false);
+    const [modalEdicao, setModalEdicao] = useState(false);
     const [nome, setNome] = useState('');
     const [cnpj, setCnpj] = useState('');
     const [plano, setPlano] = useState('gratis');
@@ -76,6 +75,56 @@ function Estabelecimentos() {
         }
     };
 
+    const abrirModal = (estabelecimento = null) => {
+        if (estabelecimento) {
+            setEditandoId(estabelecimento.id);
+            setNome(estabelecimento.nome);
+            setCnpj(estabelecimento.cnpj || '');
+            setPlano(estabelecimento.plano || 'gratis');
+            setEndereco(estabelecimento.endereco || '');
+            setNumero(estabelecimento.numero || '');
+            setTelefone(estabelecimento.telefone || '');
+            setCpfDono(estabelecimento.cpf_dono || '');
+            setNomeDono(estabelecimento.nome_dono || '');
+            setDataAbertura(estabelecimento.data_abertura ? estabelecimento.data_abertura.split('T')[0] : '');
+            setObservacoes(estabelecimento.observacoes || '');
+            setCep(estabelecimento.cep || '');
+            setEstado(estabelecimento.estado || '');
+        } else {
+            setEditandoId(null);
+            setNome('');
+            setCnpj('');
+            setPlano('gratis');
+            setEndereco('');
+            setNumero('');
+            setTelefone('');
+            setCpfDono('');
+            setNomeDono('');
+            setDataAbertura('');
+            setObservacoes('');
+            setCep('');
+            setEstado('');
+        }
+        setModalEdicao(true);
+    };
+
+    const fecharModal = () => {
+        setModalEdicao(false);
+        setEditandoId(null);
+        setNome('');
+        setCnpj('');
+        setPlano('gratis');
+        setEndereco('');
+        setNumero('');
+        setTelefone('');
+        setCpfDono('');
+        setNomeDono('');
+        setDataAbertura('');
+        setObservacoes('');
+        setCep('');
+        setEstado('');
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!nome) {
@@ -107,20 +156,7 @@ function Estabelecimentos() {
                 await api.post('/admin/estabelecimentos', dados);
                 toast.success('Estabelecimento criado com sucesso');
             }
-            setNome('');
-            setCnpj('');
-            setPlano('gratis');
-            setEndereco('');
-            setNumero('');
-            setTelefone('');
-            setCpfDono('');
-            setNomeDono('');
-            setDataAbertura('');
-            setObservacoes('');
-            setCep('');
-            setEstado('');
-            setEditandoId(null);
-            setMostrarForm(false);
+            fecharModal();
             carregarEstabelecimentos();
         } catch (error) {
             console.error('Erro ao salvar', error);
@@ -272,18 +308,17 @@ function Estabelecimentos() {
         }
     };
 
-const estabelecimentosFiltrados = useMemo(() => {
-    return estabelecimentos.filter(e => {
-        const buscaLower = busca.toLowerCase();
-        const cnpjSemFormatacao = e.cnpj ? e.cnpj.replace(/[^\d]/g, '') : '';
-        const buscaSemFormatacao = busca.replace(/[^\d]/g, '');
-        
-        return e.nome.toLowerCase().includes(buscaLower) ||
-               (e.cnpj && e.cnpj.toLowerCase().includes(buscaLower)) ||
-               (cnpjSemFormatacao && cnpjSemFormatacao.includes(buscaSemFormatacao));
-    });
-}, [estabelecimentos, busca]);
-
+    const estabelecimentosFiltrados = useMemo(() => {
+        return estabelecimentos.filter(e => {
+            const buscaLower = busca.toLowerCase();
+            const cnpjSemFormatacao = e.cnpj ? e.cnpj.replace(/[^\d]/g, '') : '';
+            const buscaSemFormatacao = busca.replace(/[^\d]/g, '');
+            
+            return e.nome.toLowerCase().includes(buscaLower) ||
+                   (e.cnpj && e.cnpj.toLowerCase().includes(buscaLower)) ||
+                   (cnpjSemFormatacao && cnpjSemFormatacao.includes(buscaSemFormatacao));
+        });
+    }, [estabelecimentos, busca]);
 
     const getPerfilCor = (perfil) => {
         if (perfil === 'dono') return '#28a745';
@@ -301,9 +336,9 @@ const estabelecimentosFiltrados = useMemo(() => {
                     <h1>Estabelecimentos</h1>
                     <p className="text-muted">Gerencie todos os estabelecimentos do sistema</p>
                 </div>
-                <button className="btn btn-primary" onClick={() => { setMostrarForm(!mostrarForm); setEditandoId(null); setNome(''); setCnpj(''); setPlano('gratis'); setEndereco(''); setNumero(''); setTelefone(''); setCpfDono(''); setNomeDono(''); setDataAbertura(''); setObservacoes(''); setCep(''); setEstado(''); }}>
+                <button className="btn btn-primary" onClick={abrirModal}>
                     <FiPlus size={18} style={{ marginRight: 6 }} />
-                    {mostrarForm ? 'Cancelar' : 'Novo Estabelecimento'}
+                    Novo Estabelecimento
                 </button>
             </div>
 
@@ -316,114 +351,11 @@ const estabelecimentosFiltrados = useMemo(() => {
                     onChange={(e) => setBusca(e.target.value)}
                 />
                 {busca && (
-                    <button 
-                        className="search-clear"
-                        onClick={handleLimparBusca}
-                        title="Limpar busca"
-                    >
+                    <button className="search-clear" onClick={handleLimparBusca} title="Limpar busca">
                         <FiX size={18} />
                     </button>
                 )}
             </div>
-
-            {mostrarForm && (
-                <div className="card">
-                    <h2>{editandoId ? 'Editar Estabelecimento' : 'Novo Estabelecimento'}</h2>
-                    <form onSubmit={handleSubmit}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                            <div className="form-group">
-                                <label>Nome *</label>
-                                <input type="text" value={nome} onChange={(e) => setNome(e.target.value)} required placeholder="Nome do estabelecimento" />
-                            </div>
-                            <div className="form-group">
-                                <label>CNPJ</label>
-                                <input 
-                                    type="text" 
-                                    value={cnpj} 
-                                    onChange={(e) => setCnpj(formatarCNPJ(e.target.value))} 
-                                    placeholder="00.000.000/0001-00" 
-                                    maxLength={18}
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label>Endereço</label>
-                                <input type="text" value={endereco} onChange={(e) => setEndereco(e.target.value)} placeholder="Rua, Av..." />
-                            </div>
-                            <div className="form-group">
-                                <label>Número</label>
-                                <input type="text" value={numero} onChange={(e) => setNumero(e.target.value)} placeholder="123" />
-                            </div>
-                            <div className="form-group">
-                                <label>CEP</label>
-                                <input 
-                                    type="text" 
-                                    value={cep} 
-                                    onChange={(e) => setCep(formatarCEP(e.target.value))} 
-                                    placeholder="00000-000" 
-                                    maxLength={9}
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label>Estado</label>
-                                <select value={estado} onChange={(e) => setEstado(e.target.value)}>
-                                    <option value="">Selecione</option>
-                                    {estados.map(uf => (
-                                        <option key={uf} value={uf}>{uf}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div className="form-group">
-                                <label>Telefone</label>
-                                <input 
-                                    type="text" 
-                                    value={telefone} 
-                                    onChange={(e) => setTelefone(formatarTelefone(e.target.value))} 
-                                    placeholder="(00) 00000-0000" 
-                                    maxLength={15}
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label>Data de Abertura</label>
-                                <input type="date" value={dataAbertura} onChange={(e) => setDataAbertura(e.target.value)} />
-                            </div>
-                            <div className="form-group">
-                                <label>Nome do Dono</label>
-                                <input type="text" value={nomeDono} onChange={(e) => setNomeDono(e.target.value)} placeholder="Nome do proprietário" />
-                            </div>
-                            <div className="form-group">
-                                <label>CPF do Dono</label>
-                                <input 
-                                    type="text" 
-                                    value={cpfDono} 
-                                    onChange={(e) => setCpfDono(formatarCPF(e.target.value))} 
-                                    placeholder="000.000.000-00" 
-                                    maxLength={14}
-                                />
-                            </div>
-                        </div>
-                        <div className="form-group">
-                            <label>Plano</label>
-                            <select value={plano} onChange={(e) => setPlano(e.target.value)}>
-                                <option value="gratis">Grátis</option>
-                                <option value="basico">Básico</option>
-                                <option value="profissional">Profissional</option>
-                            </select>
-                        </div>
-                        <div className="form-group">
-                            <label>Observações</label>
-                            <textarea value={observacoes} onChange={(e) => setObservacoes(e.target.value)} placeholder="Informações adicionais..." rows={2} />
-                        </div>
-                        <div style={{ display: 'flex', gap: 10 }}>
-                            <button type="submit" className="btn btn-primary" disabled={loading}>
-                                {loading ? 'Salvando...' : (editandoId ? 'Atualizar' : 'Cadastrar')}
-                            </button>
-                            <button type="button" className="btn btn-secondary" onClick={() => { setMostrarForm(false); setEditandoId(null); setNome(''); setCnpj(''); setPlano('gratis'); setEndereco(''); setNumero(''); setTelefone(''); setCpfDono(''); setNomeDono(''); setDataAbertura(''); setObservacoes(''); setCep(''); setEstado(''); }}>
-                                Cancelar
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            )}
 
             <div className="card">
                 {loading ? (
@@ -454,22 +386,7 @@ const estabelecimentosFiltrados = useMemo(() => {
                                         <td><span className="badge" style={{ backgroundColor: est.status === 'ativo' ? '#6b8c4a' : '#b85a4a', color: 'white' }}>{est.status || 'ativo'}</span></td>
                                         <td>
                                             <div className="acoes">
-                                                <button className="btn-icon btn-edit" onClick={() => { 
-                                                    setEditandoId(est.id); 
-                                                    setNome(est.nome); 
-                                                    setCnpj(est.cnpj || ''); 
-                                                    setPlano(est.plano || 'gratis'); 
-                                                    setEndereco(est.endereco || ''); 
-                                                    setNumero(est.numero || ''); 
-                                                    setTelefone(est.telefone || ''); 
-                                                    setCpfDono(est.cpf_dono || ''); 
-                                                    setNomeDono(est.nome_dono || ''); 
-                                                    setDataAbertura(est.data_abertura ? est.data_abertura.split('T')[0] : ''); 
-                                                    setObservacoes(est.observacoes || ''); 
-                                                    setCep(est.cep || ''); 
-                                                    setEstado(est.estado || ''); 
-                                                    setMostrarForm(true); 
-                                                }} title="Editar">
+                                                <button className="btn-icon btn-edit" onClick={() => abrirModal(est)} title="Editar">
                                                     <FiEdit2 size={16} />
                                                 </button>
                                                 <button className="btn-icon btn-info" onClick={() => setModalDetalhes(est)} title="Ver Detalhes">
@@ -498,6 +415,90 @@ const estabelecimentosFiltrados = useMemo(() => {
                     </div>
                 )}
             </div>
+
+            {modalEdicao && (
+                <div className="modal-overlay" onClick={fecharModal}>
+                    <div className="modal modal-large" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h3>{editandoId ? 'Editar Estabelecimento' : 'Novo Estabelecimento'}</h3>
+                            <button className="modal-close" onClick={fecharModal}>
+                                <FiX size={20} />
+                            </button>
+                        </div>
+                        <div className="modal-body-estabelecimento">
+                            <form onSubmit={handleSubmit}>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                                    <div className="form-group">
+                                        <label>Nome *</label>
+                                        <input type="text" value={nome} onChange={(e) => setNome(e.target.value)} required placeholder="Nome do estabelecimento" />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>CNPJ</label>
+                                        <input type="text" value={cnpj} onChange={(e) => setCnpj(formatarCNPJ(e.target.value))} placeholder="00.000.000/0001-00" maxLength={18} />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Endereço</label>
+                                        <input type="text" value={endereco} onChange={(e) => setEndereco(e.target.value)} placeholder="Rua, Av..." />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Número</label>
+                                        <input type="text" value={numero} onChange={(e) => setNumero(e.target.value)} placeholder="123" />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>CEP</label>
+                                        <input type="text" value={cep} onChange={(e) => setCep(formatarCEP(e.target.value))} placeholder="00000-000" maxLength={9} />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Estado</label>
+                                        <select value={estado} onChange={(e) => setEstado(e.target.value)}>
+                                            <option value="">Selecione</option>
+                                            {estados.map(uf => (
+                                                <option key={uf} value={uf}>{uf}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Telefone</label>
+                                        <input type="text" value={telefone} onChange={(e) => setTelefone(formatarTelefone(e.target.value))} placeholder="(00) 00000-0000" maxLength={15} />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Data de Abertura</label>
+                                        <input type="date" value={dataAbertura} onChange={(e) => setDataAbertura(e.target.value)} />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Nome do Dono</label>
+                                        <input type="text" value={nomeDono} onChange={(e) => setNomeDono(e.target.value)} placeholder="Nome do proprietário" />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>CPF do Dono</label>
+                                        <input type="text" value={cpfDono} onChange={(e) => setCpfDono(formatarCPF(e.target.value))} placeholder="000.000.000-00" maxLength={14} />
+                                    </div>
+                                </div>
+                                <div className="form-group">
+                                    <label>Plano</label>
+                                    <select value={plano} onChange={(e) => setPlano(e.target.value)}>
+                                        <option value="gratis">Grátis</option>
+                                        <option value="basico">Básico</option>
+                                        <option value="profissional">Profissional</option>
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label>Observações</label>
+                                    <textarea value={observacoes} onChange={(e) => setObservacoes(e.target.value)} placeholder="Informações adicionais..." rows={2} />
+                                </div>
+                                <div style={{ display: 'flex', gap: 10 }}>
+                                    <button type="submit" className="btn btn-primary" disabled={loading}>
+                                        {loading ? 'Salvando...' : (editandoId ? 'Atualizar' : 'Cadastrar')}
+                                    </button>
+                                    <button type="button" className="btn btn-secondary" onClick={fecharModal}>
+                                        Cancelar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {modalConfirmacao && (
                 <div className="modal-overlay">
@@ -575,16 +576,16 @@ const estabelecimentosFiltrados = useMemo(() => {
                                     <form onSubmit={handleSubmitUsuario}>
                                         <div className="form-group">
                                             <label>Nome</label>
-                                            <input type="text" value={nomeUsuario} onChange={(e) => setNomeUsuario(e.target.value)} required />
+                                            <input type="text" value={nomeUsuario} onChange={(e) => setNomeUsuario(e.target.value)} required placeholder="Nome do usuário" />
                                         </div>
                                         <div className="form-group">
                                             <label>Email</label>
-                                            <input type="email" value={emailUsuario} onChange={(e) => setEmailUsuario(e.target.value)} required />
+                                            <input type="email" value={emailUsuario} onChange={(e) => setEmailUsuario(e.target.value)} required placeholder="email@exemplo.com" />
                                         </div>
                                         {!editandoUsuarioId ? (
                                             <div className="form-group">
                                                 <label>Senha</label>
-                                                <input type="password" value={senhaUsuario} onChange={(e) => setSenhaUsuario(e.target.value)} required />
+                                                <input type="password" value={senhaUsuario} onChange={(e) => setSenhaUsuario(e.target.value)} required placeholder="Digite a senha" />
                                             </div>
                                         ) : (
                                             <div className="form-group">

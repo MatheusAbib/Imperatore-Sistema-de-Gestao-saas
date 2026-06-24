@@ -7,6 +7,7 @@
 
 ---
 
+
 ## 📋 Sobre o Projeto
 
 **Imperatore** é um sistema completo de gestão para restaurantes, bares e cafés, desenvolvido para organizar todo o fluxo operacional desde a criação do cardápio até a entrega do pedido na mesa.
@@ -18,6 +19,10 @@ O sistema conecta quatro áreas principais:
 - **Cozinha**
 
 ---
+
+## 📖 Documentação Completa
+
+Acesse a documentação completa do sistema [clicando aqui](./doc/imperatore-documento.pdf).
 
 ## 🚀 Acessos do Sistema
 

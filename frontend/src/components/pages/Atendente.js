@@ -298,7 +298,7 @@ function Atendente() {
 
             <div className="page-header">
                 <div>
-                    <h1>Atendente</h1>
+                    <h1>Mesas e Comandas</h1>
                     <p className="text-muted">Gerencie comandas e pedidos</p>
                 </div>
                 {loading && <span className="text-muted">Carregando...</span>}
@@ -310,30 +310,30 @@ function Atendente() {
                         <FiClipboard size={20} />
                         Comandas Abertas
                     </h2>
-   <div className="comanda-form">
-    <div className="comanda-inputs">
-        <input
-            type="number"
-            placeholder="Número da mesa"
-            value={numeroMesa}
-            onChange={(e) => setNumeroMesa(e.target.value)}
-        />
-        <input
-            type="text"
-            placeholder="Nome do cliente (opcional)"
-            value={nomeCliente}
-            onChange={(e) => setNomeCliente(e.target.value)}
-        />
-    </div>
-    <button 
-        className="btn btn-primary btn-nova-comanda" 
-        onClick={criarComanda} 
-        disabled={loading}
-    >
-        <FiPlus size={16} />
-        Nova Mesa
-    </button>
-</div>
+                    <div className="comanda-form">
+                        <div className="comanda-inputs">
+                            <input
+                                type="number"
+                                placeholder="Número"
+                                value={numeroMesa}
+                                onChange={(e) => setNumeroMesa(e.target.value)}
+                            />
+                            <input
+                                type="text"
+                                placeholder="Nome"
+                                value={nomeCliente}
+                                onChange={(e) => setNomeCliente(e.target.value)}
+                            />
+                            <button 
+                                className="btn btn-primary" 
+                                onClick={criarComanda} 
+                                disabled={loading}
+                            >
+                                <FiPlus size={16} />
+                                Adicionar
+                            </button>
+                        </div>
+                    </div>
 
                     {comandas.length === 0 ? (
                         <p className="text-muted">Nenhuma comanda aberta</p>
@@ -432,6 +432,7 @@ function Atendente() {
                                                 <th>Preço</th>
                                                 <th>Total</th>
                                                 <th>Status</th>
+                                                <th>Obs</th>
                                                 <th>Ações</th>
                                             </tr>
                                         </thead>
@@ -454,6 +455,7 @@ function Atendente() {
                                                                 {statusConfig.label}
                                                             </span>
                                                         </td>
+                                                        <td>{item.observacao || '-'}</td>
                                                         <td>
                                                             <div className="acoes-comanda">
                                                                 {statusAtual === 'pronto' && (

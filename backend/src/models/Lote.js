@@ -2,11 +2,11 @@ const db = require('../config/database');
 
 class Lote {
     static async criar(loteData) {
-        const { ingrediente_id, quantidade, data_validade, lote, estabelecimento_id, usuario_id } = loteData;
+        const { ingrediente_id, quantidade, data_validade, data_compra, lote, estabelecimento_id, usuario_id } = loteData;
         
         const [result] = await db.execute(
-            'INSERT INTO lotes (ingrediente_id, quantidade, data_validade, lote, estabelecimento_id) VALUES (?, ?, ?, ?, ?)',
-            [ingrediente_id, quantidade, data_validade, lote || null, estabelecimento_id]
+            'INSERT INTO lotes (ingrediente_id, quantidade, data_validade, data_compra, lote, estabelecimento_id) VALUES (?, ?, ?, ?, ?, ?)',
+            [ingrediente_id, quantidade, data_validade, data_compra || null, lote || null, estabelecimento_id]
         );
         
         await db.execute(

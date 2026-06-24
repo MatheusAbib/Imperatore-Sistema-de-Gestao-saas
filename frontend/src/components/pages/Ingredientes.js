@@ -265,7 +265,7 @@ function Ingredientes() {
                                     </select>
                                 </div>
                                 <div className="form-group">
-                                    <label>Custo por unidade (R$)</label>
+                                    <label>Custo da compra (R$)</label>
                                     <input type="number" step="0.01" value={custoMedio} onChange={(e) => setCustoMedio(e.target.value)} placeholder="Ex: 30.00" />
                                 </div>
                                 <div className="form-group" style={{ border: '1px solid var(--border-color)', borderRadius: 8, padding: 16, backgroundColor: 'var(--bg-hover)' }}>

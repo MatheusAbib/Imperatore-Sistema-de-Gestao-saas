@@ -7,12 +7,22 @@ async function getStats(req, res) {
         const [usuarios] = await db.execute('SELECT COUNT(*) as total FROM usuarios');
         const [produtos] = await db.execute('SELECT COUNT(*) as total FROM produtos');
         const [pedidos] = await db.execute('SELECT COUNT(*) as total FROM pedidos');
+        const [faturamento] = await db.execute('SELECT SUM(preco_unitario * quantidade) as total FROM pedidos');
+        const [lotesVencidos] = await db.execute(
+            'SELECT COUNT(*) as total FROM lotes WHERE data_validade < CURDATE() AND quantidade > 0'
+        );
+        const [mediaProdutos] = await db.execute(
+            'SELECT AVG(total) as media FROM (SELECT COUNT(*) as total FROM produtos GROUP BY estabelecimento_id) as sub'
+        );
 
         res.json({
-            totalEstabelecimentos: estabelecimentos[0].total,
-            totalUsuarios: usuarios[0].total,
-            totalProdutos: produtos[0].total,
-            totalPedidos: pedidos[0].total
+            totalEstabelecimentos: estabelecimentos[0].total || 0,
+            totalUsuarios: usuarios[0].total || 0,
+            totalProdutos: produtos[0].total || 0,
+            totalPedidos: pedidos[0].total || 0,
+            totalFaturamento: parseFloat(faturamento[0].total) || 0,
+            totalLotesVencidos: lotesVencidos[0].total || 0,
+            mediaProdutosPorEstabelecimento: parseFloat(mediaProdutos[0].media)?.toFixed(1) || 0
         });
     } catch (error) {
         console.error('Erro ao buscar stats:', error);
@@ -103,6 +113,55 @@ async function getDistribuicaoPlanos(req, res) {
     } catch (error) {
         console.error('Erro ao buscar distribuição de planos:', error);
         res.status(500).json({ mensagem: 'Erro ao buscar distribuição de planos' });
+    }
+}
+
+async function getTopProdutos(req, res) {
+    try {
+        const [rows] = await db.execute(
+            `SELECT p.id, p.nome, COUNT(pe.id) as total
+             FROM produtos p
+             JOIN pedidos pe ON p.id = pe.produto_id
+             GROUP BY p.id
+             ORDER BY total DESC
+             LIMIT 5`
+        );
+        res.json(rows);
+    } catch (error) {
+        console.error('Erro ao buscar top produtos:', error);
+        res.status(500).json({ mensagem: 'Erro ao buscar top produtos' });
+    }
+}
+
+async function getTopEstabelecimentos(req, res) {
+    try {
+        const [rows] = await db.execute(
+            `SELECT e.id, e.nome, COALESCE(SUM(pe.preco_unitario * pe.quantidade), 0) as faturamento
+             FROM estabelecimentos e
+             LEFT JOIN comandas c ON e.id = c.estabelecimento_id
+             LEFT JOIN pedidos pe ON c.id = pe.comanda_id
+             GROUP BY e.id
+             ORDER BY faturamento DESC
+             LIMIT 5`
+        );
+        res.json(rows);
+    } catch (error) {
+        console.error('Erro ao buscar top estabelecimentos:', error);
+        res.status(500).json({ mensagem: 'Erro ao buscar top estabelecimentos' });
+    }
+}
+
+async function getDistribuicaoPerfis(req, res) {
+    try {
+        const [rows] = await db.execute(
+            `SELECT perfil as name, COUNT(*) as value
+             FROM usuarios
+             GROUP BY perfil`
+        );
+        res.json(rows);
+    } catch (error) {
+        console.error('Erro ao buscar distribuição de perfis:', error);
+        res.status(500).json({ mensagem: 'Erro ao buscar distribuição de perfis' });
     }
 }
 
@@ -283,5 +342,8 @@ module.exports = {
     listarTodosUsuarios,
     listarUltimosEstabelecimentos,
     getCrescimentoMensal,
-    getDistribuicaoPlanos
+    getDistribuicaoPlanos,
+    getTopProdutos,
+    getTopEstabelecimentos,
+    getDistribuicaoPerfis
 };

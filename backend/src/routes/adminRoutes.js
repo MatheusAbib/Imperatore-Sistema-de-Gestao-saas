@@ -13,7 +13,10 @@ const {
     listarTodosUsuarios,
     listarUltimosEstabelecimentos,
     getCrescimentoMensal,
-    getDistribuicaoPlanos
+    getDistribuicaoPlanos,
+    getTopProdutos,
+    getTopEstabelecimentos,
+    getDistribuicaoPerfis
 } = require('../controllers/adminController');
 
 const router = express.Router();
@@ -33,5 +36,8 @@ router.delete('/usuarios/:id', deletarUsuarioAdmin);
 router.get('/ultimos-estabelecimentos', listarUltimosEstabelecimentos);
 router.get('/crescimento-mensal', getCrescimentoMensal);
 router.get('/distribuicao-planos', getDistribuicaoPlanos);
+router.get('/top-produtos', getTopProdutos);
+router.get('/top-estabelecimentos', getTopEstabelecimentos);
+router.get('/distribuicao-perfis', getDistribuicaoPerfis);
 
 module.exports = router;

@@ -192,6 +192,25 @@
 }
 
 @media (max-width: 768px) {
+        .alerta-margem-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .alerta-margem-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .alerta-margem-titulo {
+        flex-wrap: wrap;
+    }
+
+    .alerta-margem-item-precos {
+        gap: 8px;
+        font-size: 11px;
+    }
+
        .lotes-container .table-responsive table {
         min-width: 400px;
     }
@@ -411,6 +430,11 @@
         padding: 16px;
         max-height: 50vh;
     }
+
+        .modal-body-estabelecimento{
+        padding: 16px;
+    }
+
 
     .modal-footer {
         padding: 12px 16px;
@@ -671,6 +695,22 @@
 }
 
 @media (max-width: 480px) {
+        .alerta-margem {
+        padding: 12px 14px;
+    }
+
+    .alerta-margem-titulo h3 {
+        font-size: 14px;
+    }
+
+    .alerta-margem-item {
+        padding: 10px 12px;
+    }
+
+    .alerta-margem-item-nome {
+        font-size: 13px;
+    }
+
         .lotes-container .table-responsive table {
         min-width: 350px;
     }
@@ -871,6 +911,10 @@
     .modal-body {
         padding: 12px;
         max-height: 60vh;
+    }
+
+    .modal-body-estabelecimento{
+        padding: 12px;
     }
 
     .modal-footer .btn {
@@ -1144,6 +1188,16 @@
     }
 }
 
+@media (max-width: 1450px){
+    .comanda-inputs{
+        display: flex;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+    flex-direction: column;
+    }
+
+}
+
 @media (max-width: 1300px){
     .status-grid{
             grid-template-columns: repeat(3, 1fr);
@@ -1154,6 +1208,14 @@
     .sobre-grid-cards{
         grid-template-columns: 1fr;
     }
+
+    .comanda-inputs{
+        display: flex;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+    flex-direction: column;
+    }
+  
 }
 
 @media (min-width: 1200px) {

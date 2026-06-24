@@ -172,44 +172,7 @@ function Dashboard() {
         (paginaProdutos - 1) * itensPorPagina,
         paginaProdutos * itensPorPagina
     );
-    const totalPaginasProdutos = Math.ceil(totalProdutos / itensPorPagina);
 
-    const totalIngredientes = ingredientes.length;
-    const ingredientesPaginados = ingredientes.slice(
-        (paginaIngredientes - 1) * itensPorPagina,
-        paginaIngredientes * itensPorPagina
-    );
-    const totalPaginasIngredientes = Math.ceil(totalIngredientes / itensPorPagina);
-
-    const totalLotes = lotes.length;
-    const lotesPaginados = lotes.slice(
-        (paginaLotes - 1) * itensPorPagina,
-        paginaLotes * itensPorPagina
-    );
-    const totalPaginasLotes = Math.ceil(totalLotes / itensPorPagina);
-
-    const Paginacao = ({ pagina, setPagina, totalPaginas }) => {
-        if (totalPaginas <= 1) return null;
-        return (
-            <div className="pagination">
-                <button
-                    className="btn btn-secondary"
-                    onClick={() => setPagina(p => Math.max(1, p - 1))}
-                    disabled={pagina <= 1}
-                >
-                    <FiChevronLeft size={16} />
-                </button>
-                <span>Página {pagina} de {totalPaginas}</span>
-                <button
-                    className="btn btn-secondary"
-                    onClick={() => setPagina(p => Math.min(totalPaginas, p + 1))}
-                    disabled={pagina >= totalPaginas}
-                >
-                    <FiChevronRight size={16} />
-                </button>
-            </div>
-        );
-    };
 
 const StatusCard = ({ icon: Icon, title, value, color, subtitle, tooltip }) => (
     <div className="card status-card" style={{ position: 'relative' }}>
@@ -330,25 +293,7 @@ const StatusCard = ({ icon: Icon, title, value, color, subtitle, tooltip }) => (
     />
 </div>
 
-                                    {produtosAlerta.length > 0 && (
-                                        <div className="card card-warning">
-                                            <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                                <FiAlertCircle size={20} />
-                                                Produtos com Margem Baixa
-                                            </h3>
-                                            <ul style={{ marginBottom: 0 }}>
-                                                {produtosAlerta.slice(0, 5).map((p, idx) => (
-                                                    <li key={idx}>
-                                                        <strong>{p.nome}</strong> - Margem: {p.margem.toFixed(2)}%
-                                                        <span className="text-danger"> (Abaixo do ideal)</span>
-                                                    </li>
-                                                ))}
-                                                {produtosAlerta.length > 5 && (
-                                                    <li className="text-muted">... e mais {produtosAlerta.length - 5} produtos</li>
-                                                )}
-                                            </ul>
-                                        </div>
-                                    )}
+
 
                                     <div className="charts-grid">
                                         <div className="card">
@@ -441,162 +386,8 @@ const StatusCard = ({ icon: Icon, title, value, color, subtitle, tooltip }) => (
                                             <small>Dentro da validade</small>
                                         </div>
                                     </div>
-
-                                    <div className="card">
-                                        <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                            <FiPackage size={18} />
-                                            Lista de Produtos
-                                             <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-muted)' }}>
-                                                    {produtos.length} registros
-                                            </span>
-                                        </h3>
-                                        <div className="table-responsive">
-                                            <table>
-                                                <thead>
-                                                    <tr>
-                                                        <th>Produto</th>
-                                                        <th>Categoria</th>
-                                                        <th>Preço Venda</th>
-                                                        <th>Custo</th>
-                                                        <th>Margem de Lucro</th>
-                                                        <th>Lucro (R$)</th>
-                                                        <th>Status</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {produtosPaginados.map((produto) => {
-                                                        const margem = parseFloat(produto.margem);
-                                                        const lucro = parseFloat(produto.preco_venda) - parseFloat(produto.custo);
-                                                        let status = '';
-                                                        let statusClass = '';
-                                                        if (margem >= 60) { status = 'Excelente'; statusClass = 'text-success'; }
-                                                        else if (margem >= 40) { status = 'Boa'; statusClass = 'text-warning'; }
-                                                        else { status = 'Crítica'; statusClass = 'text-danger'; }
-                                                        return (
-                                                            <tr key={produto.id}>
-                                                                <td>{produto.nome}</td>
-                                                                <td>{produto.categoria || '-'}</td>
-                                                                <td>R$ {parseFloat(produto.preco_venda).toFixed(2).replace('.', ',')}</td>
-                                                                <td>R$ {parseFloat(produto.custo).toFixed(2).replace('.', ',')}</td>
-                                                                <td className={statusClass}>{produto.margem}%</td>
-                                                                <td className={statusClass}>R$ {lucro.toFixed(2).replace('.', ',')}</td>
-                                                                <td className={statusClass}>{status}</td>
-                                                            </tr>
-                                                        );
-                                                    })}
-                                                    {produtos.length === 0 && (
-                                                        <tr>
-                                                            <td colSpan="7" className="text-center text-muted">
-                                                                <FiPackage size={32} />
-                                                                <p>Nenhum produto cadastrado</p>
-                                                            </td>
-                                                        </tr>
-                                                    )}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                        <Paginacao pagina={paginaProdutos} setPagina={setPaginaProdutos} totalPaginas={totalPaginasProdutos} />
-                                    </div>
-
                                     <div>
-                                        <div className="card">
-                                            <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                                <FiBox size={18} />
-                                                Ingredientes
-                                                <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-muted)' }}>
-                                                    {ingredientes.length} registros
-                                                </span>
-                                            </h3>
-                                            <div className="table-responsive" style={{ maxHeight: 300, overflowY: 'auto' }}>
-                                                <table>
-                                                    <thead>
-                                                        <tr>
-                                                            <th>Ingrediente</th>
-                                                            <th>Unidade</th>
-                                                            <th>Custo Unitário</th>
-                                                            <th>Estoque Total</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        {ingredientesPaginados.map(ing => {
-                                                            const lotesIng = lotes.filter(l => l.ingrediente_id === ing.id);
-                                                            const totalEstoque = lotesIng.reduce((sum, l) => sum + (parseFloat(l.quantidade) || 0), 0);
-                                                            return (
-                                                                <tr key={ing.id}>
-                                                                    <td>{ing.nome}</td>
-                                                                    <td>{ing.unidade}</td>
-                                                                    <td>
-                                                                        R$ {(parseFloat(ing.custo_medio) / (parseFloat(ing.fator_conversao) || 1)).toFixed(2).replace('.', ',')} 
-                                                                        / {ing.unidade_uso || ing.unidade}
-                                                                    </td>
-                                                                    <td>{totalEstoque.toFixed(2)} {ing.unidade}</td>
-                                                                </tr>
-                                                            );
-                                                        })}
-                                                        {ingredientes.length === 0 && (
-                                                            <tr>
-                                                                <td colSpan="4" className="text-center text-muted">
-                                                                    <p>Nenhum ingrediente cadastrado</p>
-                                                                </td>
-                                                            </tr>
-                                                        )}
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                            <Paginacao pagina={paginaIngredientes} setPagina={setPaginaIngredientes} totalPaginas={totalPaginasIngredientes} />
-                                        </div>
-
-                                        <div className="card">
-                                            <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                                <FiCalendar size={18} />
-                                                Lotes
-                                                <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-muted)' }}>
-                                                    {lotes.length} registros
-                                                </span>
-                                            </h3>
-                                            <div className="table-responsive" style={{ maxHeight: 300, overflowY: 'auto' }}>
-                                                <table>
-                                                    <thead>
-                                                        <tr>
-                                                            <th>Ingrediente</th>
-                                                            <th>Quantidade</th>
-                                                            <th>Validade</th>
-                                                            <th>Status</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        {lotesPaginados.map(lote => {
-                                                            const dias = Math.ceil((new Date(lote.data_validade) - new Date()) / (1000 * 60 * 60 * 24));
-                                                            let cor = '#28a745';
-                                                            let status = 'OK';
-                                                            if (dias < 0) { cor = '#dc3545'; status = 'Vencido'; }
-                                                            else if (dias === 0) { cor = '#ffc107'; status = 'Vence Hoje'; }
-                                                            else if (dias <= 7) { cor = '#fd7e14'; status = 'Vence em breve'; }
-                                                            return (
-                                                                <tr key={lote.id}>
-                                                                    <td>{lote.ingrediente_nome}</td>
-                                                                    <td>{lote.quantidade} {lote.unidade}</td>
-                                                                    <td style={{ color: cor }}>
-                                                                        {new Date(lote.data_validade).toLocaleDateString('pt-BR')}
-                                                                    </td>
-                                                                    <td style={{ color: cor, fontWeight: 'bold' }}>
-                                                                        {status} ({dias} dias)
-                                                                    </td>
-                                                                </tr>
-                                                            );
-                                                        })}
-                                                        {lotes.length === 0 && (
-                                                            <tr>
-                                                                <td colSpan="4" className="text-center text-muted">
-                                                                    <p>Nenhum lote registrado</p>
-                                                                </td>
-                                                            </tr>
-                                                        )}
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                            <Paginacao pagina={paginaLotes} setPagina={setPaginaLotes} totalPaginas={totalPaginasLotes} />
-                                        </div>
+            
                                     </div>
                                 </>
                             )}
