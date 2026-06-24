@@ -22,7 +22,7 @@ O sistema conecta quatro áreas principais:
 
 ## 📖 Documentação Completa
 
-Acesse a documentação completa do sistema [clicando aqui](./doc/imperatore-documento.pdf).
+📄 [Baixar Documentação Completa (PDF)](./doc/Imperatore-documento.pdf)
 
 ## 🚀 Acessos do Sistema
 
