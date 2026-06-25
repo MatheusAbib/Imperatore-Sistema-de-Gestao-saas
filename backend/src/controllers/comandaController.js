@@ -5,7 +5,13 @@ const Usuario = require('../models/Usuario');
 const { logAction } = require('../utils/logHelper');
 
 async function getEstabelecimentoId(usuarioId) {
+    if (!usuarioId) {
+        throw new Error('Usuário não autenticado');
+    }
     const usuario = await Usuario.buscarPorId(usuarioId);
+    if (!usuario) {
+        throw new Error('Usuário não encontrado');
+    }
     return usuario.estabelecimento_id;
 }
 
@@ -59,9 +65,14 @@ async function criarComanda(req, res) {
 }
 
 async function listarComandas(req, res) {
-    const estabelecimento_id = await getEstabelecimentoId(req.usuarioId);
-    const comandas = await Comanda.listarPorEstabelecimento(estabelecimento_id);
-    res.json(comandas);
+    try {
+        const estabelecimento_id = await getEstabelecimentoId(req.usuarioId);
+        const comandas = await Comanda.listarPorEstabelecimento(estabelecimento_id);
+        res.json(comandas);
+    } catch (error) {
+        console.error('Erro ao listar comandas:', error);
+        res.status(500).json({ mensagem: 'Erro ao listar comandas', erro: error.message });
+    }
 }
 
 async function listarItensComanda(req, res) {
