@@ -44,24 +44,30 @@ function Atendente() {
     }, [comandaAtual]);
 
     const carregarProdutos = async () => {
+        setLoading(true);
         try {
             const response = await api.get('/produtos');
             setProdutos(response.data);
         } catch (error) {
             console.error('Erro ao carregar produtos', error);
             toast.error('Erro ao carregar produtos');
+        } finally {
+            setLoading(false);
         }
     };
 
-    const carregarComandas = async () => {
-        try {
-            const response = await api.get('/comandas');
-            setComandas(response.data);
-        } catch (error) {
-            console.error('Erro ao carregar comandas', error);
-            toast.error('Erro ao carregar comandas');
-        }
-    };
+const carregarComandas = async () => {
+    setLoading(true);
+    try {
+        const response = await api.get('/comandas');
+        setComandas(response.data);
+    } catch (error) {
+        console.error('Erro ao carregar comandas', error);
+        toast.error('Erro ao carregar comandas');
+    } finally {
+        setLoading(false);
+    }
+};
 
     const carregarItensComanda = async (comandaId) => {
         try {
@@ -291,6 +297,29 @@ function Atendente() {
             </div>
         );
     };
+
+    if (loading) {
+        return (
+            <div className="skeleton-container">
+                <div className="page-header">
+                    <div>
+                        <h1>Mesas e Comandas</h1>
+                        <p className="text-muted">Gerencie comandas e pedidos</p>
+                    </div>
+                </div>
+                <div className="atendente-grid">
+                    <div className="card">
+                        <div className="skeleton-card" style={{ height: 60, minHeight: 60 }}></div>
+                        <div className="skeleton-card" style={{ height: 50, minHeight: 50 }}></div>
+                        <div className="skeleton-card" style={{ height: 300, minHeight: 300 }}></div>
+                    </div>
+                    <div className="card">
+                        <div className="skeleton-card" style={{ height: 400, minHeight: 400 }}></div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <>

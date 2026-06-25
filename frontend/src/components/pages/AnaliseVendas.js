@@ -16,10 +16,18 @@ function AnaliseVendas() {
     const [paginaSemVenda, setPaginaSemVenda] = useState(1);
     const itensPorPagina = 10;
 
-    useEffect(() => {
+useEffect(() => {
+    carregarDados();
+    carregarTodosProdutos();
+
+    const handleReload = () => {
         carregarDados();
         carregarTodosProdutos();
-    }, []);
+    };
+
+    window.addEventListener('reloadData', handleReload);
+    return () => window.removeEventListener('reloadData', handleReload);
+}, []);
 
     const carregarDados = async () => {
         try {
@@ -83,7 +91,30 @@ function AnaliseVendas() {
         </div>
     );
 
-    if (loading) return <div className="loading-state">Carregando analise...</div>;
+    if (loading) {
+        return (
+            <div className="skeleton-container">
+                <div className="page-header">
+                    <div>
+                        <h1>Analise de Vendas</h1>
+                        <p className="text-muted">Veja quais produtos sao mais vendidos e lucrativos</p>
+                    </div>
+                </div>
+                <div className="skeleton-grid status-grid">
+                    <div className="skeleton-card"></div>
+                    <div className="skeleton-card"></div>
+                    <div className="skeleton-card"></div>
+                    <div className="skeleton-card"></div>
+                </div>
+                <div className="skeleton-grid charts-grid">
+                    <div className="skeleton-card skeleton-chart"></div>
+                    <div className="skeleton-card skeleton-chart"></div>
+                </div>
+                <div className="skeleton-card skeleton-chart"></div>
+                <div className="skeleton-table"></div>
+            </div>
+        );
+    }
 
     if (!dados) {
         return (
@@ -111,12 +142,12 @@ function AnaliseVendas() {
         custo_unitario: p.custo
     }));
 
-const produtosComMargem = dadosTabela.map(p => ({
-    nome: p.nome,
-    margem: parseFloat(p.margem) || 0,
-    preco: parseFloat(p.preco) || 0,
-    custo: parseFloat(p.custo_unitario) || 0
-}));
+    const produtosComMargem = dadosTabela.map(p => ({
+        nome: p.nome,
+        margem: parseFloat(p.margem) || 0,
+        preco: parseFloat(p.preco) || 0,
+        custo: parseFloat(p.custo_unitario) || 0
+    }));
 
     const produtosAlerta = produtosComMargem.filter(p => p.margem < 40);
 
@@ -271,9 +302,9 @@ const produtosComMargem = dadosTabela.map(p => ({
                                 <div className="alerta-margem-item-precos">
                                     <span>Preço: R$ {p.preco.toFixed(2)}</span>
                                     <span>Custo: R$ {p.custo.toFixed(2)}</span>
-                                <span style={{ color: '#b85a4a', fontWeight: 'bold' }}>
-                                    Lucro: R$ {(parseFloat(p.preco) - parseFloat(p.custo)).toFixed(2).replace('.', ',')}
-                                </span>
+                                    <span style={{ color: '#b85a4a', fontWeight: 'bold' }}>
+                                        Lucro: R$ {(parseFloat(p.preco) - parseFloat(p.custo)).toFixed(2).replace('.', ',')}
+                                    </span>
                                 </div>
                             </div>
                         ))}
@@ -346,32 +377,100 @@ const produtosComMargem = dadosTabela.map(p => ({
                 </div>
             </div>
 
-            <div className="card">
-                <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <FiPieChart size={18} />
-                    Distribuicao do Faturamento
-                    <TooltipInfo id="faturamento" texto="Participacao de cada produto no faturamento total. Mostra quais produtos sao responsaveis pela maior parte da receita do negocio." />
-                </h3>
-                <ResponsiveContainer width="100%" height={280}>
-                    <PieChart>
-                        <Pie
-                            data={dadosVendidos}
-                            cx="50%"
-                            cy="50%"
-                            labelLine={true}
-                            label={({ nome, percent }) => `${nome}: ${(percent * 100).toFixed(0)}%`}
-                            outerRadius={100}
-                            fill="#8884d8"
-                            dataKey="faturamento"
-                        >
-                            {dadosVendidos.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={cores[index % cores.length]} />
-                            ))}
-                        </Pie>
-                        <Tooltip formatter={(value) => `R$ ${value.toFixed(2)}`} />
-                    </PieChart>
-                </ResponsiveContainer>
+<div className="card">
+    <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <FiPieChart size={18} />
+        Distribuição do Faturamento
+        <TooltipInfo id="faturamento" texto="Participacao de cada produto no faturamento total. Mostra quais produtos sao responsaveis pela maior parte da receita do negocio." />
+    </h3>
+    <div className="pie-chart-container">
+        <div className="pie-chart-wrapper">
+            <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                    <Pie
+                        data={dadosVendidos}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        outerRadius={90}
+                        fill="#8884d8"
+                        dataKey="faturamento"
+                        isAnimationActive={false}
+                        nameKey="nome"
+                    >
+                        {dadosVendidos.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={cores[index % cores.length]} />
+                        ))}
+                    </Pie>
+                    <Tooltip 
+                        formatter={(value, name, props) => {
+                            return [`R$ ${value.toFixed(2)}`, props.payload.nome];
+                        }}
+                        labelFormatter={(label, payload) => {
+                            if (payload && payload.length > 0) {
+                                return payload[0].payload.nome;
+                            }
+                            return label;
+                        }}
+                        contentStyle={{
+                            backgroundColor: 'var(--bg-card)',
+                            border: '1px solid var(--border-color)',
+                            borderRadius: 6,
+                            padding: '8px 12px'
+                        }}
+                    />
+                </PieChart>
+            </ResponsiveContainer>
+        </div>
+        <div className="pie-legend-wrapper">
+            <h4 style={{ fontSize: 13, marginBottom: 8, color: 'var(--text-secondary)' }}>
+                Produtos ({dadosVendidos.length})
+            </h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                {dadosVendidos
+                    .sort((a, b) => b.faturamento - a.faturamento)
+                    .map((item, index) => {
+                        const percent = (item.faturamento / dadosVendidos.reduce((sum, i) => sum + i.faturamento, 0)) * 100;
+                        return (
+                            <div 
+                                key={index} 
+                                style={{ 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    gap: 8,
+                                    padding: '4px 8px',
+                                    borderRadius: 4,
+                                    fontSize: 12,
+                                    backgroundColor: index % 2 === 0 ? 'var(--bg-hover)' : 'transparent'
+                                }}
+                            >
+                                <span style={{ 
+                                    display: 'inline-block', 
+                                    width: 12, 
+                                    height: 12, 
+                                    borderRadius: 3, 
+                                    backgroundColor: cores[index % cores.length],
+                                    flexShrink: 0
+                                }} />
+                                <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                    {item.nome}
+                                </span>
+                                <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+                                    {percent.toFixed(1)}%
+                                </span>
+                            </div>
+                        );
+                    })
+                }
             </div>
+        </div>
+    </div>
+    {dadosVendidos.length > 8 && (
+        <p className="text-muted" style={{ textAlign: 'center', fontSize: 11, marginTop: 8 }}>
+            * Apenas produtos com mais de 5% aparecem no rótulo. Todos aparecem na legenda.
+        </p>
+    )}
+</div>
 
             <div className="card">
                 <h3>Detalhamento por Produto</h3>

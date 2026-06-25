@@ -48,9 +48,16 @@ function Estabelecimentos() {
         { valor: 'dono', label: 'Dono' }
     ];
 
-    useEffect(() => {
+useEffect(() => {
+    carregarEstabelecimentos();
+
+    const handleReload = () => {
         carregarEstabelecimentos();
-    }, []);
+    };
+
+    window.addEventListener('reloadData', handleReload);
+    return () => window.removeEventListener('reloadData', handleReload);
+}, []);
 
     const carregarEstabelecimentos = async () => {
         setLoading(true);
@@ -327,6 +334,8 @@ function Estabelecimentos() {
         return '#6c757d';
     };
 
+
+
     return (
         <>
             <ToastContainer position="top-right" autoClose={3000} theme="dark" />
@@ -342,6 +351,14 @@ function Estabelecimentos() {
                 </button>
             </div>
 
+           <div className="card">
+    {loading ? (
+        <div className="skeleton-container">
+            <div className="skeleton-card" style={{ height: 50, minHeight: 50 }}></div>
+            <div className="skeleton-table"></div>
+        </div>
+    ) : (
+        <>
             <div className="search-box">
                 <FiSearch size={20} className="search-icon" />
                 <input
@@ -356,65 +373,61 @@ function Estabelecimentos() {
                     </button>
                 )}
             </div>
-
-            <div className="card">
-                {loading ? (
-                    <div className="loading-state">Carregando...</div>
-                ) : (
-                    <div className="table-responsive">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Estabelecimento</th>
-                                    <th>CNPJ</th>
-                                    <th>Plano</th>
-                                    <th>Status</th>
-                                    <th className="text-center">Ações</th>
+            <div className="table-responsive">
+                <table>
+                        <thead>
+                            <tr>
+                                <th>Estabelecimento</th>
+                                <th>CNPJ</th>
+                                <th>Plano</th>
+                                <th>Status</th>
+                                <th className="text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {estabelecimentosFiltrados.map((est) => (
+                                <tr key={est.id}>
+                                    <td>
+                                        <div className="produto-info">
+                                            <span className="produto-icon"><FiServer size={18} /></span>
+                                            {est.nome}
+                                        </div>
+                                    </td>
+                                    <td>{est.cnpj || '-'}</td>
+                                    <td><span className="badge">{est.plano || 'gratis'}</span></td>
+                                    <td><span className="badge" style={{ backgroundColor: est.status === 'ativo' ? '#6b8c4a' : '#b85a4a', color: 'white' }}>{est.status || 'ativo'}</span></td>
+                                    <td>
+                                        <div className="acoes">
+                                            <button className="btn-icon btn-edit" onClick={() => abrirModal(est)} title="Editar">
+                                                <FiEdit2 size={16} />
+                                            </button>
+                                            <button className="btn-icon btn-info" onClick={() => setModalDetalhes(est)} title="Ver Detalhes">
+                                                <FiInfo size={16} />
+                                            </button>
+                                            <button className="btn-icon btn-users" onClick={() => abrirModalUsuarios(est)} title="Gerenciar Usuários">
+                                                <FiUsers size={16} />
+                                            </button>
+                                            <button className="btn-icon btn-delete" onClick={() => handleDelete(est.id)} title="Excluir">
+                                                <FiTrash2 size={16} />
+                                            </button>
+                                        </div>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {estabelecimentosFiltrados.map((est) => (
-                                    <tr key={est.id}>
-                                        <td>
-                                            <div className="produto-info">
-                                                <span className="produto-icon"><FiServer size={18} /></span>
-                                                {est.nome}
-                                            </div>
-                                        </td>
-                                        <td>{est.cnpj || '-'}</td>
-                                        <td><span className="badge">{est.plano || 'gratis'}</span></td>
-                                        <td><span className="badge" style={{ backgroundColor: est.status === 'ativo' ? '#6b8c4a' : '#b85a4a', color: 'white' }}>{est.status || 'ativo'}</span></td>
-                                        <td>
-                                            <div className="acoes">
-                                                <button className="btn-icon btn-edit" onClick={() => abrirModal(est)} title="Editar">
-                                                    <FiEdit2 size={16} />
-                                                </button>
-                                                <button className="btn-icon btn-info" onClick={() => setModalDetalhes(est)} title="Ver Detalhes">
-                                                    <FiInfo size={16} />
-                                                </button>
-                                                <button className="btn-icon btn-users" onClick={() => abrirModalUsuarios(est)} title="Gerenciar Usuários">
-                                                    <FiUsers size={16} />
-                                                </button>
-                                                <button className="btn-icon btn-delete" onClick={() => handleDelete(est.id)} title="Excluir">
-                                                    <FiTrash2 size={16} />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                                {estabelecimentosFiltrados.length === 0 && (
-                                    <tr>
-                                        <td colSpan="5" className="text-center text-muted">
-                                            <FiServer size={32} />
-                                            <p>Nenhum estabelecimento cadastrado</p>
-                                        </td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
+                            ))}
+                            {estabelecimentosFiltrados.length === 0 && (
+                                <tr>
+                                    <td colSpan="5" className="text-center text-muted">
+                                        <FiServer size={32} />
+                                        <p>Nenhum estabelecimento cadastrado</p>
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                 </table>
             </div>
+        </>
+    )}
+</div>
 
             {modalEdicao && (
                 <div className="modal-overlay" onClick={fecharModal}>

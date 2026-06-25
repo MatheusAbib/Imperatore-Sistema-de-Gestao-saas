@@ -146,88 +146,99 @@ function Logs() {
                     </button>
             </div>
 
-            <div className="card" style={{ marginBottom: 20 }}>
-                <div className={`logs-filtros ${!isAdmin ? 'quatro-colunas' : ''}`}>
-                    <div className="form-group">
-                        <label>Módulo</label>
-                        <select 
-                            value={filtros.modulo} 
-                            onChange={(e) => setFiltros({ ...filtros, modulo: e.target.value, pagina: 1 })}
-                        >
-                            <option value="">Todos</option>
-                            {modulos.map(m => (
-                                <option key={m.valor} value={m.valor}>{m.label}</option>
-                            ))}
-                        </select>
-                    </div>
-                    
-                    {isAdmin && (
-                        <div className="form-group">
-                            <label>Estabelecimento</label>
-                            <select 
-                                value={filtros.estabelecimento_id} 
-                                onChange={(e) => setFiltros({ ...filtros, estabelecimento_id: e.target.value, pagina: 1 })}
-                            >
-                                <option value="">Todos</option>
-                                {estabelecimentos.map(e => (
-                                    <option key={e.id} value={e.id}>{e.nome}</option>
-                                ))}
-                            </select>
-                        </div>
-                    )}
-
-                    <div className="form-group">
-                        <label>Usuário</label>
-                        <select 
-                            value={filtros.usuario_id} 
-                            onChange={(e) => setFiltros({ ...filtros, usuario_id: e.target.value, pagina: 1 })}
-                        >
-                            <option value="">Todos</option>
-                            {usuarios.map(u => (
-                                <option key={u.id} value={u.id}>{u.nome}</option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div className="form-group">
-                        <label>Data Início</label>
-                        <input 
-                            type="date" 
-                            value={filtros.data_inicio} 
-                            onChange={(e) => setFiltros({ ...filtros, data_inicio: e.target.value, pagina: 1 })}
-                        />
-                    </div>
-                    <div className="form-group">
-                        <label>Data Fim</label>
-                        <input 
-                            type="date" 
-                            value={filtros.data_fim} 
-                            onChange={(e) => setFiltros({ ...filtros, data_fim: e.target.value, pagina: 1 })}
-                        />
-                    </div>
+<div className="card" style={{ marginBottom: 20 }}>
+    {loading ? (
+        <div className="skeleton-container">
+            <div className="skeleton-card" style={{ height: 40, minHeight: 40 }}></div>
+            <div className="skeleton-card" style={{ height: 40, minHeight: 40 }}></div>
+            <div className="skeleton-card" style={{ height: 40, minHeight: 40 }}></div>
+        </div>
+    ) : (
+        <div className={`logs-filtros ${!isAdmin ? 'quatro-colunas' : ''}`}>
+            <div className="form-group">
+                <label>Módulo</label>
+                <select 
+                    value={filtros.modulo} 
+                    onChange={(e) => setFiltros({ ...filtros, modulo: e.target.value, pagina: 1 })}
+                >
+                    <option value="">Todos</option>
+                    {modulos.map(m => (
+                        <option key={m.valor} value={m.valor}>{m.label}</option>
+                    ))}
+                </select>
+            </div>
+            
+            {isAdmin && (
+                <div className="form-group">
+                    <label>Estabelecimento</label>
+                    <select 
+                        value={filtros.estabelecimento_id} 
+                        onChange={(e) => setFiltros({ ...filtros, estabelecimento_id: e.target.value, pagina: 1 })}
+                    >
+                        <option value="">Todos</option>
+                        {estabelecimentos.map(e => (
+                            <option key={e.id} value={e.id}>{e.nome}</option>
+                        ))}
+                    </select>
                 </div>
+            )}
+
+            <div className="form-group">
+                <label>Usuário</label>
+                <select 
+                    value={filtros.usuario_id} 
+                    onChange={(e) => setFiltros({ ...filtros, usuario_id: e.target.value, pagina: 1 })}
+                >
+                    <option value="">Todos</option>
+                    {usuarios.map(u => (
+                        <option key={u.id} value={u.id}>{u.nome}</option>
+                    ))}
+                </select>
             </div>
 
-            <div className="search-box">
-                <FiSearch size={20} className="search-icon" />
-                <input
-                    type="text"
-                    placeholder="Buscar por descrição, usuário ou ação..."
-                    value={busca}
-                    onChange={(e) => setBusca(e.target.value)}
+            <div className="form-group">
+                <label>Data Início</label>
+                <input 
+                    type="date" 
+                    value={filtros.data_inicio} 
+                    onChange={(e) => setFiltros({ ...filtros, data_inicio: e.target.value, pagina: 1 })}
                 />
-                {busca && (
-                    <button className="search-clear" onClick={handleLimparBusca} title="Limpar busca">
-                        <FiX size={18} />
-                    </button>
-                )}
             </div>
+            <div className="form-group">
+                <label>Data Fim</label>
+                <input 
+                    type="date" 
+                    value={filtros.data_fim} 
+                    onChange={(e) => setFiltros({ ...filtros, data_fim: e.target.value, pagina: 1 })}
+                />
+            </div>
+        </div>
+    )}
+</div>
 
             <div className="card">
                 {loading ? (
-                    <div className="loading-state">Carregando logs...</div>
+                    <div className="skeleton-container">
+                        <div className="skeleton-card" style={{ height: 50, minHeight: 50 }}></div>
+                        <div className="skeleton-table"></div>
+                    </div>
                 ) : (
                     <>
+                        <div className="search-box">
+                            <FiSearch size={20} className="search-icon" />
+                            <input
+                                type="text"
+                                placeholder="Buscar por descrição, usuário ou ação..."
+                                value={busca}
+                                onChange={(e) => setBusca(e.target.value)}
+                            />
+                            {busca && (
+                                <button className="search-clear" onClick={handleLimparBusca} title="Limpar busca">
+                                    <FiX size={18} />
+                                </button>
+                            )}
+                        </div>
+
                         <div className="table-responsive">
                             <table>
                                 <thead>

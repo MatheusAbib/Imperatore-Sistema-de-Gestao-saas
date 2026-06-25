@@ -8,12 +8,14 @@ function Cardapio() {
     const [categoriaSelecionada, setCategoriaSelecionada] = useState('');
     const [categorias, setCategorias] = useState([]);
     const [visualizacao, setVisualizacao] = useState('grid');
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         carregarProdutos();
     }, []);
 
     const carregarProdutos = async () => {
+        setLoading(true);
         try {
             const response = await api.get('/produtos');
             setProdutos(response.data);
@@ -21,14 +23,14 @@ function Cardapio() {
             setCategorias(cats);
         } catch (error) {
             console.error('Erro ao carregar produtos', error);
+        } finally {
+            setLoading(false);
         }
     };
 
-    
-        const handleLimparBusca = () => {
+    const handleLimparBusca = () => {
         setBusca('');
     };
-
 
     const produtosFiltrados = produtos.filter(p => {
         const matchNome = p.nome.toLowerCase().includes(busca.toLowerCase());
@@ -42,6 +44,38 @@ function Cardapio() {
         if (produto.categoria === 'Sobremesa') return <FiTag size={28} />;
         return <FiList size={28} />;
     };
+
+    if (loading) {
+        return (
+            <div className="skeleton-container">
+                <div className="page-header">
+                    <div>
+                        <h1>Cardápio</h1>
+                        <p className="text-muted">Consulte produtos e preços do estabelecimento</p>
+                    </div>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                        <div className="skeleton-card" style={{ width: 40, height: 40, minHeight: 40 }}></div>
+                        <div className="skeleton-card" style={{ width: 40, height: 40, minHeight: 40 }}></div>
+                    </div>
+                </div>
+                <div className="skeleton-card" style={{ height: 50, minHeight: 50 }}></div>
+                <div className="skeleton-card" style={{ height: 50, minHeight: 50 }}></div>
+                <div className="card">
+                    <div className="skeleton-container">
+                        <div className="skeleton-card" style={{ height: 30, minHeight: 30, maxWidth: 150 }}></div>
+                        <div className="cardapio-grid">
+                            <div className="skeleton-card" style={{ height: 120, minHeight: 120 }}></div>
+                            <div className="skeleton-card" style={{ height: 120, minHeight: 120 }}></div>
+                            <div className="skeleton-card" style={{ height: 120, minHeight: 120 }}></div>
+                            <div className="skeleton-card" style={{ height: 120, minHeight: 120 }}></div>
+                            <div className="skeleton-card" style={{ height: 120, minHeight: 120 }}></div>
+                            <div className="skeleton-card" style={{ height: 120, minHeight: 120 }}></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="page-content">
@@ -84,7 +118,6 @@ function Cardapio() {
                     </button>
                 )}
             </div>
-
 
             {categorias.length > 0 && (
                 <div className="filter-group">

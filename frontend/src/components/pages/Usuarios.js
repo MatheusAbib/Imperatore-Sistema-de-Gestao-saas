@@ -15,6 +15,7 @@ function Usuarios() {
     const [senha, setSenha] = useState('');
     const [perfil, setPerfil] = useState('atendente');
     const [modalConfirmacao, setModalConfirmacao] = useState(null);
+    const [busca, setBusca] = useState('');
 
     const perfis = [
         { valor: 'atendente', label: 'Atendente', cor: '#6c757d' },
@@ -123,6 +124,11 @@ function Usuarios() {
         return p ? p.label : perfil;
     };
 
+    const usuariosFiltrados = usuarios.filter(user =>
+        user.nome.toLowerCase().includes(busca.toLowerCase()) ||
+        user.email.toLowerCase().includes(busca.toLowerCase())
+    );
+
     if (usuario?.perfil !== 'dono' && usuario?.perfil !== 'gerente') {
         return (
             <div className="card" style={{ textAlign: 'center', padding: 60 }}>
@@ -160,86 +166,106 @@ function Usuarios() {
                         {usuarios.length} registros
                     </span>
                 </div>
+                
                 {loading ? (
-                    <div className="loading-state">Carregando usuários...</div>
-                ) : (
-                    <div className="table-responsive">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Usuário</th>
-                                    <th>Email</th>
-                                    <th>Perfil</th>
-                                    <th className="text-center">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {usuarios.map((user) => (
-                                    <tr key={user.id}>
-                                        <td>
-                                            <div className="produto-info">
-                                                <span className="produto-icon"><FiUser size={18} /></span>
-                                                {user.nome}
-                                            </div>
-                                        </td>
-                                        <td>{user.email}</td>
-                                        <td>
-                                            <span style={{ 
-                                                color: getPerfilCor(user.perfil), 
-                                                fontWeight: 'bold',
-                                                backgroundColor: getPerfilCor(user.perfil) + '22',
-                                                padding: '4px 12px',
-                                                borderRadius: 12,
-                                                fontSize: 12
-                                            }}>
-                                                {getPerfilLabel(user.perfil)}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <div className="acoes">
-                                                <select 
-                                                    value={user.perfil}
-                                                    onChange={(e) => handleMudarPerfil(user.id, e.target.value)}
-                                                    className="perfil-select"
-                                                    disabled={!podeCriar}
-                                                    style={{
-                                                        padding: '4px 8px',
-                                                        borderRadius: 4,
-                                                        border: '1px solid var(--border-color)',
-                                                        fontSize: 12,
-                                                        background: 'var(--bg-card)',
-                                                        cursor: podeCriar ? 'pointer' : 'default'
-                                                    }}
-                                                >
-                                                    {perfis.map(p => (
-                                                        <option key={p.valor} value={p.valor}>{p.label}</option>
-                                                    ))}
-                                                </select>
-                                                {podeCriar && (
-                                                    <button 
-                                                        className="btn-icon btn-delete" 
-                                                        onClick={() => handleDelete(user.id)}
-                                                        title="Excluir"
-                                                    >
-                                                        <FiTrash2 size={16} />
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                                {usuarios.length === 0 && (
-                                    <tr>
-                                        <td colSpan="4" className="text-center text-muted">
-                                            <FiUsers size={32} />
-                                            <p>Nenhum usuário cadastrado</p>
-                                            <span>Cadastre o primeiro usuário</span>
-                                        </td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
+                    <div className="skeleton-container">
+                        <div className="skeleton-card" style={{ height: 50, minHeight: 50 }}></div>
+                        <div className="skeleton-table"></div>
                     </div>
+                ) : (
+                    <>
+                        <div className="search-box">
+                            <FiSearch size={20} className="search-icon" />
+                            <input
+                                type="text"
+                                placeholder="Buscar usuário por nome ou email..."
+                                value={busca}
+                                onChange={(e) => setBusca(e.target.value)}
+                            />
+                            {busca && (
+                                <button className="search-clear" onClick={() => setBusca('')} title="Limpar busca">
+                                    <FiX size={18} />
+                                </button>
+                            )}
+                        </div>
+                        <div className="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Usuário</th>
+                                        <th>Email</th>
+                                        <th>Perfil</th>
+                                        <th className="text-center">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {usuariosFiltrados.map((user) => (
+                                        <tr key={user.id}>
+                                            <td>
+                                                <div className="produto-info">
+                                                    <span className="produto-icon"><FiUser size={18} /></span>
+                                                    {user.nome}
+                                                </div>
+                                            </td>
+                                            <td>{user.email}</td>
+                                            <td>
+                                                <span style={{ 
+                                                    color: getPerfilCor(user.perfil), 
+                                                    fontWeight: 'bold',
+                                                    backgroundColor: getPerfilCor(user.perfil) + '22',
+                                                    padding: '4px 12px',
+                                                    borderRadius: 12,
+                                                    fontSize: 12
+                                                }}>
+                                                    {getPerfilLabel(user.perfil)}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div className="acoes">
+                                                    <select 
+                                                        value={user.perfil}
+                                                        onChange={(e) => handleMudarPerfil(user.id, e.target.value)}
+                                                        className="perfil-select"
+                                                        disabled={!podeCriar}
+                                                        style={{
+                                                            padding: '4px 8px',
+                                                            borderRadius: 4,
+                                                            border: '1px solid var(--border-color)',
+                                                            fontSize: 12,
+                                                            background: 'var(--bg-card)',
+                                                            cursor: podeCriar ? 'pointer' : 'default'
+                                                        }}
+                                                    >
+                                                        {perfis.map(p => (
+                                                            <option key={p.valor} value={p.valor}>{p.label}</option>
+                                                        ))}
+                                                    </select>
+                                                    {podeCriar && (
+                                                        <button 
+                                                            className="btn-icon btn-delete" 
+                                                            onClick={() => handleDelete(user.id)}
+                                                            title="Excluir"
+                                                        >
+                                                            <FiTrash2 size={16} />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    {usuariosFiltrados.length === 0 && (
+                                        <tr>
+                                            <td colSpan="4" className="text-center text-muted">
+                                                <FiUsers size={32} />
+                                                <p>Nenhum usuário encontrado</p>
+                                                <span>Cadastre o primeiro usuário</span>
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </>
                 )}
             </div>
 

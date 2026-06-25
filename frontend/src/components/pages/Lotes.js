@@ -20,31 +20,45 @@ function Lotes() {
     const [modalNovoLote, setModalNovoLote] = useState(false);
     const [filtroIngrediente, setFiltroIngrediente] = useState('');
     const [dataCompra, setDataCompra] = useState('');
-    
+    const [buscaIngrediente, setBuscaIngrediente] = useState('');    
     const [paginaTodos, setPaginaTodos] = useState(1);
     const [paginaIngrediente, setPaginaIngrediente] = useState(1);
     const itensPorPagina = 8;
 
-    useEffect(() => {
+useEffect(() => {
+    carregarLotes();
+    carregarIngredientes();
+
+    const handleReload = () => {
         carregarLotes();
         carregarIngredientes();
-    }, []);
+    };
+
+    window.addEventListener('reloadData', handleReload);
+    return () => window.removeEventListener('reloadData', handleReload);
+}, []);
 
     const carregarLotes = async () => {
+        setLoading(true);
         try {
             const response = await api.get('/lotes');
             setLotes(response.data);
         } catch (error) {
             console.error('Erro ao carregar lotes', error);
+        } finally {
+            setLoading(false);
         }
     };
 
     const carregarIngredientes = async () => {
+        setLoading(true);
         try {
             const response = await api.get('/ingredientes');
             setIngredientes(response.data);
         } catch (error) {
             console.error('Erro ao carregar ingredientes', error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -202,14 +216,39 @@ function Lotes() {
                 </div>
             </div>
 
-            <div className="card">
-                <h2>Controle de Estoque por Lote</h2>
-                
-                <div className="lotes-container">
-                    <div className="lotes-ingredientes-list">
-                        {ingredientes.map(ing => {
+<div className="card">
+    <h2 class="lotes-todos-title"><FiBox size={20} /> Controle de Estoque por Lote</h2>
+    
+    {loading ? (
+        <div className="skeleton-container">
+            <div className="skeleton-card" style={{ height: 50, minHeight: 50 }}></div>
+            <div className="skeleton-card" style={{ height: 300, minHeight: 300 }}></div>
+        </div>
+    ) : (
+        <>
+            <div className="search-box">
+                <FiSearch size={20} className="search-icon" />
+                <input
+                    type="text"
+                    placeholder="Buscar ingrediente..."
+                    value={buscaIngrediente}
+                    onChange={(e) => setBuscaIngrediente(e.target.value)}
+                />
+                {buscaIngrediente && (
+                    <button className="search-clear" onClick={() => setBuscaIngrediente('')} title="Limpar busca">
+                        <FiX size={18} />
+                    </button>
+                )}
+            </div>
+            
+            <div className="lotes-container">
+                <div className="lotes-ingredientes-list">
+                    {ingredientes
+                        .filter(ing => ing.nome.toLowerCase().includes(buscaIngrediente.toLowerCase()))
+                        .map(ing => {
                             const lotesIng = lotes.filter(l => l.ingrediente_id === ing.id);
                             const totalEstoque = lotesIng.reduce((sum, l) => sum + (parseFloat(l.quantidade) || 0), 0);
+                            
                             return (
                                 <div
                                     key={ing.id}
@@ -226,174 +265,184 @@ function Lotes() {
                                     </small>
                                 </div>
                             );
-                        })}
-                    </div>
+                        })
+                    }
+                </div>
 
-                    <div>
-                        <div className="lotes-header">
-                            <h3>Lotes</h3>
-                            {ingredienteSelecionado && (
-                                <button 
-                                    className="btn btn-primary btn-novo-lote"
-                                    onClick={() => {
-                                        const ingrediente = ingredientes.find(ing => ing.id === ingredienteSelecionado);
-                                        setIngredienteId(ingredienteSelecionado);
-                                        setUnidadeSelecionada(ingrediente?.unidade || '');
-                                        setDataCompra('');
-                                        setModalNovoLote(true);
-                                        setMostrarForm(false);
-                                    }}
-                                >
-                                    <FiPlus size={16} />
-                                    Novo Lote
-                                </button>
-                            )}
-                        </div>
-                        {lotesIngrediente.length === 0 ? (
-                            <p className="text-muted">Selecione um ingrediente para ver os lotes</p>
-                        ) : (
-                            <>
-                                <div className="table-responsive">
-                                    <table>
-                                        <thead>
-                                            <tr>
-                                                <th>Lote</th>
-                                                <th>Quantidade</th>
-                                                <th>Data Compra</th>
-                                                <th>Validade</th>
-                                                <th>Status</th>
-                                                <th className="text-center">Ações</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {lotesIngredientePaginados.map(lote => {
-                                                const dias = getDiasRestantes(lote.data_validade);
-                                                return (
-                                                    <tr key={lote.id}>
-                                                        <td>{lote.lote || 'N/A'}</td>
-                                                        <td>{lote.quantidade} {unidadeSelecionada}</td>
-                                                        <td>{lote.data_compra ? new Date(lote.data_compra).toLocaleDateString('pt-BR') : '-'}</td>
-                                                        <td>{new Date(lote.data_validade).toLocaleDateString('pt-BR')}</td>
-                                                        <td style={{ color: getStatusCor(dias), fontWeight: 'bold' }}>
-                                                            {getStatusTexto(dias)} ({dias} dias)
-                                                        </td>
-                                                        <td>
-                                                            <div className="acoes">
-                                                                <button 
-                                                                    className="btn-icon btn-delete" 
-                                                                    onClick={() => handleDelete(lote.id)}
-                                                                    title="Excluir"
-                                                                >
-                                                                    <FiTrash2 size={16} />
-                                                                </button>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                );
-                                            })}
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <Paginacao 
-                                    pagina={paginaIngrediente}
-                                    total={lotesIngrediente.length}
-                                    onChange={setPaginaIngrediente}
-                                />
-                            </>
+                <div>
+                    <div className="lotes-header">
+                        <h3>Lotes</h3>
+                        {ingredienteSelecionado && (
+                            <button 
+                                className="btn btn-primary btn-novo-lote"
+                                onClick={() => {
+                                    const ingrediente = ingredientes.find(ing => ing.id === ingredienteSelecionado);
+                                    setIngredienteId(ingredienteSelecionado);
+                                    setUnidadeSelecionada(ingrediente?.unidade || '');
+                                    setDataCompra('');
+                                    setModalNovoLote(true);
+                                    setMostrarForm(false);
+                                }}
+                            >
+                                <FiPlus size={16} />
+                                Novo Lote
+                            </button>
                         )}
                     </div>
+                    {lotesIngrediente.length === 0 ? (
+                        <p className="text-muted">Selecione um ingrediente para ver os lotes</p>
+                    ) : (
+                        <>
+                            <div className="table-responsive">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Lote</th>
+                                            <th>Quantidade</th>
+                                            <th>Data Compra</th>
+                                            <th>Validade</th>
+                                            <th>Status</th>
+                                            <th className="text-center">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {lotesIngredientePaginados.map(lote => {
+                                            const dias = getDiasRestantes(lote.data_validade);
+                                            return (
+                                                <tr key={lote.id}>
+                                                    <td>{lote.lote || 'N/A'}</td>
+                                                    <td>{lote.quantidade} {unidadeSelecionada}</td>
+                                                    <td>{lote.data_compra ? new Date(lote.data_compra).toLocaleDateString('pt-BR') : '-'}</td>
+                                                    <td>{new Date(lote.data_validade).toLocaleDateString('pt-BR')}</td>
+                                                    <td style={{ color: getStatusCor(dias), fontWeight: 'bold' }}>
+                                                        {getStatusTexto(dias)} ({dias} dias)
+                                                    </td>
+                                                    <td>
+                                                        <div className="acoes">
+                                                            <button 
+                                                                className="btn-icon btn-delete" 
+                                                                onClick={() => handleDelete(lote.id)}
+                                                                title="Excluir"
+                                                            >
+                                                                <FiTrash2 size={16} />
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <Paginacao 
+                                pagina={paginaIngrediente}
+                                total={lotesIngrediente.length}
+                                onChange={setPaginaIngrediente}
+                            />
+                        </>
+                    )}
                 </div>
             </div>
-
-            <div className="card">
-                <h2 className="lotes-todos-title">
-                    <FiBox size={20} />
-                    Todos os Lotes
-                </h2>
-                
-                <div className="lotes-filtros">
-                    <div className="lotes-filtro-select">
-                        <select 
-                            value={filtroIngrediente} 
-                            onChange={(e) => {
-                                setFiltroIngrediente(e.target.value);
-                                setPaginaTodos(1);
-                            }}
-                        >
-                            <option value="">Todos os ingredientes</option>
-                            {ingredientes.map(ing => (
-                                <option key={ing.id} value={ing.id}>{ing.nome}</option>
-                            ))}
-                        </select>
-                    </div>
-                    <span className="lotes-count">
-                        {lotesFiltrados.length} lotes encontrados
-                    </span>
+        </>
+    )}
+</div>
+<div className="card">
+    <h2 className="lotes-todos-title">
+        <FiBox size={20} />
+        Todos os Lotes
+    </h2>
+    
+    {loading ? (
+        <div className="skeleton-container">
+            <div className="skeleton-card" style={{ height: 50, minHeight: 50 }}></div>
+            <div className="skeleton-table"></div>
+        </div>
+    ) : (
+        <>
+            <div className="lotes-filtros">
+                <div className="lotes-filtro-select">
+                    <select 
+                        value={filtroIngrediente} 
+                        onChange={(e) => {
+                            setFiltroIngrediente(e.target.value);
+                            setPaginaTodos(1);
+                        }}
+                    >
+                        <option value="">Todos os ingredientes</option>
+                        {ingredientes.map(ing => (
+                            <option key={ing.id} value={ing.id}>{ing.nome}</option>
+                        ))}
+                    </select>
                 </div>
+                <span className="lotes-count">
+                    {lotesFiltrados.length} lotes encontrados
+                </span>
+            </div>
 
-                <div className="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Ingrediente</th>
-                                <th>Lote</th>
-                                <th>Quantidade</th>
-                                <th>Data Compra</th>
-                                <th>Validade</th>
-                                <th>Status</th>
-                                <th className="text-center">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {lotesPaginados.map(lote => {
-                                const dias = getDiasRestantes(lote.data_validade);
-                                return (
-                                    <tr key={lote.id}>
-                                        <td>
-                                            <div className="produto-info">
-                                                <span className="produto-icon"><FiPackage size={18} /></span>
-                                                {lote.ingrediente_nome}
-                                            </div>
-                                        </td>
-                                        <td>{lote.lote || 'N/A'}</td>
-                                        <td>{lote.quantidade} {lote.unidade}</td>
-                                        <td>{lote.data_compra ? new Date(lote.data_compra).toLocaleDateString('pt-BR') : '-'}</td>
-                                        <td>{new Date(lote.data_validade).toLocaleDateString('pt-BR')}</td>
-                                        <td style={{ color: getStatusCor(dias), fontWeight: 'bold' }}>
-                                            {getStatusTexto(dias)} ({dias} dias)
-                                        </td>
-                                        <td>
-                                            <div className="acoes">
-                                                <button 
-                                                    className="btn-icon btn-delete" 
-                                                    onClick={() => handleDelete(lote.id)}
-                                                    title="Excluir"
-                                                >
-                                                    <FiTrash2 size={16} />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                            {lotesFiltrados.length === 0 && (
-                                <tr>
-                                    <td colSpan="7" className="text-center text-muted">
-                                        <FiBox size={32} />
-                                        <p>Nenhum lote encontrado</p>
+            <div className="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Ingrediente</th>
+                            <th>Lote</th>
+                            <th>Quantidade</th>
+                            <th>Data Compra</th>
+                            <th>Validade</th>
+                            <th>Status</th>
+                            <th className="text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {lotesPaginados.map(lote => {
+                            const dias = getDiasRestantes(lote.data_validade);
+                            return (
+                                <tr key={lote.id}>
+                                    <td>
+                                        <div className="produto-info">
+                                            <span className="produto-icon"><FiPackage size={18} /></span>
+                                            {lote.ingrediente_nome}
+                                        </div>
+                                    </td>
+                                    <td>{lote.lote || 'N/A'}</td>
+                                    <td>{lote.quantidade} {lote.unidade}</td>
+                                    <td>{lote.data_compra ? new Date(lote.data_compra).toLocaleDateString('pt-BR') : '-'}</td>
+                                    <td>{new Date(lote.data_validade).toLocaleDateString('pt-BR')}</td>
+                                    <td style={{ color: getStatusCor(dias), fontWeight: 'bold' }}>
+                                        {getStatusTexto(dias)} ({dias} dias)
+                                    </td>
+                                    <td>
+                                        <div className="acoes">
+                                            <button 
+                                                className="btn-icon btn-delete" 
+                                                onClick={() => handleDelete(lote.id)}
+                                                title="Excluir"
+                                            >
+                                                <FiTrash2 size={16} />
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-                <Paginacao 
-                    pagina={paginaTodos}
-                    total={lotesFiltrados.length}
-                    onChange={setPaginaTodos}
-                />
+                            );
+                        })}
+                        {lotesFiltrados.length === 0 && (
+                            <tr>
+                                <td colSpan="7" className="text-center text-muted">
+                                    <FiBox size={32} />
+                                    <p>Nenhum lote encontrado</p>
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
             </div>
-
+            <Paginacao 
+                pagina={paginaTodos}
+                total={lotesFiltrados.length}
+                onChange={setPaginaTodos}
+            />
+        </>
+    )}
+</div>
             {modalNovoLote && (
                 <div className="modal-overlay" onClick={() => setModalNovoLote(false)}>
                     <div className="modal" onClick={(e) => e.stopPropagation()}>

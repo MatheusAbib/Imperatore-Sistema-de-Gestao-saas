@@ -62,6 +62,25 @@ function Configuracoes() {
         }
     };
 
+    if (loading && !usuario) {
+        return (
+            <div className="skeleton-container">
+                <div className="page-header">
+                    <div>
+                        <h1>Configurações</h1>
+                        <p className="text-muted">Gerencie seus dados pessoais</p>
+                    </div>
+                </div>
+                <div className="card">
+                    <div className="skeleton-card" style={{ height: 200, minHeight: 200 }}></div>
+                </div>
+                <div className="card">
+                    <div className="skeleton-card" style={{ height: 250, minHeight: 250 }}></div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <>
             <ToastContainer position="top-right" autoClose={3000} theme="dark" />

@@ -71,6 +71,12 @@ function Header({ setPagina, paginaAtual }) {
         }
     };
 
+const handleNavigate = (pageId) => {
+    setPagina(pageId);
+    setMenuAberto(false);
+    window.dispatchEvent(new CustomEvent('reloadData'));
+};
+
     const confirmarLogout = () => {
         setModalLogout(false);
         logout();

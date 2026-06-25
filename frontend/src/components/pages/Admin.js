@@ -22,11 +22,19 @@ function Admin() {
     const [distribuicaoPerfis, setDistribuicaoPerfis] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
+useEffect(() => {
+    carregarDados();
+
+    const handleReload = () => {
         carregarDados();
-    }, []);
+    };
+
+    window.addEventListener('reloadData', handleReload);
+    return () => window.removeEventListener('reloadData', handleReload);
+}, []);
 
     const carregarDados = async () => {
+        setLoading(true);
         try {
             const [statsRes, estabelecimentosRes, crescimentoRes, planosRes, topProdRes, topEstabRes, perfisRes] = await Promise.all([
                 api.get('/admin/stats'),
@@ -63,7 +71,33 @@ function Admin() {
     const coresPerfis = ['#b85a3a', '#28a745', '#007bff', '#fd7e14', '#6c757d'];
     const coresTop = ['#b85a3a', '#b88b4a', '#6b8c4a', '#5a7a8c', '#d4a84a'];
 
-    if (loading) return <div className="loading-state">Carregando...</div>;
+    if (loading) {
+        return (
+            <div className="skeleton-container">
+                <div className="page-header">
+                    <div>
+                        <h1>Painel Administrativo</h1>
+                        <p className="text-muted">Visão geral do sistema</p>
+                    </div>
+                </div>
+                <div className="status-grid">
+                    <div className="skeleton-card" style={{ height: 80, minHeight: 80 }}></div>
+                    <div className="skeleton-card" style={{ height: 80, minHeight: 80 }}></div>
+                    <div className="skeleton-card" style={{ height: 80, minHeight: 80 }}></div>
+                    <div className="skeleton-card" style={{ height: 80, minHeight: 80 }}></div>
+                </div>
+                <div className="charts-grid">
+                    <div className="skeleton-card" style={{ height: 300, minHeight: 300 }}></div>
+                    <div className="skeleton-card" style={{ height: 300, minHeight: 300 }}></div>
+                </div>
+                <div className="charts-grid">
+                    <div className="skeleton-card" style={{ height: 300, minHeight: 300 }}></div>
+                    <div className="skeleton-card" style={{ height: 300, minHeight: 300 }}></div>
+                </div>
+                <div className="skeleton-card" style={{ height: 200, minHeight: 200 }}></div>
+            </div>
+        );
+    }
 
     return (
         <div className="admin-container">
@@ -166,8 +200,6 @@ function Admin() {
             </div>
 
             <div className="charts-grid">
-
-
                 <div className="card">
                     <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <FiAward size={18} />

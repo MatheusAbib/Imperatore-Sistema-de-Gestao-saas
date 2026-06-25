@@ -57,9 +57,6 @@ function Dashboard() {
             setPagina('admin');
         } else if (isDonoOuGerente) {
             carregarDados();
-            carregarResumoValidade();
-            carregarIngredientes();
-            carregarLotes();
         } else if (usuario?.perfil === 'atendente') {
             setPagina('comandas');
         } else if (usuario?.perfil === 'cozinha') {
@@ -67,39 +64,30 @@ function Dashboard() {
         }
     }, [usuario]);
 
+    useEffect(() => {
+        const handleReload = () => {
+            if (isDonoOuGerente) {
+                carregarDados();
+            }
+        };
+
+        window.addEventListener('reloadData', handleReload);
+        return () => window.removeEventListener('reloadData', handleReload);
+    }, [isDonoOuGerente]);
+
     const carregarDados = async () => {
+        setLoading(true);
         try {
-            const response = await api.get('/produtos');
-            setProdutos(response.data);
-        } catch (error) {
-            console.error('Erro ao carregar dados', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+            const [prodRes, ingRes, lotesRes] = await Promise.all([
+                api.get('/produtos'),
+                api.get('/ingredientes'),
+                api.get('/lotes')
+            ]);
+            setProdutos(prodRes.data);
+            setIngredientes(ingRes.data);
+            setLotes(lotesRes.data);
 
-    const carregarIngredientes = async () => {
-        try {
-            const response = await api.get('/ingredientes');
-            setIngredientes(response.data);
-        } catch (error) {
-            console.error('Erro ao carregar ingredientes', error);
-        }
-    };
-
-    const carregarLotes = async () => {
-        try {
-            const response = await api.get('/lotes');
-            setLotes(response.data);
-        } catch (error) {
-            console.error('Erro ao carregar lotes', error);
-        }
-    };
-
-    const carregarResumoValidade = async () => {
-        try {
-            const response = await api.get('/lotes');
-            const lotes = response.data || [];
+            const lotes = lotesRes.data || [];
             const hoje = new Date();
             hoje.setHours(0, 0, 0, 0);
 
@@ -132,13 +120,9 @@ function Dashboard() {
                 bons: (total - vencidos - venceHoje - venceAte7Dias) || 0
             });
         } catch (error) {
-            console.error('Erro ao carregar resumo de validade', error);
-            setResumoValidade({
-                vencidos: 0,
-                venceHoje: 0,
-                venceAte7Dias: 0,
-                bons: 0
-            });
+            console.error('Erro ao carregar dados', error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -168,70 +152,65 @@ function Dashboard() {
         }));
 
     const totalProdutos = produtos.length;
-    const produtosPaginados = produtos.slice(
-        (paginaProdutos - 1) * itensPorPagina,
-        paginaProdutos * itensPorPagina
+
+    const StatusCard = ({ icon: Icon, title, value, color, subtitle, tooltip }) => (
+        <div className="card status-card" style={{ position: 'relative' }}>
+            {tooltip && (
+                <div style={{ position: 'absolute', top: 8, right: 8, zIndex: 10 }}>
+                    <TooltipInfo id={`tooltip-${title.replace(/\s/g, '')}`} texto={tooltip} />
+                </div>
+            )}
+            <div className="status-card-icon" style={{ backgroundColor: color + '22', color }}>
+                <Icon size={24} />
+            </div>
+            <div className="status-card-content">
+                <span className="status-card-value">{value}</span>
+                <span className="status-card-title">{title}</span>
+                {subtitle && <span className="status-card-subtitle">{subtitle}</span>}
+            </div>
+        </div>
     );
 
-
-const StatusCard = ({ icon: Icon, title, value, color, subtitle, tooltip }) => (
-    <div className="card status-card" style={{ position: 'relative' }}>
-        {tooltip && (
-            <div style={{ position: 'absolute', top: 8, right: 8, zIndex: 10 }}>
-                <TooltipInfo id={`tooltip-${title.replace(/\s/g, '')}`} texto={tooltip} />
-            </div>
-        )}
-        <div className="status-card-icon" style={{ backgroundColor: color + '22', color }}>
-            <Icon size={24} />
-        </div>
-        <div className="status-card-content">
-            <span className="status-card-value">{value}</span>
-            <span className="status-card-title">{title}</span>
-            {subtitle && <span className="status-card-subtitle">{subtitle}</span>}
-        </div>
-    </div>
-);
-
-   const TooltipInfo = ({ id, texto }) => (
-    <div style={{ position: 'relative', display: 'inline-block'}}>
-        <FiHelpCircle 
-            size={16} 
-            color="var(--text-muted)" 
-            style={{ cursor: 'pointer' }}
-            onMouseEnter={() => setTooltipAtivo(id)}
-            onMouseLeave={() => setTooltipAtivo(null)}
-        />
-        {tooltipAtivo === id && (
-            <div style={{
-                position: 'absolute',
-                top: '50px',
-                left: 'calc(100% + 12px)',
-                transform: 'translateY(-50%)',
-                backgroundColor: '#2c2c2c',
-                color: '#e8ddd8',
-                padding: '8px 12px',
-                borderRadius: 6,
-                fontSize: 11,
-                maxWidth: 220,
-                width: 'max-content',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-                zIndex: 100,
-                textAlign: 'left',
-                lineHeight: 1.4
-            }}>
-                {texto}
+    const TooltipInfo = ({ id, texto }) => (
+        <div style={{ position: 'relative', display: 'inline-block'}}>
+            <FiHelpCircle 
+                size={16} 
+                color="var(--text-muted)" 
+                style={{ cursor: 'pointer' }}
+                onMouseEnter={() => setTooltipAtivo(id)}
+                onMouseLeave={() => setTooltipAtivo(null)}
+            />
+            {tooltipAtivo === id && (
                 <div style={{
                     position: 'absolute',
-                    top: '50%',
-                    left: '-6px',
+                    top: '50px',
+                    left: 'calc(100% + 12px)',
                     transform: 'translateY(-50%)',
-                    border: '6px solid transparent',
-                    borderRightColor: '#2c2c2c'
-                }} />
-            </div>
-        )}
-    </div>
-);
+                    backgroundColor: '#2c2c2c',
+                    color: '#e8ddd8',
+                    padding: '8px 12px',
+                    borderRadius: 6,
+                    fontSize: 11,
+                    maxWidth: 220,
+                    width: 'max-content',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                    zIndex: 100,
+                    textAlign: 'left',
+                    lineHeight: 1.4
+                }}>
+                    {texto}
+                    <div style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '-6px',
+                        transform: 'translateY(-50%)',
+                        border: '6px solid transparent',
+                        borderRightColor: '#2c2c2c'
+                    }} />
+                </div>
+            )}
+        </div>
+    );
 
     return (
         <div className="container">
@@ -253,47 +232,63 @@ const StatusCard = ({ icon: Icon, title, value, color, subtitle, tooltip }) => (
                     {pagina === 'dashboard' && (
                         <>
                             {loading ? (
-                                <div className="loading-state">Carregando dados...</div>
+                                <div className="skeleton-container">
+                                    <div className="skeleton-grid status-grid">
+                                        <div className="skeleton-card"></div>
+                                        <div className="skeleton-card"></div>
+                                        <div className="skeleton-card"></div>
+                                        <div className="skeleton-card"></div>
+                                    </div>
+                                    <div className="skeleton-grid charts-grid">
+                                        <div className="skeleton-card skeleton-chart"></div>
+                                        <div className="skeleton-card skeleton-chart"></div>
+                                    </div>
+                                    <div className="skeleton-grid validity-grid">
+                                        <div className="skeleton-card"></div>
+                                        <div className="skeleton-card"></div>
+                                        <div className="skeleton-card"></div>
+                                        <div className="skeleton-card"></div>
+                                    </div>
+                                    <div className="skeleton-table"></div>
+                                </div>
                             ) : (
                                 <>
-                                 <div className="status-grid">
-    <StatusCard
-        icon={FiPackage}
-        title="Produtos"
-        value={totalProdutos}
-        color="#b85a3a"
-        subtitle="Total cadastrados"
-        tooltip="Número total de produtos cadastrados no cardápio. Isso inclui todos os produtos, independente de estarem sendo vendidos ou não."
-    />
-    <StatusCard
-        icon={FiTrendingUp}
-        title="Margem Média"
-        value={produtosComMargem.length > 0 ? 
-            (produtosComMargem.reduce((sum, p) => sum + p.margem, 0) / produtosComMargem.length).toFixed(1) + '%' : 
-            '0%'}
-        color="#6b8c4a"
-        subtitle="Média geral"
-        tooltip="Média aritmética de todas as margens de lucro dos produtos cadastrados. Quanto maior, mais saudável é o negócio. Ideal: acima de 50%."
-    />
-    <StatusCard
-        icon={FiAlertCircle}
-        title="Em Alerta"
-        value={produtosAlerta.length}
-        color="#b85a4a"
-        subtitle="Margem < 40%"
-        tooltip="Produtos com margem de lucro abaixo de 40%. Isso significa que o lucro é baixo e pode indicar que o preço está muito próximo do custo. Considere aumentar o preço ou reduzir custos."
-    />
-    <StatusCard
-        icon={FiCheckCircle}
-        title="Excelentes"
-        value={produtosExcelente.length}
-        color="#6b8c4a"
-        subtitle="Margem > 60%"
-        tooltip="Produtos com margem de lucro acima de 60%. São os produtos mais rentáveis do cardápio. Ótimo para focar as vendas e promoções."
-    />
-</div>
-
-
+                                    <div className="status-grid">
+                                        <StatusCard
+                                            icon={FiPackage}
+                                            title="Produtos"
+                                            value={totalProdutos}
+                                            color="#b85a3a"
+                                            subtitle="Total cadastrados"
+                                            tooltip="Número total de produtos cadastrados no cardápio. Isso inclui todos os produtos, independente de estarem sendo vendidos ou não."
+                                        />
+                                        <StatusCard
+                                            icon={FiTrendingUp}
+                                            title="Margem Média"
+                                            value={produtosComMargem.length > 0 ? 
+                                                (produtosComMargem.reduce((sum, p) => sum + p.margem, 0) / produtosComMargem.length).toFixed(1) + '%' : 
+                                                '0%'}
+                                            color="#6b8c4a"
+                                            subtitle="Média geral"
+                                            tooltip="Média aritmética de todas as margens de lucro dos produtos cadastrados. Quanto maior, mais saudável é o negócio. Ideal: acima de 50%."
+                                        />
+                                        <StatusCard
+                                            icon={FiAlertCircle}
+                                            title="Em Alerta"
+                                            value={produtosAlerta.length}
+                                            color="#b85a4a"
+                                            subtitle="Margem < 40%"
+                                            tooltip="Produtos com margem de lucro abaixo de 40%. Isso significa que o lucro é baixo e pode indicar que o preço está muito próximo do custo. Considere aumentar o preço ou reduzir custos."
+                                        />
+                                        <StatusCard
+                                            icon={FiCheckCircle}
+                                            title="Excelentes"
+                                            value={produtosExcelente.length}
+                                            color="#6b8c4a"
+                                            subtitle="Margem > 60%"
+                                            tooltip="Produtos com margem de lucro acima de 60%. São os produtos mais rentáveis do cardápio. Ótimo para focar as vendas e promoções."
+                                        />
+                                    </div>
 
                                     <div className="charts-grid">
                                         <div className="card">
@@ -326,38 +321,38 @@ const StatusCard = ({ icon: Icon, title, value, color, subtitle, tooltip }) => (
                                             </ResponsiveContainer>
                                         </div>
 
-<div className="card">
-    <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <FiTrendingUp size={18} />
-        Top 10 Margens
-        <TooltipInfo 
-            id="graf2" 
-            texto="Ranking dos produtos com as maiores margens de lucro. Quanto maior a barra, mais rentável é o produto."
-        />
-    </h3>
-    <ResponsiveContainer width="100%" height={350}>
-        <BarChart data={dadosBarra} layout="vertical" margin={{  right: 20, top: 20, bottom: 20 }}>
-            <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-            <XAxis type="number" domain={[0, 100]} />
-            <YAxis 
-                dataKey="nome" 
-                type="category" 
-                width={120} 
-                tick={{ fontSize: 11, fill: 'var(--text-color)' }}
-                interval={0}
-            />
-            <Tooltip 
-                contentStyle={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}
-                formatter={(value) => `${value.toFixed(1)}%`}
-            />
-            <Bar dataKey="margem" fill="#b88b4a" barSize={20}>
-                {dadosBarra.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.margem >= 60 ? '#6b8c4a' : (entry.margem >= 40 ? '#d4a84a' : '#b85a4a')} />
-                ))}
-            </Bar>
-        </BarChart>
-    </ResponsiveContainer>
-</div>
+                                        <div className="card">
+                                            <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                <FiTrendingUp size={18} />
+                                                Top 10 Margens
+                                                <TooltipInfo 
+                                                    id="graf2" 
+                                                    texto="Ranking dos produtos com as maiores margens de lucro. Quanto maior a barra, mais rentável é o produto."
+                                                />
+                                            </h3>
+                                            <ResponsiveContainer width="100%" height={350}>
+                                                <BarChart data={dadosBarra} layout="vertical" margin={{ right: 20, top: 20, bottom: 20 }}>
+                                                    <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                                                    <XAxis type="number" domain={[0, 100]} />
+                                                    <YAxis 
+                                                        dataKey="nome" 
+                                                        type="category" 
+                                                        width={120} 
+                                                        tick={{ fontSize: 11, fill: 'var(--text-color)' }}
+                                                        interval={0}
+                                                    />
+                                                    <Tooltip 
+                                                        contentStyle={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}
+                                                        formatter={(value) => `${value.toFixed(1)}%`}
+                                                    />
+                                                    <Bar dataKey="margem" fill="#b88b4a" barSize={20}>
+                                                        {dadosBarra.map((entry, index) => (
+                                                            <Cell key={`cell-${index}`} fill={entry.margem >= 60 ? '#6b8c4a' : (entry.margem >= 40 ? '#d4a84a' : '#b85a4a')} />
+                                                        ))}
+                                                    </Bar>
+                                                </BarChart>
+                                            </ResponsiveContainer>
+                                        </div>
                                     </div>
 
                                     <div className="validity-grid">
@@ -385,9 +380,6 @@ const StatusCard = ({ icon: Icon, title, value, color, subtitle, tooltip }) => (
                                             <p className="stats-number">{resumoValidade.bons || 0}</p>
                                             <small>Dentro da validade</small>
                                         </div>
-                                    </div>
-                                    <div>
-            
                                     </div>
                                 </>
                             )}

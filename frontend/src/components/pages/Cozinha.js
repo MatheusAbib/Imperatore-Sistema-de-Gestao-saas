@@ -19,43 +19,45 @@ function Cozinha() {
         return () => clearInterval(interval);
     }, []);
 
-    const carregarPedidos = async () => {
-        setAtualizando(true);
-        try {
-            const response = await api.get('/pedidos/cozinha');
-            const pedidosOrdenados = response.data.sort((a, b) => {
-                return new Date(b.created_at) - new Date(a.created_at);
-            });
-            setPedidos(pedidosOrdenados);
-        } catch (error) {
-            console.error('Erro ao carregar pedidos', error);
-        } finally {
-            setAtualizando(false);
-        }
-    };
-
-const atualizarStatus = async (pedidoId, status) => {
+const carregarPedidos = async () => {
     setLoading(true);
+    setAtualizando(true);
     try {
-        await api.put(`/pedidos/${pedidoId}/status`, { status });
-        
-        setPedidos(prevPedidos => 
-            prevPedidos.map(p => 
-                p.id === pedidoId 
-                    ? { ...p, status_atual: status } 
-                    : p
-            )
-        );
-        
-        toast.success('Status atualizado com sucesso!');
+        const response = await api.get('/pedidos/cozinha');
+        const pedidosOrdenados = response.data.sort((a, b) => {
+            return new Date(b.created_at) - new Date(a.created_at);
+        });
+        setPedidos(pedidosOrdenados);
     } catch (error) {
-        console.error('Erro ao atualizar status', error);
-        toast.error('Erro ao atualizar status');
-        await carregarPedidos();
+        console.error('Erro ao carregar pedidos', error);
     } finally {
+        setAtualizando(false);
         setLoading(false);
     }
 };
+
+    const atualizarStatus = async (pedidoId, status) => {
+        setLoading(true);
+        try {
+            await api.put(`/pedidos/${pedidoId}/status`, { status });
+            
+            setPedidos(prevPedidos => 
+                prevPedidos.map(p => 
+                    p.id === pedidoId 
+                        ? { ...p, status_atual: status } 
+                        : p
+                )
+            );
+            
+            toast.success('Status atualizado com sucesso!');
+        } catch (error) {
+            console.error('Erro ao atualizar status', error);
+            toast.error('Erro ao atualizar status');
+            await carregarPedidos();
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const enviarNotificacao = async (pedidoId) => {
         setNotificando(prev => ({ ...prev, [pedidoId]: true }));
@@ -178,6 +180,34 @@ const atualizarStatus = async (pedidoId, status) => {
             </div>
         );
     };
+
+    if (loading && pedidos.length === 0) {
+        return (
+            <div className="skeleton-container">
+                <div className="page-header">
+                    <div>
+                        <h1 style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <FiCoffee size={28} color="var(--primary)" />
+                            Cozinha
+                        </h1>
+                        <p className="text-muted">Gerencie os pedidos em tempo real</p>
+                    </div>
+                    <div className="skeleton-card" style={{ width: 140, height: 40, minHeight: 40 }}></div>
+                </div>
+                <div className="cozinha-grid">
+                    <div className="card">
+                        <div className="skeleton-card" style={{ height: 300, minHeight: 300 }}></div>
+                    </div>
+                    <div className="card">
+                        <div className="skeleton-card" style={{ height: 300, minHeight: 300 }}></div>
+                    </div>
+                    <div className="card">
+                        <div className="skeleton-card" style={{ height: 300, minHeight: 300 }}></div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <>

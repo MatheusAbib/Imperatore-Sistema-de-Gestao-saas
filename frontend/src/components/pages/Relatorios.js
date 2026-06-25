@@ -519,172 +519,191 @@ function Relatorios() {
                 </div>
             </div>
 
-            {loading && (
-                <div className="card" style={{ textAlign: 'center', padding: 40 }}>
-                    <p>Carregando dados...</p>
+
+<div className="card">
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+        <FiBarChart2 size={22} color="#6b8c4a" />
+        <h3 style={{ margin: 0 }}>Análise de Vendas</h3>
+        <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-muted)' }}>
+            {analiseVendas?.produtos?.length || 0} produtos com venda
+        </span>
+    </div>
+    {loading ? (
+        <div className="skeleton-container">
+            <div className="skeleton-card" style={{ height: 40, minHeight: 40 }}></div>
+        </div>
+    ) : (
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <button className="btn" onClick={exportarAnaliseVendasExcel} style={{ backgroundColor: '#6b8c4a', color: 'white' }}>
+                <FiFile size={16} /> Excel
+            </button>
+            <button className="btn" onClick={exportarAnaliseVendasPDF} style={{ backgroundColor: '#6b8c4a', color: 'white' }}>
+                <FiFileText size={16} /> PDF
+            </button>
+            <button className="btn" onClick={() => abrirPreview('analise')} style={{ backgroundColor: '#6b8c4a', color: 'white' }}>
+                <FiEye size={16} /> Prévia
+            </button>
+        </div>
+    )}
+</div>
+
+<div className="card">
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+        <FiPackage size={22} color="#b85a3a" />
+        <h3 style={{ margin: 0 }}>Produtos</h3>
+        <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-muted)' }}>
+            {produtos.length} registros
+        </span>
+    </div>
+    {loading ? (
+        <div className="skeleton-container">
+            <div className="skeleton-card" style={{ height: 40, minHeight: 40 }}></div>
+        </div>
+    ) : (
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <button className="btn" onClick={exportarProdutosExcel} style={{ backgroundColor: '#b85a3a', color: 'white' }}>
+                <FiFile size={16} /> Excel
+            </button>
+            <button className="btn" onClick={exportarProdutosPDF} style={{ backgroundColor: '#b85a3a', color: 'white' }}>
+                <FiFileText size={16} /> PDF
+            </button>
+            <button className="btn" onClick={() => abrirPreview('produtos')} style={{ backgroundColor: '#b85a3a', color: 'white' }}>
+                <FiEye size={16} /> Prévia
+            </button>
+        </div>
+    )}
+</div>
+
+<div className="card">
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+        <FiBox size={22} color="#5a7a8c" />
+        <h3 style={{ margin: 0 }}>Ingredientes</h3>
+        <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-muted)' }}>
+            {ingredientes.length} registros
+        </span>
+    </div>
+    {loading ? (
+        <div className="skeleton-container">
+            <div className="skeleton-card" style={{ height: 40, minHeight: 40 }}></div>
+        </div>
+    ) : (
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <button className="btn" onClick={exportarIngredientesExcel} style={{ backgroundColor: '#5a7a8c', color: 'white' }}>
+                <FiFile size={16} /> Excel
+            </button>
+            <button className="btn" onClick={exportarIngredientesPDF} style={{ backgroundColor: '#5a7a8c', color: 'white' }}>
+                <FiFileText size={16} /> PDF
+            </button>
+            <button className="btn" onClick={() => abrirPreview('ingredientes')} style={{ backgroundColor: '#5a7a8c', color: 'white' }}>
+                <FiEye size={16} /> Prévia
+            </button>
+        </div>
+    )}
+</div>
+
+<div className="card">
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+        <FiCalendar size={22} color="#c4884a" />
+        <h3 style={{ margin: 0 }}>Lotes / Validade</h3>
+        <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-muted)' }}>
+            {lotes.length} registros
+        </span>
+    </div>
+    {loading ? (
+        <div className="skeleton-container">
+            <div className="skeleton-card" style={{ height: 40, minHeight: 40 }}></div>
+        </div>
+    ) : (
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <button className="btn" onClick={exportarLotesExcel} style={{ backgroundColor: '#c4884a', color: 'white' }}>
+                <FiFile size={16} /> Excel
+            </button>
+            <button className="btn" onClick={exportarLotesPDF} style={{ backgroundColor: '#c4884a', color: 'white' }}>
+                <FiFileText size={16} /> PDF
+            </button>
+            <button className="btn" onClick={() => abrirPreview('lotes')} style={{ backgroundColor: '#c4884a', color: 'white' }}>
+                <FiEye size={16} /> Prévia
+            </button>
+        </div>
+    )}
+</div>
+
+<div className="card" style={{ backgroundColor: 'var(--bg-hover)', border: '2px dashed var(--primary)' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 13 }}>
+        <FiDownload size={24} color="var(--primary)" />
+        <div style={{ flex: 1 }}>
+            <h3 style={{ margin: 0, fontSize: 16 }}>Relatório Completo</h3>
+            <p className="text-muted" style={{ fontSize: 13, margin: 0 }}>
+                Exporta todos os dados em um único arquivo (Produtos, Ingredientes, Lotes e Análise de Vendas)
+            </p>
+        </div>
+        <div style={{ position: 'relative' }}>
+            <button 
+                className="btn" 
+                onClick={() => setDropdownAberto(!dropdownAberto)}
+                style={{ backgroundColor: 'var(--primary)', color: 'white', display: 'flex', alignItems: 'center', gap: 8 }}
+            >
+                <FiDownload size={16} /> 
+                {formatoCompleto === 'excel' ? 'Excel' : 'PDF'}
+                <FiChevronDown size={14} />
+            </button>
+            {dropdownAberto && (
+                <div style={{
+                    position: 'absolute',
+                    top: '100%',
+                    right: 0,
+                    marginTop: 4,
+                    backgroundColor: 'var(--bg-card)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: 8,
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                    zIndex: 100,
+                    minWidth: 120,
+                    overflow: 'hidden'
+                }}>
+                    <button
+                        className="btn"
+                        onClick={() => {
+                            setFormatoCompleto('excel');
+                            setDropdownAberto(false);
+                            exportarRelatorioCompletoExcel();
+                        }}
+                        style={{
+                            display: 'block',
+                            width: '100%',
+                            textAlign: 'left',
+                            padding: '8px 16px',
+                            borderRadius: 0,
+                            backgroundColor: 'transparent',
+                            color: 'var(--text-primary)'
+                        }}
+                    >
+                        <FiFile size={14} style={{ marginRight: 8 }} /> Excel
+                    </button>
+                    <button
+                        className="btn"
+                        onClick={() => {
+                            setFormatoCompleto('pdf');
+                            setDropdownAberto(false);
+                            exportarRelatorioCompletoPDF();
+                        }}
+                        style={{
+                            display: 'block',
+                            width: '100%',
+                            textAlign: 'left',
+                            padding: '8px 16px',
+                            borderRadius: 0,
+                            backgroundColor: 'transparent',
+                            color: 'var(--text-primary)'
+                        }}
+                    >
+                        <FiFileText size={14} style={{ marginRight: 8 }} /> PDF
+                    </button>
                 </div>
             )}
-
-            <div className="card">
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-                    <FiBarChart2 size={22} color="#6b8c4a" />
-                    <h3 style={{ margin: 0 }}>Análise de Vendas</h3>
-                    <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-muted)' }}>
-                        {analiseVendas?.produtos?.length || 0} produtos com venda
-                    </span>
-                </div>
-                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                    <button className="btn" onClick={exportarAnaliseVendasExcel} style={{ backgroundColor: '#6b8c4a', color: 'white' }}>
-                        <FiFile size={16} /> Excel
-                    </button>
-                    <button className="btn" onClick={exportarAnaliseVendasPDF} style={{ backgroundColor: '#6b8c4a', color: 'white' }}>
-                        <FiFileText size={16} /> PDF
-                    </button>
-                    <button className="btn" onClick={() => abrirPreview('analise')} style={{ backgroundColor: '#6b8c4a', color: 'white' }}>
-                        <FiEye size={16} /> Prévia
-                    </button>
-                </div>
-            </div>
-
-            <div className="card">
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-                    <FiPackage size={22} color="#b85a3a" />
-                    <h3 style={{ margin: 0 }}>Produtos</h3>
-                    <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-muted)' }}>
-                        {produtos.length} registros
-                    </span>
-                </div>
-                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                    <button className="btn" onClick={exportarProdutosExcel} style={{ backgroundColor: '#b85a3a', color: 'white' }}>
-                        <FiFile size={16} /> Excel
-                    </button>
-                    <button className="btn" onClick={exportarProdutosPDF} style={{ backgroundColor: '#b85a3a', color: 'white' }}>
-                        <FiFileText size={16} /> PDF
-                    </button>
-                    <button className="btn" onClick={() => abrirPreview('produtos')} style={{ backgroundColor: '#b85a3a', color: 'white' }}>
-                        <FiEye size={16} /> Prévia
-                    </button>
-                </div>
-            </div>
-
-            <div className="card">
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-                    <FiBox size={22} color="#5a7a8c" />
-                    <h3 style={{ margin: 0 }}>Ingredientes</h3>
-                    <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-muted)' }}>
-                        {ingredientes.length} registros
-                    </span>
-                </div>
-                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                    <button className="btn" onClick={exportarIngredientesExcel} style={{ backgroundColor: '#5a7a8c', color: 'white' }}>
-                        <FiFile size={16} /> Excel
-                    </button>
-                    <button className="btn" onClick={exportarIngredientesPDF} style={{ backgroundColor: '#5a7a8c', color: 'white' }}>
-                        <FiFileText size={16} /> PDF
-                    </button>
-                    <button className="btn" onClick={() => abrirPreview('ingredientes')} style={{ backgroundColor: '#5a7a8c', color: 'white' }}>
-                        <FiEye size={16} /> Prévia
-                    </button>
-                </div>
-            </div>
-
-            <div className="card">
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-                    <FiCalendar size={22} color="#c4884a" />
-                    <h3 style={{ margin: 0 }}>Lotes / Validade</h3>
-                    <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-muted)' }}>
-                        {lotes.length} registros
-                    </span>
-                </div>
-                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                    <button className="btn" onClick={exportarLotesExcel} style={{ backgroundColor: '#c4884a', color: 'white' }}>
-                        <FiFile size={16} /> Excel
-                    </button>
-                    <button className="btn" onClick={exportarLotesPDF} style={{ backgroundColor: '#c4884a', color: 'white' }}>
-                        <FiFileText size={16} /> PDF
-                    </button>
-                    <button className="btn" onClick={() => abrirPreview('lotes')} style={{ backgroundColor: '#c4884a', color: 'white' }}>
-                        <FiEye size={16} /> Prévia
-                    </button>
-                </div>
-            </div>
-
-            <div className="card" style={{ backgroundColor: 'var(--bg-hover)', border: '2px dashed var(--primary)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 13 }}>
-                    <FiDownload size={24} color="var(--primary)" />
-                    <div style={{ flex: 1 }}>
-                        <h3 style={{ margin: 0, fontSize: 16 }}>Relatório Completo</h3>
-                        <p className="text-muted" style={{ fontSize: 13, margin: 0 }}>
-                            Exporta todos os dados em um único arquivo (Produtos, Ingredientes, Lotes e Análise de Vendas)
-                        </p>
-                    </div>
-                    <div style={{ position: 'relative' }}>
-                        <button 
-                            className="btn" 
-                            onClick={() => setDropdownAberto(!dropdownAberto)}
-                            style={{ backgroundColor: 'var(--primary)', color: 'white', display: 'flex', alignItems: 'center', gap: 8 }}
-                        >
-                            <FiDownload size={16} /> 
-                            {formatoCompleto === 'excel' ? 'Excel' : 'PDF'}
-                            <FiChevronDown size={14} />
-                        </button>
-                        {dropdownAberto && (
-                            <div style={{
-                                position: 'absolute',
-                                top: '100%',
-                                right: 0,
-                                marginTop: 4,
-                                backgroundColor: 'var(--bg-card)',
-                                border: '1px solid var(--border-color)',
-                                borderRadius: 8,
-                                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                                zIndex: 100,
-                                minWidth: 120,
-                                overflow: 'hidden'
-                            }}>
-                                <button
-                                    className="btn"
-                                    onClick={() => {
-                                        setFormatoCompleto('excel');
-                                        setDropdownAberto(false);
-                                        exportarRelatorioCompletoExcel();
-                                    }}
-                                    style={{
-                                        display: 'block',
-                                        width: '100%',
-                                        textAlign: 'left',
-                                        padding: '8px 16px',
-                                        borderRadius: 0,
-                                        backgroundColor: 'transparent',
-                                        color: 'var(--text-primary)'
-                                    }}
-                                >
-                                    <FiFile size={14} style={{ marginRight: 8 }} /> Excel
-                                </button>
-                                <button
-                                    className="btn"
-                                    onClick={() => {
-                                        setFormatoCompleto('pdf');
-                                        setDropdownAberto(false);
-                                        exportarRelatorioCompletoPDF();
-                                    }}
-                                    style={{
-                                        display: 'block',
-                                        width: '100%',
-                                        textAlign: 'left',
-                                        padding: '8px 16px',
-                                        borderRadius: 0,
-                                        backgroundColor: 'transparent',
-                                        color: 'var(--text-primary)'
-                                    }}
-                                >
-                                    <FiFileText size={14} style={{ marginRight: 8 }} /> PDF
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </div>
+        </div>
+    </div>
+</div>
 
             {preview && previewData && (
                 <div className="modal-overlay" onClick={fecharPreview}>

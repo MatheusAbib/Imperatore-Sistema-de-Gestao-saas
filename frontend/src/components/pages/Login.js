@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { FiMail, FiLock, FiLogIn, FiEye, FiEyeOff, FiMessageCircle, FiMail as FiMailIcon } from 'react-icons/fi';
+import { FiMail, FiLock, FiLogIn, FiEye, FiEyeOff } from 'react-icons/fi';
 
 function Login() {
     const [email, setEmail] = useState('');
     const [senha, setSenha] = useState('');
     const [mostrarSenha, setMostrarSenha] = useState(false);
     const [erro, setErro] = useState('');
+    const [carregandoPagina, setCarregandoPagina] = useState(true);
     const { login, loading } = useAuth();
 
     const handleSubmit = async (e) => {
@@ -18,6 +19,20 @@ function Login() {
             setErro(result.error);
         }
     };
+
+    setTimeout(() => {
+        setCarregandoPagina(false);
+    }, 500);
+
+    if (carregandoPagina) {
+        return (
+            <div className="login-page">
+                <div className="login-center" style={{ minHeight: '100vh' }}>
+                    <div className="spinner-login"></div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="login-page">
@@ -72,6 +87,7 @@ function Login() {
                                         onChange={(e) => setSenha(e.target.value)}
                                         placeholder="Digite sua senha"
                                         required
+                                        autoComplete="new-password"
                                     />
                                     <button
                                         type="button"
@@ -84,8 +100,17 @@ function Login() {
                             </div>
 
                             <button type="submit" className="login-submit" disabled={loading}>
-                                <FiLogIn size={18} />
-                                {loading ? 'Carregando...' : 'Entrar'}
+                                {loading ? (
+                                    <>
+                                        <span className="spinner"></span>
+                                        Carregando...
+                                    </>
+                                ) : (
+                                    <>
+                                        <FiLogIn size={18} />
+                                        Entrar
+                                    </>
+                                )}
                             </button>
                         </form>
                     </div>

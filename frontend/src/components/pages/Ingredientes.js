@@ -30,9 +30,16 @@ function Ingredientes() {
         { valor: 'porcao', label: 'Porção' }
     ];
 
-    useEffect(() => {
+useEffect(() => {
+    carregarIngredientes();
+
+    const handleReload = () => {
         carregarIngredientes();
-    }, []);
+    };
+
+    window.addEventListener('reloadData', handleReload);
+    return () => window.removeEventListener('reloadData', handleReload);
+}, []);
 
     const carregarIngredientes = async () => {
         setLoading(true);
@@ -168,6 +175,14 @@ function Ingredientes() {
                 </button>
             </div>
 
+<div className="card">
+    {loading ? (
+        <div className="skeleton-container">
+            <div className="skeleton-card" style={{ height: 50, minHeight: 50 }}></div>
+            <div className="skeleton-table"></div>
+        </div>
+    ) : (
+        <>
             <div className="search-box">
                 <FiSearch size={20} className="search-icon" />
                 <input
@@ -182,65 +197,60 @@ function Ingredientes() {
                     </button>
                 )}
             </div>
-
-            <div className="card">
-                {loading ? (
-                    <div className="loading-state">Carregando ingredientes...</div>
-                ) : (
-                    <div className="table-responsive">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Ingrediente</th>
-                                    <th>Unidade</th>
-                                    <th>Custo de Compra</th>
-                                    <th>Custo Unitário</th>
-                                    <th className="text-center">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {ingredientesFiltrados.map((ing) => (
-                                    <tr key={ing.id}>
-                                        <td>
-                                            <div className="produto-info">
-                                                <span className="produto-icon"><FiPackage size={18} /></span>
-                                                {ing.nome}
-                                            </div>
-                                        </td>
-                                        <td>{ing.unidade}</td>
-                                        <td>R$ {parseFloat(ing.custo_medio).toFixed(2)}</td>
-                                        <td>
-                                            <span style={{ fontWeight: 'bold'}}>
-                                                R$ {getCustoUso(ing)} / {ing.unidade_uso || ing.unidade}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <div className="acoes">
-                                                <button className="btn-icon btn-edit" onClick={() => abrirModalEdicao(ing)} title="Editar">
-                                                    <FiEdit2 size={16} />
-                                                </button>
-                                                <button className="btn-icon btn-delete" onClick={() => handleDelete(ing.id)} title="Excluir">
-                                                    <FiTrash2 size={16} />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                                {ingredientesFiltrados.length === 0 && (
-                                    <tr>
-                                        <td colSpan="5" className="text-center text-muted">
-                                            <FiPackage size={32} />
-                                            <p>Nenhum ingrediente encontrado</p>
-                                            <span>Cadastre seu primeiro ingrediente</span>
-                                        </td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
+            <div className="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Ingrediente</th>
+                            <th>Unidade</th>
+                            <th>Custo de Compra</th>
+                            <th>Custo Unitário</th>
+                            <th className="text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {ingredientesFiltrados.map((ing) => (
+                            <tr key={ing.id}>
+                                <td>
+                                    <div className="produto-info">
+                                        <span className="produto-icon"><FiPackage size={18} /></span>
+                                        {ing.nome}
+                                    </div>
+                                </td>
+                                <td>{ing.unidade}</td>
+                                <td>R$ {parseFloat(ing.custo_medio).toFixed(2)}</td>
+                                <td>
+                                    <span style={{ fontWeight: 'bold'}}>
+                                        R$ {getCustoUso(ing)} / {ing.unidade_uso || ing.unidade}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div className="acoes">
+                                        <button className="btn-icon btn-edit" onClick={() => abrirModalEdicao(ing)} title="Editar">
+                                            <FiEdit2 size={16} />
+                                        </button>
+                                        <button className="btn-icon btn-delete" onClick={() => handleDelete(ing.id)} title="Excluir">
+                                            <FiTrash2 size={16} />
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))}
+                        {ingredientesFiltrados.length === 0 && (
+                            <tr>
+                                <td colSpan="5" className="text-center text-muted">
+                                    <FiPackage size={32} />
+                                    <p>Nenhum ingrediente encontrado</p>
+                                    <span>Cadastre seu primeiro ingrediente</span>
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
             </div>
-
+        </>
+    )}
+</div>
             {modalEdicao && (
                 <div className="modal-overlay" onClick={fecharModalEdicao}>
                     <div className="modal" onClick={(e) => e.stopPropagation()}>

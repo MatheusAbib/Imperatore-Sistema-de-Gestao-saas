@@ -110,6 +110,7 @@ function UsuariosAdmin() {
         (u.estabelecimento_nome && u.estabelecimento_nome.toLowerCase().includes(busca.toLowerCase()))
     );
 
+
     return (
         <>
             <ToastContainer position="top-right" autoClose={3000} theme="dark" />
@@ -121,6 +122,14 @@ function UsuariosAdmin() {
                 </div>
             </div>
 
+<div className="card">
+    {loading ? (
+        <div className="skeleton-container">
+            <div className="skeleton-card" style={{ height: 50, minHeight: 50 }}></div>
+            <div className="skeleton-table"></div>
+        </div>
+    ) : (
+        <>
             <div className="search-box">
                 <FiSearch size={20} className="search-icon" />
                 <input
@@ -130,93 +139,85 @@ function UsuariosAdmin() {
                     onChange={(e) => setBusca(e.target.value)}
                 />
                 {busca && (
-                    <button 
-                        className="search-clear"
-                        onClick={handleLimparBusca}
-                        title="Limpar busca"
-                    >
+                    <button className="search-clear" onClick={handleLimparBusca} title="Limpar busca">
                         <FiX size={18} />
                     </button>
                 )}
             </div>
+            <div className="table-responsive">
+                <table>
 
-            <div className="card">
-                {loading ? (
-                    <div className="loading-state">Carregando usuários...</div>
-                ) : (
-                    <div className="table-responsive">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Usuário</th>
-                                    <th>Email</th>
-                                    <th>Perfil</th>
-                                    <th>Estabelecimento</th>
-                                    <th className="text-center">Ações</th>
+                        <thead>
+                            <tr>
+                                <th>Usuário</th>
+                                <th>Email</th>
+                                <th>Perfil</th>
+                                <th>Estabelecimento</th>
+                                <th className="text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {usuariosFiltrados.map((user) => (
+                                <tr key={user.id}>
+                                    <td>
+                                        <div className="produto-info">
+                                            <span className="produto-icon"><FiUser size={18} /></span>
+                                            {user.nome}
+                                        </div>
+                                    </td>
+                                    <td>{user.email}</td>
+                                    <td>
+                                        <span style={{ 
+                                            color: getPerfilCor(user.perfil), 
+                                            fontWeight: 'bold',
+                                            backgroundColor: getPerfilCor(user.perfil) + '22',
+                                            padding: '4px 12px',
+                                            borderRadius: 12,
+                                            fontSize: 12
+                                        }}>
+                                            {user.perfil}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                            <FiServer size={14} color="var(--text-muted)" />
+                                            {user.estabelecimento_nome || 'Sem estabelecimento'}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div className="acoes">
+                                            <button 
+                                                className="btn-icon btn-edit" 
+                                                onClick={() => handleEditar(user)}
+                                                title="Editar"
+                                            >
+                                                <FiEdit2 size={16} />
+                                            </button>
+                                            <button 
+                                                className="btn-icon btn-delete" 
+                                                onClick={() => handleDelete(user.id)}
+                                                title="Excluir"
+                                            >
+                                                <FiTrash2 size={16} />
+                                            </button>
+                                        </div>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {usuariosFiltrados.map((user) => (
-                                    <tr key={user.id}>
-                                        <td>
-                                            <div className="produto-info">
-                                                <span className="produto-icon"><FiUser size={18} /></span>
-                                                {user.nome}
-                                            </div>
-                                        </td>
-                                        <td>{user.email}</td>
-                                        <td>
-                                            <span style={{ 
-                                                color: getPerfilCor(user.perfil), 
-                                                fontWeight: 'bold',
-                                                backgroundColor: getPerfilCor(user.perfil) + '22',
-                                                padding: '4px 12px',
-                                                borderRadius: 12,
-                                                fontSize: 12
-                                            }}>
-                                                {user.perfil}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                                <FiServer size={14} color="var(--text-muted)" />
-                                                {user.estabelecimento_nome || 'Sem estabelecimento'}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <div className="acoes">
-                                                <button 
-                                                    className="btn-icon btn-edit" 
-                                                    onClick={() => handleEditar(user)}
-                                                    title="Editar"
-                                                >
-                                                    <FiEdit2 size={16} />
-                                                </button>
-                                                <button 
-                                                    className="btn-icon btn-delete" 
-                                                    onClick={() => handleDelete(user.id)}
-                                                    title="Excluir"
-                                                >
-                                                    <FiTrash2 size={16} />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                                {usuariosFiltrados.length === 0 && (
-                                    <tr>
-                                        <td colSpan="5" className="text-center text-muted">
-                                            <FiUsers size={32} />
-                                            <p>Nenhum usuário encontrado</p>
-                                        </td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
+                            ))}
+                            {usuariosFiltrados.length === 0 && (
+                                <tr>
+                                    <td colSpan="5" className="text-center text-muted">
+                                        <FiUsers size={32} />
+                                        <p>Nenhum usuário encontrado</p>
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                </table>
             </div>
-
+        </>
+    )}
+</div>
             {modalEdicao && (
                 <div className="modal-overlay" onClick={() => setModalEdicao(null)}>
                     <div className="modal" onClick={(e) => e.stopPropagation()}>

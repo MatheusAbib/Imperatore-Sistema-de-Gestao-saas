@@ -23,11 +23,20 @@ function Produtos() {
     const [categoriasExistentes, setCategoriasExistentes] = useState([]);
     const [modalRemoverIngrediente, setModalRemoverIngrediente] = useState(null);
 
-    useEffect(() => {
+useEffect(() => {
+    carregarProdutos();
+    carregarIngredientes();
+    carregarCategorias();
+
+    const handleReload = () => {
         carregarProdutos();
         carregarIngredientes();
         carregarCategorias();
-    }, []);
+    };
+
+    window.addEventListener('reloadData', handleReload);
+    return () => window.removeEventListener('reloadData', handleReload);
+}, []);
 
     const carregarProdutos = async () => {
         setLoading(true);
@@ -256,6 +265,14 @@ function Produtos() {
                 </button>
             </div>
 
+<div className="card">
+    {loading ? (
+        <div className="skeleton-container">
+            <div className="skeleton-card" style={{ height: 50, minHeight: 50 }}></div>
+            <div className="skeleton-table"></div>
+        </div>
+    ) : (
+        <>
             <div className="search-box">
                 <FiSearch size={20} className="search-icon" />
                 <input
@@ -265,94 +282,72 @@ function Produtos() {
                     onChange={(e) => setBusca(e.target.value)}
                 />
                 {busca && (
-                    <button 
-                        className="search-clear"
-                        onClick={handleLimparBusca}
-                        title="Limpar busca"
-                    >
+                    <button className="search-clear" onClick={handleLimparBusca} title="Limpar busca">
                         <FiX size={18} />
                     </button>
                 )}
             </div>
-
-            <div className="card">
-                {loading ? (
-                    <div className="loading-state">Carregando produtos...</div>
-                ) : (
-                    <div className="table-responsive">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Produto</th>
-                                    <th>Categoria</th>
-                                    <th>Preço de Venda</th>
-                                    <th>Custo de Preparo</th>
-                                    <th>Lucro (R$)</th>
-                                    <th>Margem de Lucro</th>
-                                    <th className="text-center">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {produtosFiltrados.map((produto) => (
-                                    <tr key={produto.id}>
-                                        <td>
-                                            <div className="produto-info">
-                                                <span className="produto-icon">{getIcon(produto)}</span>
-                                                {produto.nome}
-                                            </div>
-                                        </td>
-                                        <td><span className="badge">{produto.categoria || '-'}</span></td>
-                                        <td className="text-strong">R$ {parseFloat(produto.preco_venda).toFixed(2).replace('.', ',')}</td>
-                                        <td>R$ {parseFloat(produto.custo).toFixed(2).replace('.', ',')}</td>
-                                 
-                                        <td className={getMargemClass(parseFloat(produto.margem))}>
-                                            R$ {(parseFloat(produto.preco_venda) - parseFloat(produto.custo)).toFixed(2).replace('.', ',')}
-                                        </td>
-                                        <td className={getMargemClass(parseFloat(produto.margem))}>
-                                            {produto.margem}%
-                                        </td>
-                                        <td>
-                                            <div className="acoes">
-                                                <button 
-                                                    className="btn-icon btn-edit" 
-                                                    onClick={() => abrirModalEdicao(produto)}
-                                                    title="Editar"
-                                                >
-                                                    <FiEdit2 size={16} />
-                                                </button>
-                                                <button 
-                                                    className="btn-icon btn-delete" 
-                                                    onClick={() => handleDelete(produto.id)}
-                                                    title="Excluir"
-                                                >
-                                                    <FiTrash2 size={16} />
-                                                </button>
-                                                <button 
-                                                    className="btn-icon btn-ingrediente" 
-                                                    onClick={() => abrirModalIngrediente(produto)}
-                                                    title="Gerenciar Ingredientes"
-                                                >
-                                                    <FiPackage size={16} />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                                {produtosFiltrados.length === 0 && (
-                                    <tr>
-                                        <td colSpan="7" className="text-center text-muted">
-                                            <FiPackage size={32} />
-                                            <p>Nenhum produto encontrado</p>
-                                            <span>Cadastre seu primeiro produto</span>
-                                        </td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
+            <div className="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Produto</th>
+                            <th>Categoria</th>
+                            <th>Preço de Venda</th>
+                            <th>Custo de Preparo</th>
+                            <th>Lucro (R$)</th>
+                            <th>Margem de Lucro</th>
+                            <th className="text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {produtosFiltrados.map((produto) => (
+                            <tr key={produto.id}>
+                                <td>
+                                    <div className="produto-info">
+                                        <span className="produto-icon">{getIcon(produto)}</span>
+                                        {produto.nome}
+                                    </div>
+                                </td>
+                                <td><span className="badge">{produto.categoria || '-'}</span></td>
+                                <td className="text-strong">R$ {parseFloat(produto.preco_venda).toFixed(2).replace('.', ',')}</td>
+                                <td>R$ {parseFloat(produto.custo).toFixed(2).replace('.', ',')}</td>
+                                <td className={getMargemClass(parseFloat(produto.margem))}>
+                                    R$ {(parseFloat(produto.preco_venda) - parseFloat(produto.custo)).toFixed(2).replace('.', ',')}
+                                </td>
+                                <td className={getMargemClass(parseFloat(produto.margem))}>
+                                    {produto.margem}%
+                                </td>
+                                <td>
+                                    <div className="acoes">
+                                        <button className="btn-icon btn-edit" onClick={() => abrirModalEdicao(produto)} title="Editar">
+                                            <FiEdit2 size={16} />
+                                        </button>
+                                        <button className="btn-icon btn-delete" onClick={() => handleDelete(produto.id)} title="Excluir">
+                                            <FiTrash2 size={16} />
+                                        </button>
+                                        <button className="btn-icon btn-ingrediente" onClick={() => abrirModalIngrediente(produto)} title="Gerenciar Ingredientes">
+                                            <FiPackage size={16} />
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))}
+                        {produtosFiltrados.length === 0 && (
+                            <tr>
+                                <td colSpan="7" className="text-center text-muted">
+                                    <FiPackage size={32} />
+                                    <p>Nenhum produto encontrado</p>
+                                    <span>Cadastre seu primeiro produto</span>
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
             </div>
-
+        </>
+    )}
+</div>
             {modalEdicao && (
                 <div className="modal-overlay" onClick={fecharModalEdicao}>
                     <div className="modal" onClick={(e) => e.stopPropagation()}>

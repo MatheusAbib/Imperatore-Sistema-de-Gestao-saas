@@ -192,6 +192,20 @@
 }
 
 @media (max-width: 768px) {
+  .pie-chart-container {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .pie-chart-wrapper {
+        width: 100%;
+    }
+
+    .pie-legend-wrapper {
+        flex: 1;
+        width: 100%;
+        max-height: 250px;
+    }
         .alerta-margem-grid {
         grid-template-columns: 1fr;
     }
@@ -695,7 +709,97 @@
 }
 
 @media (max-width: 480px) {
-        .alerta-margem {
+    .login-page {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .login-center {
+        min-height: auto;
+        padding: 10px;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .login-wrapper {
+        max-width: 100%;
+        padding: 0 10px;
+    }
+
+    .login-card {
+        padding: 20px 16px;
+        border-radius: 10px;
+    }
+
+    .login-brand h1 {
+        font-size: 22px;
+    }
+
+    .login-brand-icon {
+        width: 28px;
+        height: 28px;
+    }
+
+    .login-card-header p {
+        font-size: 13px;
+    }
+
+    .login-input-wrapper input {
+        font-size: 14px;
+        padding: 8px 36px 8px 36px;
+    }
+
+    .login-submit {
+        font-size: 14px;
+        padding: 10px;
+    }
+
+    .login-header-full {
+        padding: 8px 16px;
+    }
+
+    .login-header-brand span {
+        font-size: 15px;
+    }
+
+    .login-footer-full {
+        padding: 8px 16px;
+        flex-direction: column;
+        text-align: center;
+        gap: 4px;
+    }
+
+    .login-footer-text {
+        font-size: 11px;
+    }
+
+    .login-footer-links {
+        font-size: 11px;
+        gap: 10px;
+    }
+
+    .login-error {
+        font-size: 12px;
+        padding: 8px 12px;
+    }
+
+    .pie-chart-wrapper {
+        height: 250px;
+    }
+
+    .pie-chart-wrapper .recharts-wrapper {
+        height: 250px !important;
+    }
+
+    .pie-legend-wrapper {
+        max-height: 200px;
+    }
+
+    .alerta-margem {
         padding: 12px 14px;
     }
 
@@ -711,10 +815,11 @@
         font-size: 13px;
     }
 
-        .lotes-container .table-responsive table {
+    .lotes-container .table-responsive table {
         min-width: 350px;
     }
-      .login-header-brand span {
+
+    .login-header-brand span {
         font-size: 16px;
     }
 
@@ -725,7 +830,8 @@
     .login-footer-links {
         font-size: 12px;
     }
-        .mobile-header-estabelecimento span {
+
+    .mobile-header-estabelecimento span {
         font-size: 10px;
         max-width: 70px;
     }
@@ -733,7 +839,8 @@
     .mobile-header-center span {
         font-size: 15px;
     }
-      .lotes-ingredientes-list {
+
+    .lotes-ingredientes-list {
         max-height: 150px !important;
     }
 
@@ -750,6 +857,7 @@
     .paginacao-lotes span {
         font-size: 12px;
     }
+
     .mobile-header h1 {
         font-size: 16px;
     }
@@ -846,7 +954,7 @@
         font-size: 14px;
     }
 
-  .notificacoes-dropdown {
+    .notificacoes-dropdown {
         width: 280px !important;
         right: 5px !important;
         top: 58px !important;
@@ -891,7 +999,7 @@
 
     table {
         font-size: 11px;
-        min-width: 900px;
+        min-width: 600px;
     }
 
     th, td {
@@ -913,7 +1021,7 @@
         max-height: 60vh;
     }
 
-    .modal-body-estabelecimento{
+    .modal-body-estabelecimento {
         padding: 12px;
     }
 
@@ -1011,7 +1119,7 @@
         grid-template-columns: 1fr !important;
     }
 
-  .sobre-card {
+    .sobre-card {
         padding: 12px;
     }
 
@@ -1035,14 +1143,12 @@
         grid-template-columns: 1fr !important;
     }
 
-
     .lotes-container {
         grid-template-columns: 1fr !important;
     }
 
-      .atendente-grid {
+    .atendente-grid {
         gap: 14px;
-        
     }
 
     .comandas-list {
@@ -1077,7 +1183,8 @@
     .comandas-atendente {
         grid-template-columns: 1fr !important;
     }
-      .analise-grid {
+
+    .analise-grid {
         gap: 10px;
     }
 

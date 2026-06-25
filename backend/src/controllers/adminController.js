@@ -213,7 +213,9 @@ async function atualizarEstabelecimento(req, res) {
 async function deletarEstabelecimento(req, res) {
     try {
         const { id } = req.params;
-        const nome = req.body.nome || id;
+        
+        const [est] = await db.execute('SELECT nome FROM estabelecimentos WHERE id = ?', [id]);
+        const nome = est.length > 0 ? est[0].nome : id;
         
         await db.execute('DELETE FROM notificacoes WHERE estabelecimento_id = ?', [id]);
         await db.execute('DELETE FROM movimentos_estoque WHERE lote_id IN (SELECT id FROM lotes WHERE estabelecimento_id = ?)', [id]);
@@ -316,7 +318,9 @@ async function atualizarUsuarioAdmin(req, res) {
 async function deletarUsuarioAdmin(req, res) {
     try {
         const { id } = req.params;
-        const nome = req.body.nome || id;
+        
+        const [user] = await db.execute('SELECT nome FROM usuarios WHERE id = ?', [id]);
+        const nome = user.length > 0 ? user[0].nome : id;
         
         await db.execute('DELETE FROM usuarios WHERE id = ?', [id]);
 
