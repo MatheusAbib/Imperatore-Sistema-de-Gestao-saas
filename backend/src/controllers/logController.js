@@ -24,7 +24,8 @@ async function listarLogs(req, res) {
         const estabelecimento_id_usuario = usuario[0][0].estabelecimento_id;
 
         const { modulo, estabelecimento_id, usuario_id: filtro_usuario, data_inicio, data_fim, pagina = 1, limite = 20 } = req.query;
-        const offset = (pagina - 1) * limite;
+        const limit = parseInt(limite) || 20;
+        const offset = parseInt((pagina - 1) * limit) || 0;
 
         let sql = `
             SELECT l.*, u.nome as usuario_nome, u.perfil, e.nome as estabelecimento_nome
@@ -75,7 +76,7 @@ async function listarLogs(req, res) {
         const total = countResult[0].total;
 
         sql += ' ORDER BY l.created_at DESC LIMIT ? OFFSET ?';
-        params.push(parseInt(limite), parseInt(offset));
+        params.push(limit, offset);
 
         const [rows] = await db.execute(sql, params);
 
@@ -83,7 +84,7 @@ async function listarLogs(req, res) {
             logs: rows,
             total,
             pagina: parseInt(pagina),
-            totalPaginas: Math.ceil(total / limite)
+            totalPaginas: Math.ceil(total / limit)
         });
     } catch (error) {
         console.error('Erro ao listar logs:', error);
