@@ -90,8 +90,8 @@ async function getCrescimentoMensal(req, res) {
                 COUNT(*) as total
              FROM estabelecimentos
              WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
-             GROUP BY YEAR(created_at), MONTH(created_at)
-             ORDER BY created_at ASC`
+             GROUP BY DATE_FORMAT(created_at, '%b/%Y')
+             ORDER BY MIN(created_at) ASC`
         );
         res.json(rows);
     } catch (error) {
