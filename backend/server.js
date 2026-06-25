@@ -8,9 +8,9 @@ const PORT = process.env.PORT || 3000;
 console.log('DB_HOST carregado:', process.env.DB_HOST);
 console.log('DB_NAME carregado:', process.env.DB_NAME);
 
-if (process.env.VERCEL) {
-    module.exports = app;
-} else {
+module.exports = app;
+
+if (require.main === module) {
     app.listen(PORT, () => {
         console.log(`Servidor rodando na porta ${PORT}`);
     });
