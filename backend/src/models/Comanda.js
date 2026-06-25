@@ -10,13 +10,16 @@ class Comanda {
         return result.insertId;
     }
 
-    static async listarPorEstabelecimento(estabelecimento_id) {
-        const [rows] = await db.execute(
-            'SELECT * FROM comandas WHERE estabelecimento_id = ? AND status = "aberta" ORDER BY numero_mesa',
-            [estabelecimento_id]
-        );
-        return rows;
-    }
+static async listarPorEstabelecimento(estabelecimento_id) {
+    const [rows] = await db.execute(
+        `SELECT * FROM comandas 
+         WHERE estabelecimento_id = ? 
+         AND status = ? 
+         ORDER BY numero_mesa`,
+        [estabelecimento_id, 'aberta']
+    );
+    return rows;
+}
 
     static async buscarPorId(id, estabelecimento_id) {
         const [rows] = await db.execute(
