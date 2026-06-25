@@ -5,13 +5,18 @@ const Usuario = require('../models/Usuario');
 const { logAction } = require('../utils/logHelper');
 
 async function getEstabelecimentoId(usuarioId) {
+    console.log('getEstabelecimentoId - usuarioId:', usuarioId);
     if (!usuarioId) {
+        console.error('usuarioId é undefined ou null');
         throw new Error('Usuário não autenticado');
     }
+    console.log('Buscando usuário no banco...');
     const usuario = await Usuario.buscarPorId(usuarioId);
+    console.log('Usuário encontrado:', usuario ? 'Sim' : 'Não');
     if (!usuario) {
         throw new Error('Usuário não encontrado');
     }
+    console.log('estabelecimento_id:', usuario.estabelecimento_id);
     return usuario.estabelecimento_id;
 }
 
@@ -66,23 +71,25 @@ async function criarComanda(req, res) {
 
 async function listarComandas(req, res) {
     try {
-        console.log('=== listarComandas iniciado ===');
-        console.log('req.usuarioId:', req.usuarioId);
+        console.log('=== listarComandas ===');
+        console.log('1. req.usuarioId:', req.usuarioId);
         
+        console.log('2. Chamando getEstabelecimentoId...');
         const estabelecimento_id = await getEstabelecimentoId(req.usuarioId);
-        console.log('estabelecimento_id:', estabelecimento_id);
+        console.log('3. estabelecimento_id:', estabelecimento_id);
         
+        console.log('4. Chamando Comanda.listarPorEstabelecimento...');
         const comandas = await Comanda.listarPorEstabelecimento(estabelecimento_id);
-        console.log('comandas encontradas:', comandas.length);
+        console.log('5. comandas encontradas:', comandas.length);
         
+        console.log('6. Enviando resposta...');
         res.json(comandas);
     } catch (error) {
         console.error('ERRO em listarComandas:', error.message);
         console.error('Stack:', error.stack);
         res.status(500).json({ 
             mensagem: 'Erro ao listar comandas', 
-            erro: error.message,
-            stack: error.stack 
+            erro: error.message 
         });
     }
 }
