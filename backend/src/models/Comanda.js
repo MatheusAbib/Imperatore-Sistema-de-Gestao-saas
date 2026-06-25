@@ -36,12 +36,12 @@ static async listarPorEstabelecimento(estabelecimento_id) {
         );
     }
 
-    static async fecharComanda(id) {
-        await db.execute(
-            'UPDATE comandas SET status = "fechada", updated_at = NOW() WHERE id = ?',
-            [id]
-        );
-    }
+static async fecharComanda(id) {
+    await db.execute(
+        "UPDATE comandas SET status = 'fechada', updated_at = NOW() WHERE id = ?",
+        [id]
+    );
+}
 }
 
 module.exports = Comanda;

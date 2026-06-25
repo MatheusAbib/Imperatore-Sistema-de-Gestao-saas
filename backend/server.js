@@ -2,6 +2,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const app = require('./src/app');
+const { limparComandasFechadas } = require('./src/services/cleanupService');
 
 const PORT = process.env.PORT || 3000;
 
@@ -13,5 +14,7 @@ module.exports = app;
 if (require.main === module) {
     app.listen(PORT, () => {
         console.log(`Servidor rodando na porta ${PORT}`);
+        limparComandasFechadas();
+        setInterval(limparComandasFechadas, 5 * 60 * 1000);
     });
 }
