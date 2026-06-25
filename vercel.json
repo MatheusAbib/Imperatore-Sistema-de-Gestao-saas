@@ -9,7 +9,6 @@
             "root": "backend",
             "routePrefix": "/_/backend",
             "entrypoint": "api.js",
-            "builder": "vercel-build",
             "framework": "express"
         }
     }
