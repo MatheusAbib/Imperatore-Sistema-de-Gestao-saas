@@ -66,12 +66,24 @@ async function criarComanda(req, res) {
 
 async function listarComandas(req, res) {
     try {
+        console.log('=== listarComandas iniciado ===');
+        console.log('req.usuarioId:', req.usuarioId);
+        
         const estabelecimento_id = await getEstabelecimentoId(req.usuarioId);
+        console.log('estabelecimento_id:', estabelecimento_id);
+        
         const comandas = await Comanda.listarPorEstabelecimento(estabelecimento_id);
+        console.log('comandas encontradas:', comandas.length);
+        
         res.json(comandas);
     } catch (error) {
-        console.error('Erro ao listar comandas:', error);
-        res.status(500).json({ mensagem: 'Erro ao listar comandas', erro: error.message });
+        console.error('ERRO em listarComandas:', error.message);
+        console.error('Stack:', error.stack);
+        res.status(500).json({ 
+            mensagem: 'Erro ao listar comandas', 
+            erro: error.message,
+            stack: error.stack 
+        });
     }
 }
 
