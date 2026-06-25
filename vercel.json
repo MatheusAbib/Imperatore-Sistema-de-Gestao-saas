@@ -9,7 +9,9 @@
             "root": "backend",
             "routePrefix": "/_/backend",
             "entrypoint": "api.js",
-            "framework": "express"
+            "builder": "vercel-build",
+            "framework": "express",
+            "runtime": "nodejs20.x"
         }
     }
 }
