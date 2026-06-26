@@ -11,13 +11,15 @@ const adminRoutes = require('./routes/adminRoutes');
 const logRoutes = require('./routes/logRoutes');
 const analiseRoutes = require('./routes/analiseRoutes');
 const cleanupRoutes = require('./routes/cleanupRoutes');
-
+const keepAliveRoutes = require('./routes/keepAliveRoutes');
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.use('/api', keepAliveRoutes);
 
 app.use('/api/auth', authRoutes);
 app.use('/api/produtos', produtoRoutes);
@@ -29,7 +31,6 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/logs', logRoutes);
 app.use('/api/analise', analiseRoutes);
 app.use('/api', cleanupRoutes);
-
 
 app.get('/health', (req, res) => {
     res.json({ status: 'ok', message: 'Servidor funcionando' });
