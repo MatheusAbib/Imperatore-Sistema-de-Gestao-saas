@@ -18,7 +18,8 @@ function Atendente() {
     const [mostrarProdutos, setMostrarProdutos] = useState(false);
     const [numeroMesa, setNumeroMesa] = useState('');
     const [nomeCliente, setNomeCliente] = useState('');
-    const [loading, setLoading] = useState(false);
+    const [loadingInicial, setLoadingInicial] = useState(true);
+    const [loadingAcao, setLoadingAcao] = useState(false);
     const [modalAberto, setModalAberto] = useState(false);
     const [produtoSelecionado, setProdutoSelecionado] = useState(null);
     const [quantidade, setQuantidade] = useState('1');
@@ -30,8 +31,7 @@ function Atendente() {
     const itensPorPagina = 15;
 
     useEffect(() => {
-        carregarProdutos();
-        carregarComandas();
+        carregarDadosIniciais();
     }, []);
 
     useEffect(() => {
@@ -43,31 +43,39 @@ function Atendente() {
         return () => clearInterval(interval);
     }, [comandaAtual]);
 
+    const carregarDadosIniciais = async () => {
+        setLoadingInicial(true);
+        try {
+            await Promise.all([
+                carregarProdutos(),
+                carregarComandas()
+            ]);
+        } catch (error) {
+            console.error('Erro ao carregar dados iniciais', error);
+        } finally {
+            setLoadingInicial(false);
+        }
+    };
+
     const carregarProdutos = async () => {
-        setLoading(true);
         try {
             const response = await api.get('/produtos');
             setProdutos(response.data);
         } catch (error) {
             console.error('Erro ao carregar produtos', error);
             toast.error('Erro ao carregar produtos');
-        } finally {
-            setLoading(false);
         }
     };
 
-const carregarComandas = async () => {
-    setLoading(true);
-    try {
-        const response = await api.get('/comandas');
-        setComandas(response.data);
-    } catch (error) {
-        console.error('Erro ao carregar comandas', error);
-        toast.error('Erro ao carregar comandas');
-    } finally {
-        setLoading(false);
-    }
-};
+    const carregarComandas = async () => {
+        try {
+            const response = await api.get('/comandas');
+            setComandas(response.data);
+        } catch (error) {
+            console.error('Erro ao carregar comandas', error);
+            toast.error('Erro ao carregar comandas');
+        }
+    };
 
     const carregarItensComanda = async (comandaId) => {
         try {
@@ -93,7 +101,7 @@ const carregarComandas = async () => {
             return;
         }
 
-        setLoading(true);
+        setLoadingAcao(true);
         try {
             const response = await api.post('/comandas', {
                 numero_mesa: parseInt(numeroMesa),
@@ -110,7 +118,7 @@ const carregarComandas = async () => {
             console.error('Erro ao criar comanda', error);
             toast.error('Erro ao criar comanda');
         } finally {
-            setLoading(false);
+            setLoadingAcao(false);
         }
     };
 
@@ -136,7 +144,7 @@ const carregarComandas = async () => {
             return;
         }
 
-        setLoading(true);
+        setLoadingAcao(true);
         try {
             await api.post('/comandas/itens', {
                 comanda_id: comandaAtual.id,
@@ -153,7 +161,7 @@ const carregarComandas = async () => {
             console.error('Erro ao adicionar item', error);
             toast.error('Erro ao adicionar item');
         } finally {
-            setLoading(false);
+            setLoadingAcao(false);
         }
     };
 
@@ -166,7 +174,7 @@ const carregarComandas = async () => {
 
     const confirmarRemocao = async () => {
         if (!modalConfirmacao) return;
-        setLoading(true);
+        setLoadingAcao(true);
         try {
             await api.delete(`/comandas/itens/${modalConfirmacao.id}`);
             await carregarItensComanda(comandaAtual.id);
@@ -176,13 +184,13 @@ const carregarComandas = async () => {
             console.error('Erro ao remover item', error);
             toast.error('Erro ao remover item');
         } finally {
-            setLoading(false);
+            setLoadingAcao(false);
             setModalConfirmacao(null);
         }
     };
 
     const marcarEntregue = async (itemId) => {
-        setLoading(true);
+        setLoadingAcao(true);
         try {
             await api.put(`/pedidos/${itemId}/status`, { status: 'entregue' });
             
@@ -199,7 +207,7 @@ const carregarComandas = async () => {
             console.error('Erro ao marcar entregue', error);
             toast.error('Erro ao marcar entregue');
         } finally {
-            setLoading(false);
+            setLoadingAcao(false);
         }
     };
 
@@ -208,7 +216,7 @@ const carregarComandas = async () => {
     };
 
     const confirmarFecharComanda = async () => {
-        setLoading(true);
+        setLoadingAcao(true);
         try {
             await api.put(`/comandas/${comandaAtual.id}/fechar`);
             setComandaAtual(null);
@@ -220,7 +228,7 @@ const carregarComandas = async () => {
             console.error('Erro ao fechar comanda', error);
             toast.error('Erro ao fechar comanda');
         } finally {
-            setLoading(false);
+            setLoadingAcao(false);
             setModalFecharComanda(false);
         }
     };
@@ -298,7 +306,7 @@ const carregarComandas = async () => {
         );
     };
 
-    if (loading) {
+    if (loadingInicial) {
         return (
             <div className="skeleton-container">
                 <div className="page-header">
@@ -330,7 +338,6 @@ const carregarComandas = async () => {
                     <h1>Mesas e Comandas</h1>
                     <p className="text-muted">Gerencie comandas e pedidos</p>
                 </div>
-                {loading && <span className="text-muted">Carregando...</span>}
             </div>
 
             <div className="atendente-grid">
@@ -356,7 +363,7 @@ const carregarComandas = async () => {
                             <button 
                                 className="btn btn-primary" 
                                 onClick={criarComanda} 
-                                disabled={loading}
+                                disabled={loadingAcao}
                             >
                                 <FiPlus size={16} />
                                 Adicionar
@@ -405,7 +412,7 @@ const carregarComandas = async () => {
                                 <button 
                                     className="btn btn-danger" 
                                     onClick={fecharComanda} 
-                                    disabled={loading}
+                                    disabled={loadingAcao}
                                 >
                                     <FiX size={16} />
                                     Fechar Comanda
@@ -431,6 +438,7 @@ const carregarComandas = async () => {
                                         key={produto.id}
                                         className="btn produto-btn"
                                         onClick={() => abrirModal(produto)}
+                                        disabled={loadingAcao}
                                     >
                                         <span className="produto-btn-nome">{produto.nome}</span>
                                         <span className="produto-btn-preco">
@@ -491,6 +499,7 @@ const carregarComandas = async () => {
                                                                     <button 
                                                                         className="btn-icon btn-success" 
                                                                         onClick={() => marcarEntregue(item.id)}
+                                                                        disabled={loadingAcao}
                                                                         title="Marcar como entregue"
                                                                     >
                                                                         <FiCheckCircle size={14} />
@@ -499,6 +508,7 @@ const carregarComandas = async () => {
                                                                 <button 
                                                                     className="btn-icon btn-delete" 
                                                                     onClick={() => removerItem(item.id)}
+                                                                    disabled={loadingAcao}
                                                                     title="Remover"
                                                                 >
                                                                     <FiTrash2 size={16} />
@@ -563,7 +573,7 @@ const carregarComandas = async () => {
                         </div>
                         <div className="modal-footer">
                             <button className="btn btn-secondary" onClick={fecharModal}>Cancelar</button>
-                            <button className="btn btn-primary" onClick={confirmarAdicionarItem} disabled={loading}>
+                            <button className="btn btn-primary" onClick={confirmarAdicionarItem} disabled={loadingAcao}>
                                 <FiPlus size={16} />
                                 Adicionar
                             </button>
@@ -589,7 +599,7 @@ const carregarComandas = async () => {
                             <button className="btn btn-secondary" onClick={() => setModalConfirmacao(null)}>
                                 Cancelar
                             </button>
-                            <button className="btn btn-danger" onClick={confirmarRemocao}>
+                            <button className="btn btn-danger" onClick={confirmarRemocao} disabled={loadingAcao}>
                                 <FiTrash2 size={16} />
                                 Remover
                             </button>
@@ -617,7 +627,7 @@ const carregarComandas = async () => {
                             <button className="btn btn-secondary" onClick={() => setModalFecharComanda(false)}>
                                 Cancelar
                             </button>
-                            <button className="btn btn-danger" onClick={confirmarFecharComanda} disabled={loading}>
+                            <button className="btn btn-danger" onClick={confirmarFecharComanda} disabled={loadingAcao}>
                                 <FiX size={16} />
                                 Fechar Comanda
                             </button>

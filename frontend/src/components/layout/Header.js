@@ -23,7 +23,8 @@ import {
     FiBellOff,
     FiAlertCircle,
     FiInfo,
-    FiBarChart2
+    FiBarChart2,
+    FiClock 
 } from 'react-icons/fi';
 
 function Header({ setPagina, paginaAtual }) {
@@ -113,6 +114,7 @@ const handleNavigate = (pageId) => {
         ],
         atendente: [
             { id: 'comandas', label: 'Comandas', icon: FiClipboard },
+            { id: 'comandas-finalizadas', label: 'Finalizadas', icon: FiClock },
             { id: 'cardapio', label: 'Cardápio', icon: FiCoffee },
         ],
         cozinha: [

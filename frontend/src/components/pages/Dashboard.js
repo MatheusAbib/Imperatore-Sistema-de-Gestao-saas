@@ -27,6 +27,7 @@ import UsuariosAdmin from './UsuariosAdmin';
 import Sobre from './Sobre';
 import Logs from './Logs';
 import AnaliseVendas from './AnaliseVendas';
+import ComandasFinalizadas from './ComandasFinalizadas';
 
 function Dashboard() {
     const [produtos, setProdutos] = useState([]);
@@ -401,6 +402,7 @@ function Dashboard() {
             {usuario?.perfil === 'atendente' && (
                 <>
                     {pagina === 'comandas' && <Atendente />}
+                    {pagina === 'comandas-finalizadas' && <ComandasFinalizadas />}
                     {pagina === 'cardapio' && <Cardapio />}
                     {pagina === 'configuracoes' && <Configuracoes />}
                     {pagina === 'sobre' && <Sobre />}

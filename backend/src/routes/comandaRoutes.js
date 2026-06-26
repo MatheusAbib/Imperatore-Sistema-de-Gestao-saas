@@ -13,7 +13,9 @@ const {
     listarNotificacoes,
     marcarNotificacaoLida,
     marcarTodasNotificacoesLidas,
-    criarNotificacao
+    criarNotificacao,
+    listarDetalhesComandaFinalizada,
+    listarComandasFinalizadas
 } = require('../controllers/comandaController');
 
 const router = express.Router();
@@ -22,6 +24,7 @@ router.use(autenticar);
 
 router.post('/comandas', criarComanda);
 router.get('/comandas', listarComandas);
+router.get('/comandas/finalizadas', listarComandasFinalizadas);
 router.get('/comandas/:id/itens', listarItensComanda);
 router.get('/comandas/:id/pedidos/status', listarStatusPedidos);
 router.post('/comandas/itens', adicionarItem);
@@ -34,5 +37,6 @@ router.put('/pedidos/:id/status', atualizarStatusPedido);
 router.put('/comandas/:id/fechar', fecharComanda);
 router.put('/notificacoes/:id/lida', marcarNotificacaoLida);
 router.put('/notificacoes/lidas', marcarTodasNotificacoesLidas);
+router.get('/comandas/finalizadas/:id/detalhes', listarDetalhesComandaFinalizada);
 
 module.exports = router;

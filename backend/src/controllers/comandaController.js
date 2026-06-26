@@ -94,6 +94,31 @@ async function listarComandas(req, res) {
     }
 }
 
+async function listarComandasFinalizadas(req, res) {
+    try {
+        const estabelecimento_id = await getEstabelecimentoId(req.usuarioId);
+        const db = require('../config/database');
+        
+        const [rows] = await db.execute(
+            `SELECT c.*, 
+                    COUNT(p.id) as total_itens,
+                    COALESCE(SUM(p.quantidade * p.preco_unitario), 0) as valor_total
+             FROM comandas c
+             LEFT JOIN pedidos p ON c.id = p.comanda_id
+             WHERE c.estabelecimento_id = ? 
+               AND c.status = 'fechada'
+             GROUP BY c.id
+             ORDER BY c.updated_at DESC`,
+            [estabelecimento_id]
+        );
+        
+        res.json(rows);
+    } catch (error) {
+        console.error('Erro ao listar comandas finalizadas:', error);
+        res.status(500).json({ mensagem: 'Erro ao listar comandas finalizadas' });
+    }
+}
+
 async function listarItensComanda(req, res) {
     const { id } = req.params;
     const estabelecimento_id = await getEstabelecimentoId(req.usuarioId);
@@ -313,9 +338,50 @@ async function listarStatusPedidos(req, res) {
     res.json(rows);
 }
 
+async function listarDetalhesComandaFinalizada(req, res) {
+    try {
+        const { id } = req.params;
+        const estabelecimento_id = await getEstabelecimentoId(req.usuarioId);
+        const db = require('../config/database');
+
+        const [comanda] = await db.execute(
+            `SELECT c.*, 
+                    COUNT(p.id) as total_itens,
+                    COALESCE(SUM(p.quantidade * p.preco_unitario), 0) as valor_total
+             FROM comandas c
+             LEFT JOIN pedidos p ON c.id = p.comanda_id
+             WHERE c.id = ? AND c.estabelecimento_id = ? AND c.status = 'fechada'
+             GROUP BY c.id`,
+            [id, estabelecimento_id]
+        );
+
+        if (comanda.length === 0) {
+            return res.status(404).json({ mensagem: 'Comanda não encontrada' });
+        }
+
+        const [itens] = await db.execute(
+            `SELECT p.id, p.quantidade, p.preco_unitario, p.observacao,
+                    pr.nome as produto_nome, pr.categoria
+             FROM pedidos p
+             JOIN produtos pr ON p.produto_id = pr.id
+             WHERE p.comanda_id = ?`,
+            [id]
+        );
+
+        res.json({
+            comanda: comanda[0],
+            itens: itens
+        });
+    } catch (error) {
+        console.error('Erro ao buscar detalhes da comanda:', error);
+        res.status(500).json({ mensagem: 'Erro ao buscar detalhes da comanda' });
+    }
+}
+
 module.exports = {
     criarComanda,
     listarComandas,
+    listarComandasFinalizadas,
     listarItensComanda,
     adicionarItem,
     removerItem,
@@ -326,5 +392,6 @@ module.exports = {
     marcarNotificacaoLida,
     marcarTodasNotificacoesLidas,
     listarStatusPedidos,
-    criarNotificacao
+    criarNotificacao,
+    listarDetalhesComandaFinalizada
 };
