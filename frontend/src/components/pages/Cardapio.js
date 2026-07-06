@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
-import { FiSearch, FiCoffee, FiList, FiGrid, FiTag, FiDollarSign, FiX } from 'react-icons/fi';
+import { FiSearch, FiCoffee, FiList, FiGrid, FiTag, FiDollarSign, FiX, FiInfo, FiPackage } from 'react-icons/fi';
 
 function Cardapio() {
     const [produtos, setProdutos] = useState([]);
@@ -9,6 +9,10 @@ function Cardapio() {
     const [categorias, setCategorias] = useState([]);
     const [visualizacao, setVisualizacao] = useState('grid');
     const [loading, setLoading] = useState(false);
+    const [modalAberto, setModalAberto] = useState(false);
+    const [produtoSelecionado, setProdutoSelecionado] = useState(null);
+    const [ingredientes, setIngredientes] = useState([]);
+    const [carregandoIngredientes, setCarregandoIngredientes] = useState(false);
 
     useEffect(() => {
         carregarProdutos();
@@ -30,6 +34,28 @@ function Cardapio() {
 
     const handleLimparBusca = () => {
         setBusca('');
+    };
+
+    const abrirModalIngredientes = async (produto) => {
+        setProdutoSelecionado(produto);
+        setModalAberto(true);
+        setCarregandoIngredientes(true);
+        
+        try {
+            const response = await api.get(`/produtos/${produto.id}/ingredientes`);
+            setIngredientes(response.data);
+        } catch (error) {
+            console.error('Erro ao carregar ingredientes', error);
+            setIngredientes([]);
+        } finally {
+            setCarregandoIngredientes(false);
+        }
+    };
+
+    const fecharModal = () => {
+        setModalAberto(false);
+        setProdutoSelecionado(null);
+        setIngredientes([]);
     };
 
     const produtosFiltrados = produtos.filter(p => {
@@ -78,116 +104,242 @@ function Cardapio() {
     }
 
     return (
-        <div className="page-content">
-            <div className="page-header">
-                <div>
-                    <h1>Cardápio</h1>
-                    <p className="text-muted">Consulte produtos e preços do estabelecimento</p>
-                </div>
-                <div className="view-toggle">
-                    <button 
-                        className={visualizacao === 'grid' ? 'btn btn-primary' : 'btn btn-secondary'}
-                        onClick={() => setVisualizacao('grid')}
-                    >
-                        <FiGrid size={18} />
-                    </button>
-                    <button 
-                        className={visualizacao === 'list' ? 'btn btn-primary' : 'btn btn-secondary'}
-                        onClick={() => setVisualizacao('list')}
-                    >
-                        <FiList size={18} />
-                    </button>
-                </div>
-            </div>
-
-            <div className="search-box">
-                <FiSearch size={20} className="search-icon" />
-                <input
-                    type="text"
-                    placeholder="Buscar produto..."
-                    value={busca}
-                    onChange={(e) => setBusca(e.target.value)}
-                />
-                {busca && (
-                    <button 
-                        className="search-clear"
-                        onClick={handleLimparBusca}
-                        title="Limpar busca"
-                    >
-                        <FiX size={18} />
-                    </button>
-                )}
-            </div>
-
-            {categorias.length > 0 && (
-                <div className="filter-group">
-                    <button
-                        className={categoriaSelecionada === '' ? 'btn btn-primary' : 'btn btn-secondary'}
-                        onClick={() => setCategoriaSelecionada('')}
-                    >
-                        Todos
-                    </button>
-                    {categorias.map(cat => (
-                        <button
-                            key={cat}
-                            className={categoriaSelecionada === cat ? 'btn btn-primary' : 'btn btn-secondary'}
-                            onClick={() => setCategoriaSelecionada(cat)}
+        <>
+            <div className="page-content">
+                <div className="page-header">
+                    <div>
+                        <h1>Cardápio</h1>
+                        <p className="text-muted">Consulte produtos e preços do estabelecimento</p>
+                    </div>
+                    <div className="view-toggle">
+                        <button 
+                            className={visualizacao === 'grid' ? 'btn btn-primary' : 'btn btn-secondary'}
+                            onClick={() => setVisualizacao('grid')}
                         >
-                            {cat}
+                            <FiGrid size={18} />
                         </button>
-                    ))}
+                        <button 
+                            className={visualizacao === 'list' ? 'btn btn-primary' : 'btn btn-secondary'}
+                            onClick={() => setVisualizacao('list')}
+                        >
+                            <FiList size={18} />
+                        </button>
+                    </div>
                 </div>
-            )}
 
-            <div className="card">
-                <div className="cardapio-header">
-                    <span className="produtos-count">{produtosFiltrados.length} produtos encontrados</span>
+                <div className="search-box">
+                    <FiSearch size={20} className="search-icon" />
+                    <input
+                        type="text"
+                        placeholder="Buscar produto..."
+                        value={busca}
+                        onChange={(e) => setBusca(e.target.value)}
+                    />
+                    {busca && (
+                        <button 
+                            className="search-clear"
+                            onClick={handleLimparBusca}
+                            title="Limpar busca"
+                        >
+                            <FiX size={18} />
+                        </button>
+                    )}
                 </div>
 
-                {visualizacao === 'grid' ? (
-                    <div className="cardapio-grid">
-                        {produtosFiltrados.map(produto => (
-                            <div key={produto.id} className="cardapio-item">
-                                <h3>{produto.nome}</h3>
-                                {produto.categoria && (
-                                    <span className="badge">{produto.categoria}</span>
-                                )}
-                                <p className="cardapio-preco">
-                                    R$ {parseFloat(produto.preco_venda).toFixed(2)}
-                                </p>
-                            </div>
+                {categorias.length > 0 && (
+                    <div className="filter-group">
+                        <button
+                            className={categoriaSelecionada === '' ? 'btn btn-primary' : 'btn btn-secondary'}
+                            onClick={() => setCategoriaSelecionada('')}
+                        >
+                            Todos
+                        </button>
+                        {categorias.map(cat => (
+                            <button
+                                key={cat}
+                                className={categoriaSelecionada === cat ? 'btn btn-primary' : 'btn btn-secondary'}
+                                onClick={() => setCategoriaSelecionada(cat)}
+                            >
+                                {cat}
+                            </button>
                         ))}
                     </div>
-                ) : (
-                    <div className="cardapio-list">
-                        {produtosFiltrados.map(produto => (
-                            <div key={produto.id} className="cardapio-list-item">
-                                <div className="cardapio-list-info">
-                                    <span className="cardapio-list-icon">{getIcon(produto)}</span>
-                                    <div>
-                                        <h4>{produto.nome}</h4>
+                )}
+
+                <div className="card">
+                    <div className="cardapio-header">
+                        <span className="produtos-count">{produtosFiltrados.length} produtos encontrados</span>
+                    </div>
+
+                    {visualizacao === 'grid' ? (
+                        <div className="cardapio-grid">
+                            {produtosFiltrados.map(produto => (
+                                <div key={produto.id} className="cardapio-item" style={{ 
+                                    display: 'flex', 
+                                    flexDirection: 'column',
+                                    padding: '20px 18px',
+                                    minHeight: '200px'
+                                }}>
+                                    <div style={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'flex-start',
+                                        marginBottom: 8
+                                    }}>
+                                        <h3 style={{ 
+                                            fontSize: 18, 
+                                            margin: 0,
+                                            flex: 1,
+                                            marginRight: 10
+                                        }}>
+                                            {produto.nome}
+                                        </h3>
                                         {produto.categoria && (
-                                            <span className="badge">{produto.categoria}</span>
+                                            <span className="badge" style={{ flexShrink: 0 }}>
+                                                {produto.categoria}
+                                            </span>
                                         )}
                                     </div>
+                                    
+                                    <div style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        marginTop: 'auto',
+                                        paddingTop: 12,
+                                        borderTop: '1px solid var(--border-color)'
+                                    }}>
+                                        <p className="cardapio-preco" style={{ 
+                                            margin: 0,
+                                            fontSize: 24
+                                        }}>
+                                            R$ {parseFloat(produto.preco_venda).toFixed(2)}
+                                        </p>
+                                        <button
+                                            className="btn btn-primary"
+                                            style={{ 
+                                                padding: '8px 16px',
+                                                fontSize: 13,
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: 6
+                                            }}
+                                            onClick={() => abrirModalIngredientes(produto)}
+                                        >
+                                            <FiInfo size={15} />
+                                            Ingredientes
+                                        </button>
+                                    </div>
                                 </div>
-                                <p className="cardapio-list-preco">
-                                    R$ {parseFloat(produto.preco_venda).toFixed(2)}
-                                </p>
-                            </div>
-                        ))}
-                    </div>
-                )}
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="cardapio-list">
+                            {produtosFiltrados.map(produto => (
+                                <div key={produto.id} className="cardapio-list-item">
+                                    <div className="cardapio-list-info">
+                                        <span className="cardapio-list-icon">{getIcon(produto)}</span>
+                                        <div>
+                                            <h4>{produto.nome}</h4>
+                                            {produto.categoria && (
+                                                <span className="badge">{produto.categoria}</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                                        <p className="cardapio-list-preco">
+                                            R$ {parseFloat(produto.preco_venda).toFixed(2)}
+                                        </p>
+                                        <button
+                                            className="btn btn-primary"
+                                            style={{ display: 'flex', alignItems: 'center', gap: 6 }}
+                                            onClick={() => abrirModalIngredientes(produto)}
+                                        >
+                                            <FiInfo size={16} />
+                                            Ingredientes
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
 
-                {produtosFiltrados.length === 0 && (
-                    <div className="empty-state">
-                        <FiSearch size={48} />
-                        <h3>Nenhum produto encontrado</h3>
-                        <p className="text-muted">Tente ajustar sua busca ou categoria</p>
-                    </div>
-                )}
+                    {produtosFiltrados.length === 0 && (
+                        <div className="empty-state">
+                            <FiSearch size={48} />
+                            <h3>Nenhum produto encontrado</h3>
+                            <p className="text-muted">Tente ajustar sua busca ou categoria</p>
+                        </div>
+                    )}
+                </div>
             </div>
-        </div>
+
+            {modalAberto && (
+                <div className="modal-overlay" onClick={fecharModal}>
+                    <div className="modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h3>{produtoSelecionado?.nome}</h3>
+                            <button className="modal-close" onClick={fecharModal}>
+                                <FiX size={24} />
+                            </button>
+                        </div>
+                        <div className="modal-body">
+                            {produtoSelecionado?.categoria && (
+                                <span className="badge" style={{ display: 'inline-block', marginBottom: 12 }}>
+                                    {produtoSelecionado.categoria}
+                                </span>
+                            )}
+                            <p style={{ fontSize: 18, fontWeight: 700, color: 'var(--green-hover)', marginBottom: 16 }}>
+                                Preço: R$ {parseFloat(produtoSelecionado?.preco_venda || 0).toFixed(2)}
+                            </p>
+                            
+                            <div style={{ marginTop: 20 }}>
+                                <h4 style={{ fontSize: 16, color: 'var(--text-secondary)', marginBottom: 12, paddingBottom: 8, borderBottom: '2px solid var(--border-color)' }}>
+                                    Ingredientes
+                                </h4>
+                                {carregandoIngredientes ? (
+                                    <div className="skeleton-container">
+                                        <div className="skeleton-card" style={{ height: 30, minHeight: 30 }}></div>
+                                        <div className="skeleton-card" style={{ height: 30, minHeight: 30 }}></div>
+                                        <div className="skeleton-card" style={{ height: 30, minHeight: 30 }}></div>
+                                    </div>
+                                ) : ingredientes.length > 0 ? (
+                                    <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                                        {ingredientes.map(ing => (
+                                            <li key={ing.id} style={{ 
+                                                display: 'flex', 
+                                                justifyContent: 'space-between', 
+                                                alignItems: 'center', 
+                                                padding: '10px 0', 
+                                                borderBottom: '1px solid var(--border-color)'
+                                            }}>
+                                                <span style={{ fontWeight: 500, color: 'var(--text-primary)' }}>{ing.nome}</span>
+                                                <span style={{ 
+                                                    color: 'var(--text-muted)', 
+                                                    fontSize: 14, 
+                                                    background: 'var(--bg-hover)', 
+                                                    padding: '2px 10px', 
+                                                    borderRadius: 12 
+                                                }}>
+                                                    {ing.quantidade} {ing.unidade_uso || ing.unidade}
+                                                </span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <p className="text-muted">Este produto não possui ingredientes cadastrados.</p>
+                                )}
+                            </div>
+                        </div>
+                        <div className="modal-footer">
+                            <button className="btn btn-secondary" onClick={fecharModal}>
+                                Fechar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </>
     );
 }
 
