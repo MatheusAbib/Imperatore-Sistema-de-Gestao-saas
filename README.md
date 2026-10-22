@@ -18,6 +18,8 @@ O sistema conecta quatro áreas principais:
 - **Salão** (Atendente)
 - **Cozinha**
 
+> 🔗 **Acesse o projeto online:** (https://imperatore-zeta.vercel.app/)
+
 ---
 
 ## 📖 Documentação Completa
